@@ -1,0 +1,40 @@
+<div class="pv2 flex" [formGroup]="form">
+    <label class="w5 f4 ws-normal" style="word-wrap: break-word" [attr.for]="question.key">
+        <i [hidden]="!isValid" class="w2 tc f5 fa fa-check"></i>
+        <i [hidden]="isValid" class="w2 tc f5 red fa fa-exclamation"></i>
+        {{question.label}}
+    </label>
+
+    <div class="pl1" >
+        <div [ngSwitch]="question.controlType">
+
+            <div *ngSwitchCase="'string'" class="w5 flex bb b--gray">
+                <input class="input-reset w5 bn pa1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
+            </div>
+
+            <textarea *ngSwitchCase="'text'" class="w5" [formControlName]="question.key" [id]="question.key"></textarea>
+
+            <div *ngSwitchCase="'date'" class="w5 flex bb b--gray">
+                <input class="input-reset w5 bn pa1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
+            </div>
+
+            <div *ngSwitchCase="'number'" class="w5 flex bb b--gray">
+                <input class="input-reset w5 bn pa1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
+            </div>
+
+            <div *ngSwitchCase="'boolean'" class="w5 flex">
+                <input [formControlName]="question.key" [id]="question.key" [type]="question.type">
+            </div>
+
+            <div *ngSwitchCase="'dropdown'" class="w5 flex bb b--gray gray hover-black">
+                <select [id]="question.key" class="input-reset w5 bn pa1 bg-white black" [formControlName]="question.key" #inputSelect>
+                    <option *ngFor="let opt of question.options" [value]="opt">{{opt}}</option>
+                </select>
+                <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem; pointer-events: none" (click)="inputSelect.click($event)"><i class="f4 fa fa-angle-down"></i></div>
+            </div>
+
+        </div>
+
+        <!--div class="f6">{{question.label}} is required</div-->
+    </div>
+</div>

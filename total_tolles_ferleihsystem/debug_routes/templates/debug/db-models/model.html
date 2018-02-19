@@ -1,0 +1,37 @@
+<!doctype html>
+{% autoescape true %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+    <h1>DB Model for "{{classname}}":</h1>
+
+    <a href="{{url_for('debug_routes.model_overview')}}">back</a>
+
+
+    <div>
+        <p>Code for fields:</p>
+        <code>
+            {% for field in model_data['model_fields']: %}
+            {{field}}<br />
+            {% endfor %}
+        </code>
+        <p>Normal fields:</p>
+        <code>({% for field, class in model_data['normal_attributes']: %}('{{field}}', {{class.__name__}}){%- if not loop.last -%}, {%- endif %}{% endfor %})</code>
+        <p>Fields containing lists:</p>
+        <code>{{model_data['attributes_containing_lists']}}</code>
+        <p>Unknown fields:</p>
+        <code>{{model_data['unknown_attributes']}}</code>
+    </div>
+
+</body>
+
+</html>
+{% endautoescape %}

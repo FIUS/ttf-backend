@@ -1,0 +1,11 @@
+
+<table class="w-100 table collapse ph3 pv2" body>
+    <tbody>
+        <tr>
+            <th class="ph3 pv2 tl ttu" *ngFor="let title of headings" >{{title}}</th>
+        </tr>
+        <tr class="bt b--black-10 pointer" [ngClass]="{'bg-yellow': row.id === selected}"  *ngFor="let row of rows" (click)="selectRow(row)">
+            <th class="ph3 pv2 tl" *ngFor="let content of row.content" >{{content}}</th>
+        </tr>
+    </tbody>
+</table>

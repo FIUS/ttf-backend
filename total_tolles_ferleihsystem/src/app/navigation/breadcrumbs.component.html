@@ -1,0 +1,4 @@
+<div class="w-100 h3 f3 ph4 bb bw1 b--black-10 flex items-center overflow-x-auto">
+    <a class="link dim mr3 mb0 black" routerLink="/"><i class="fa fa-home"></i><i class="ml3 mb0 fa fa-chevron-right"></i></a>
+    <a class="link dim mr3 mb0 black" *ngFor="let breadcrumb of breadcrumbs" routerLink="{{breadcrumb.target}}">{{breadcrumb.title}}<i class="ml3 mb0 fa fa-chevron-right"></i></a>
+</div>

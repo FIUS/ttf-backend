@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+    <script>
+        window.apiBasePath = "{{url_for('api.default_root_resource', _external=True)}}";
+    </script>
+    <script>window.__theme = 'bs4';</script>
+    <ttf-root class="h-100 flex flex-column"></ttf-root>
+    {{ javascript_tag('inline') | safe }}
+    {{ javascript_tag('polyfills') | safe }}
+    {{ javascript_tag('styles') | safe }}
+    {{ javascript_tag('vendor') | safe }}
+    {{ javascript_tag('main') | safe }}
+</body>
+
+</html>

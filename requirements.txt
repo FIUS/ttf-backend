@@ -1,0 +1,7 @@
+Flask==0.12
+flask-restplus==0.10.1
+Flask-SQLAlchemy==2.2
+Flask-Webpack==0.1.0
+flask-cors==3.0.2
+flask-jwt-extended==2.2.0
+flask-bcrypt==0.7.1

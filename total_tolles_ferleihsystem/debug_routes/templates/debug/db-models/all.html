@@ -1,0 +1,29 @@
+<!doctype html>
+{% autoescape true %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+    <h1>DB Models overview:</h1>
+
+    <a href="{{url_for('debug_routes.index')}}">back</a>
+
+
+    <p>DB Models for Data:</p>
+    <ul>
+        {% for classname in data_classes: %}
+        <li><a href="{{url_for('debug_routes.model_detail', classname=classname)}}">{{classname}}</a></li>
+        {% endfor %}
+    </ul>
+
+</body>
+
+</html>
+{% endautoescape %}
