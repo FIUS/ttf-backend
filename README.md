@@ -25,7 +25,7 @@ Frontend:
 cd total_tolles_ferleihsystem
 
 npm install
-npm build
+npm run build
 ```
 
 
