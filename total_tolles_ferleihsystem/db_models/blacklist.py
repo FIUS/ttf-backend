@@ -27,7 +27,14 @@ class BlacklistToItemType (db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('Blacklist.id'), primary_key=True)
     #TODO itemType_id = db.Column()
+    end_time = db.Column(db.DateTime, nullable=True)
+    reason = db.Column(db.Text, nullable=True)
 
-    def __init__(self, user: Blacklist):
+    def __init__(self, user: Blacklist, end_time: any=None, reason: str=None):
+        #TODO Fabi pls FIX duration time
         #TODO itemType: ItemType
         self.user = user
+
+        if self.end_time != None:
+            self.end_time = end_time
+            self.reason = reason
