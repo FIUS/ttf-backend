@@ -36,7 +36,7 @@ export class ApiService implements OnInit {
     getRoot(): Observable<RootModel> {
         if (!this.rootSource.isStopped) {
             let url = '/api'
-            if ((window as any).apiBasePath != undefined) {
+            if ((window as any).apiBasePath != null) {
                 url = (window as any).apiBasePath;
             }
             this.rest.get(url).subscribe(data => {
@@ -50,8 +50,8 @@ export class ApiService implements OnInit {
     getSpec(): Observable<any> {
         this.getRoot().subscribe(root => {
             if (!this.specSource.isStopped) {
-                var re = /\/$/;
-                let url = root._links.spec.href.replace(re, '');
+                const re = /\/$/;
+                const url = root._links.spec.href.replace(re, '');
                 this.rest.get(url).subscribe(data => {
                     this.specSource.next((data as any));
                     this.specSource.complete();
@@ -62,7 +62,7 @@ export class ApiService implements OnInit {
     }
 
     private getStreamSource(streamID: string) {
-        if (this.streams[streamID] == undefined) {
+        if (this.streams[streamID] == null) {
             this.streams[streamID] = new BehaviorSubject<ApiObject | ApiObject[]>(undefined);
         }
         return this.streams[streamID]
