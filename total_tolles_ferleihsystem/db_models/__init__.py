@@ -19,7 +19,7 @@ DB_COMMAND_LOGGER.addHandler(handler)
 STD_STRING_SIZE = 255
 
 
-from . import blacklist, item
+from . import blacklist, item, itemType
 
 
 @app.cli.command('create_db')
