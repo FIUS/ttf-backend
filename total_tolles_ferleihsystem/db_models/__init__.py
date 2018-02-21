@@ -19,6 +19,9 @@ DB_COMMAND_LOGGER.addHandler(handler)
 STD_STRING_SIZE = 255
 
 
+from . import blacklist
+
+
 @app.cli.command('create_db')
 def create_db():
     """Create all db tables."""
