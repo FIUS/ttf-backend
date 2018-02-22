@@ -1,5 +1,6 @@
 from .. import db
 from . import STD_STRING_SIZE
+from .itemType import ItemType
 from .tag import Tag
 from .attribute import Attribute
 
@@ -10,13 +11,14 @@ class Item (db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(STD_STRING_SIZE), unique=True)
-    #TODO type = db.Column(db.Integer, db.foreignKey())
+    type_id = db.Column(db.Integer, db.foreignKey('ItemType.id'))
     lending_duration = db.Column(db.Time) #TODO add default value
     delted = db.Column(db.Boolean, default=False)
     visible_for = db.Column(db.String(STD_STRING_SIZE), nullable=True)
 
-    def __init__(self, name: str, lending_duration: int=0, visible_for: str=''):
+    def __init__(self, name: str, type: ItemType, lending_duration: int=0, visible_for: str=''):
         self.name = name
+        self.type = type
 
         if lending_duration != 0:
            self.lending_duration = lending_duration
