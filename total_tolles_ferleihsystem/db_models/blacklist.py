@@ -1,5 +1,6 @@
 from .. import db
 from . import STD_STRING_SIZE
+from .itemType import ItemType
 
 
 class Blacklist (db.Model):
@@ -10,8 +11,6 @@ class Blacklist (db.Model):
     name = db.Column(db.String(STD_STRING_SIZE), unique=True, index=True)
     system_wide = db.Column(db.Boolean, default=False)
     reason = db.Column(db.Text, nullable=True)
-
-    #TODO add relationship for user
 
     def __init__(self, name: str, system_wide: bool = False, reason: str = None):
         self.name = name
@@ -26,14 +25,14 @@ class BlacklistToItemType (db.Model):
     __tablename__ = 'BlacklistToItemType'
 
     user_id = db.Column(db.Integer, db.ForeignKey('Blacklist.id'), primary_key=True)
-    #TODO itemType_id = db.Column()
+    item_type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'), primary_key=True)
     end_time = db.Column(db.DateTime, nullable=True)
     reason = db.Column(db.Text, nullable=True)
 
-    def __init__(self, user: Blacklist, end_time: any=None, reason: str=None):
+    def __init__(self, user: Blacklist, item_type: ItemType, end_time: any=None, reason: str=None):
         #TODO Fabi pls FIX duration time
-        #TODO itemType: ItemType
         self.user = user
+        self.item_type = item_type
 
         if self.end_time != None:
             self.end_time = end_time
