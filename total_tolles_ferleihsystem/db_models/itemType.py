@@ -1,6 +1,6 @@
 from .. import db
 from . import STD_STRING_SIZE
-
+from .attribute import AttributeDefinition
 
 class ItemType (db.Model):
 
@@ -36,3 +36,15 @@ class ItemTypeToItemType (db.Model):
     def __init__(self, parent: ItemType, item_type: ItemType):
         self.parent = parent
         self.item_type = item_type
+
+
+class ItemTypeToAttributeDefinition (db.Model):
+
+    __tablename__ = 'ItemTypeToAttributeDefinition'
+
+    item_type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'), primary_key=True)
+    attribute_definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'), primary_key=True)
+
+    def __init__(self, item_type: ItemType, attribute_definition: AttributeDefinition):
+        self.item_type = item_type
+        self.attribute_definition = attribute_definition
