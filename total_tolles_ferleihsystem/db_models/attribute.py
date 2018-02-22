@@ -24,7 +24,9 @@ class Attribute (db.Model):
     __tablename__ = 'Attribute'
 
     id = db.Column(db.Integer, primary_key=True)
+    definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'))
     value = db.Column(db.String(STD_STRING_SIZE))
 
-    def __init__(self, value: str):
+    def __init__(self, definition: AttributeDefinition, value: str):
+        self.definition = definition
         self.value = value
