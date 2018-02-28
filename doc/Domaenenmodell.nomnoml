@@ -1,0 +1,16 @@
+#spacing: 80
+
+[<choice> 1]
+
+[Katalog] views -- [User]
+[Moderator] -> manages [Katalog]
+[Moderator] - lends[1]
+[User] <:- to[1]
+[1] - [Item]
+[Moderator] manages -> [Item]
+[Katalog] -> [Item Type]
+[Katalog] -> [Tag]
+[Katalog] -> [Item]
+[Tag] -o [Item]
+[Item Type] -o [Item]
+
