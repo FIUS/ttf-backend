@@ -11,10 +11,12 @@ class Item (db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(STD_STRING_SIZE), unique=True)
-    type_id = db.Column(db.Integer, db.foreignKey('ItemType.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'))
     lending_duration = db.Column(db.Time) #TODO add default value
     delted = db.Column(db.Boolean, default=False)
     visible_for = db.Column(db.String(STD_STRING_SIZE), nullable=True)
+
+    type = db.relationship('ItemType', lazy='joined')
 
     def __init__(self, name: str, type: ItemType, lending_duration: int=0, visible_for: str=''):
         self.name = name
@@ -36,6 +38,10 @@ class File (db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('Item.id'))
     name = db.Column(db.String(STD_STRING_SIZE))
     path = db.Column(db.String(STD_STRING_SIZE))
+
+    item = db.relationship('Item', lazy='joined', backref=db.backref('_files', lazy='joined',
+                                                                     single_parent=True,
+                                                                     cascade="all, delete-orphan"))
 
     def __init__(self, item: Item, name: str, path: str):
         self.item = item
@@ -68,6 +74,11 @@ class ItemToItem (db.Model):
 
     parent_id = db.Column(db.Integer, db.ForeignKey('Item.id'), primary_key=True)
     item_id = db.Column(db.Integer, db.ForeignKey('Item.id'), primary_key=True)
+
+    parent = db.relationship('Item', foreign_keys=[parent_id],
+                             backref=db.backref('_contained_items', lazy='joined',
+                                                single_parent=True, cascade="all, delete-orphan"))
+    item = db.relationship('Item', foreign_keys=[item_id], lazy='joined')
 
     def __init__(self, parent: Item, item: Item):
         self.parent = parent
