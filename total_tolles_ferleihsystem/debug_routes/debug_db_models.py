@@ -14,7 +14,7 @@ from datetime import datetime, date
 from flask import render_template, url_for, abort
 from . import debug_blueprint
 from .. import db
-from ..db_models import *
+from .. import db_models
 
 
 _data_classes = {}
@@ -31,7 +31,7 @@ def _inspect_module(module):
     module_list = getmembers(module, predicate=ismodule)
     classes = getmembers(module, predicate=isclass)
     for (name, cls) in classes:
-        if issubclass(cls, db.Model) and not issubclass(cls, Taxonomy):
+        if issubclass(cls, db.Model):
             if cls is not db.Model:
                 _data_classes[name] = cls
     return [mod[1] for mod in module_list]
@@ -42,8 +42,13 @@ def _fill_class_dicts():
     global _data_classes
     if not _data_classes:
         stack = []
-        next_module = data
+        visited = set()
+        next_module = db_models
         while next_module is not None:
+            if next_module in visited:
+                next_module = stack.pop()
+                continue
+            visited.add(next_module)
             stack += _inspect_module(next_module)
             if stack:
                 next_module = stack.pop()

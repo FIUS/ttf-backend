@@ -124,7 +124,7 @@ def log_unauthorized(message):
     auth_logger.debug('Unauthorized access: %s', message)
 
 
-from . import authentication, root
+from . import root, authentication, item_types
 
 
 app.register_blueprint(api_blueprint, url_prefix='/api')

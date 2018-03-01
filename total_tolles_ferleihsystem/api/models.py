@@ -1,6 +1,7 @@
 """Module containing models for whole API to use."""
 
 from . import api
+from flask_restplus import fields
 from ..hal_field import HaLUrl, UrlData, NestedFields
 
 with_curies = api.model('WithCuries', {
@@ -29,4 +30,24 @@ auth_links = api.inherit('AuthLinks', with_curies, {
 
 authentication_routes_model = api.model('AuthenticationRoutesModel', {
     '_links': NestedFields(auth_links),
+})
+
+item_type_links = api.inherit('ItemTypeLinks', with_curies, {
+    'self': HaLUrl(UrlData('api.item_types_item_type_list', absolute=True)),
+})
+
+item_type_post = api.model('ItemTypePOST', {
+    'name': fields.String(),
+    'name_schema': fields.String(),
+    'visible_for': fields.String(),
+    'how_to': fields.String(),
+})
+
+item_type_put = api.inherit('ItemTypePUT', item_type_post, {
+    'lendable': fields.Boolean(default=True),
+})
+
+item_type_get = api.inherit('ItemType', item_type_put, {
+    '_links': NestedFields(item_type_links),
+    'id': fields.Integer(),
 })

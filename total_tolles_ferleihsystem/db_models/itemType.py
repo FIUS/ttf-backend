@@ -9,7 +9,7 @@ class ItemType (db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(STD_STRING_SIZE), unique=True)
-    name_schema = db.Column(db.String(STD_STRING_SIZE), unique=True)
+    name_schema = db.Column(db.String(STD_STRING_SIZE))
     lendable = db.Column(db.Boolean, default=True)
     lending_duration = db.Column(db.Time, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
