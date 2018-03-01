@@ -1,16 +1,19 @@
-#spacing: 80
+#spacing: 100
+#title: Domänenmodell TTF
 
-[<choice> 1]
+[<choice>  1]
 
-[Katalog] views -- [User]
-[Moderator] -> manages [Katalog]
+[Katalog] -- views> [User]
+[Admin] -> is [Moderator]
+[Admin] -> manages [Katalog]
+[Admin] manages -> [Item]
 [Moderator] - lends[1]
-[User] <:- to[1]
-[1] - [Item]
-[Moderator] manages -> [Item]
+[User] to <:- [1]
+[1] - [List of Items]
+[List of Items] contains 1..* -> [Item] 
+[Tag] can be the base of -- [List of Items]
 [Katalog] -> [Item Type]
 [Katalog] -> [Tag]
 [Katalog] -> [Item]
 [Tag] -o [Item]
 [Item Type] -o [Item]
-
