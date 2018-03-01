@@ -7,12 +7,19 @@ from flask_jwt_extended import jwt_required, create_access_token, \
 from . import api as api
 from .import auth_logger
 from .. import jwt
+from .. import app
 
-from .ldap import User, UserRole
+from ..login import User, UserRole, LoginService, BasicAuthProvider
 
 
 ns = api.namespace('auth', description='Authentication Resources:')
 
+login_service: LoginService
+if app.config['DEBUG']:
+    login_service = LoginService(BasicAuthProvider())
+else:
+    #FIXME add LDAP auth provider here
+    login_service = LoginService(None)
 
 user_auth_model = api.model('UserAuth', {
     'username': fields.String(required=True, example='admin'),
@@ -37,11 +44,11 @@ def login_user():
     """Login a user."""
     username = api.payload.get('username', None)
     password = api.payload.get('password', None)
-    user = User.get_user_by_name(username)  # FIXME/TODO
+    user = login_service.get_user_by_id(username)
     if not user:
         auth_logger.debug('Attempted login with unknown username "%s".', username)
         abort(401, 'Wrong username or pasword.')
-    if not user.check_password(password):
+    if not login_service.check_password(user, password):
         auth_logger.error('Attempted login with invalid password for user "%s"', username)
         abort(401, 'Wrong username or pasword.')
 
@@ -113,7 +120,7 @@ class Refresh(Resource):
     def post(self):
         """Create a new access token with a refresh token."""
         username = get_jwt_identity()
-        user = User.get_user_by_name(username)  # FIXME/TODO
+        user = login_service.get_user_by_id(username)
         if not user:
             abort(401, "User doesn't exist.")
         auth_logger.debug('User "%s" asked for a new access token.', username)

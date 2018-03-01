@@ -8,7 +8,7 @@ from flask_restplus import Api, abort
 from flask_jwt_extended import get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from .. import app, jwt
-from .ldap import User, UserRole
+from ..login import User, UserRole
 
 
 authorizations = {
@@ -27,7 +27,7 @@ authorizations = {
 }
 
 
-def has_roles(role: UserRole):  # FIXME/TODO
+def satisfies_role(role: UserRole):
     """
     Check if the requesting user has one of the given roles.
 
@@ -36,16 +36,14 @@ def has_roles(role: UserRole):  # FIXME/TODO
     def has_roles_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            claims = get_jwt_claims()
-            for role in roles:
-                if role.name in claims:
-                    break
-            else:
-                auth_logger.debug('Access to ressource with isufficient rights. User roles: %s, required roles: %s', [], claims)
+            role_claims = get_jwt_claims()
+            if role > role_claims:
+                auth_logger.debug('Access to ressource with isufficient rights. User roles: %s, required roles: %s', role_claims, role)
                 abort(403, 'Only members of the group(s) {} have access to this resource.'.format(
                     ', '.join([])
                 ))
-            return f(*args, **kwargs)
+            else:
+                return f(*args, **kwargs)
         return wrapper
     return has_roles_decorator
 
@@ -78,7 +76,7 @@ def load_user_identity(user: User):
 
 @jwt.user_claims_loader
 def load_user_claims(user: User):
-    return user.role
+    return user.role.value
 
 
 @jwt.expired_token_loader
