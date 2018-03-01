@@ -38,10 +38,9 @@ def satisfies_role(role: UserRole):
         def wrapper(*args, **kwargs):
             role_claims = get_jwt_claims()
             if role > role_claims:
-                auth_logger.debug('Access to ressource with isufficient rights. User roles: %s, required roles: %s', role_claims, role)
-                abort(403, 'Only members of the group(s) {} have access to this resource.'.format(
-                    ', '.join([])
-                ))
+                auth_logger.debug('Access to ressource with isufficient rights. User role: %s, required role: %s',
+                                  UserRole(role_claims), role)
+                abort(403, 'Only users with {} privileges have access to this resource.'.format(role.name))
             else:
                 return f(*args, **kwargs)
         return wrapper

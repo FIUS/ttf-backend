@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, create_access_token, \
                                get_jwt_claims, jwt_refresh_token_required
 
 from . import api as api
-from .import auth_logger
+from .import auth_logger, satisfies_role
 from .models import authentication_routes_model
 from .. import jwt
 from .. import app
@@ -36,8 +36,8 @@ jwt_response_full = api.inherit('JWT_FULL', jwt_response, {
 })
 
 check_response = api.model('check', {
-    'username': fields.String(required=True),
-    'role': fields.String()
+    'username': fields.String(required=True, readonly=True),
+    'role': fields.Integer(required=True, readonly=True)
 })
 
 
