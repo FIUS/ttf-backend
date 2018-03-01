@@ -9,7 +9,7 @@ class ItemType (db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(STD_STRING_SIZE), unique=True)
-    name_schema = db.Column(db.String(STD_STRING_SIZE), unique=True)
+    name_schema = db.Column(db.String(STD_STRING_SIZE))
     lendable = db.Column(db.Boolean, default=True)
     lending_duration = db.Column(db.Time, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
@@ -52,7 +52,7 @@ class ItemTypeToAttributeDefinition (db.Model):
     attribute_definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'), primary_key=True)
 
     item_type = db.relationship('ItemType', backref=db.backref('_item_type_to_attribute_definitions', lazy='joined'))
-    attribute_definition = db.relationship('AttributeDefinition')
+    attribute_definition = db.relationship('AttributeDefinition', lazy='joined')
 
     def __init__(self, item_type: ItemType, attribute_definition: AttributeDefinition):
         self.item_type = item_type

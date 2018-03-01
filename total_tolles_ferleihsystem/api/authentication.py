@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, create_access_token, \
 
 from . import api as api
 from .import auth_logger
+from .models import authentication_routes_model
 from .. import jwt
 from .. import app
 
@@ -57,7 +58,16 @@ def login_user():
 
 
 @ns.route('/')
-class Authenticate(Resource):
+class AuthenticationRoutes(Resource):
+    """Authentication Routes Hal resource."""
+
+    @api.doc(security=None)
+    @api.marshal_with(authentication_routes_model)
+    def get(self):
+        return
+
+@ns.route('/login/')
+class Login(Resource):
     """Login resource."""
 
     @api.doc(security=None)
@@ -76,7 +86,7 @@ class Authenticate(Resource):
 
 
 @ns.route('/fresh-login/')
-class FrechLogin(Resource):
+class FreshLogin(Resource):
     """Resource for a fresh login token without refresh token."""
 
     @api.doc(security=None)
