@@ -18,3 +18,15 @@ root_links = api.inherit('RootLinks', with_curies, {
 root_model = api.model('RootModel', {
     '_links': NestedFields(root_links),
 })
+
+auth_links = api.inherit('AuthLinks', with_curies, {
+    'self': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
+    'login': HaLUrl(UrlData('api.auth_login', absolute=True)),
+    'fresh_login': HaLUrl(UrlData('api.auth_fresh_login', absolute=True)),
+    'refresh': HaLUrl(UrlData('api.auth_refresh', absolute=True)),
+    'check': HaLUrl(UrlData('api.auth_check', absolute=True)),
+})
+
+authentication_routes_model = api.model('AuthenticationRoutesModel', {
+    '_links': NestedFields(auth_links),
+})
