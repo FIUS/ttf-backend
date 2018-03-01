@@ -27,6 +27,8 @@ class Attribute (db.Model):
     definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'))
     value = db.Column(db.String(STD_STRING_SIZE))
 
+    definition = db.relationship('AttributeDefinition', lazy='joined')
+
     def __init__(self, definition: AttributeDefinition, value: str):
         self.definition = definition
         self.value = value

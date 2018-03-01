@@ -93,6 +93,12 @@ class ItemToLending (db.Model):
     lending_id = db.Column(db.Integer, db.ForeignKey('Lending.id'), primary_key=True)
     due = db.Column(db.DateTime)
 
+    item = db.relationship('Item', backref=db.backref('_lending', lazy='joined',
+                                                      single_parent=True, cascade="all, delete-orphan"))
+    lending = db.relationship('Lending', backref=db.backref('_items', lazy='joined',
+                                                            single_parent=True,
+                                                            cascade="all, delete-orphan"), lazy='joined')
+
     def __init__(self, item: Item, lending: Lending, due: any):
         # TODO Fabi fix date
         self.item = item
@@ -107,6 +113,10 @@ class ItemToTag (db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('Item.id'), primary_key=True)
     tag_id = db.Column(db.Integer, db.ForeignKey('Tag.id'), primary_key=True)
 
+    item = db.relationship('Item', backref=db.backref('_tags', lazy='joined',
+                                                      single_parent=True, cascade="all, delete-orphan"))
+    tag = db.relationship('Tag', lazy='joined')
+
     def __init__(self, item: Item, tag: Tag):
         self.item = item
         self.tag = tag
@@ -118,6 +128,10 @@ class ItemToAttribute (db.Model):
 
     item_id = db.Column(db.Integer, db.ForeignKey('Item.id'), primary_key=True)
     attribute_id = db.Column(db.Integer, db.ForeignKey('Attribute.id'), primary_key=True)
+
+    item = db.relationship('Item', backref=db.backref('_attributes', lazy='joined',
+                                                      single_parent=True, cascade="all, delete-orphan"))
+    attribute = db.relationship('Attribute', lazy='joined')
 
     def __init__(self, item: Item, attribute: Attribute):
         self.item = item

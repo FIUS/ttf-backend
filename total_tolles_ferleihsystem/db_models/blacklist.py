@@ -29,6 +29,10 @@ class BlacklistToItemType (db.Model):
     end_time = db.Column(db.DateTime, nullable=True)
     reason = db.Column(db.Text, nullable=True)
 
+    user = db.relationship('Blacklist', backref=db.backref('_item_types', lazy='joined',
+                                                           single_parent=True, cascade="all, delete-orphan"))
+    item_type = db.relationship('ItemType', lazy='joined')
+
     def __init__(self, user: Blacklist, item_type: ItemType, end_time: any=None, reason: str=None):
         #TODO Fabi pls FIX duration time
         self.user = user
