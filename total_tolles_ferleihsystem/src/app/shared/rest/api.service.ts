@@ -1,18 +1,34 @@
 import { Injectable, OnInit } from '@angular/core';
 import { Observable, } from 'rxjs/Rx';
 import { BaseApiService, ApiObject, LinkObject, ApiLinksObject } from './api-base.service';
+import { JWTService } from './jwt.service';
 import { AsyncSubject } from 'rxjs/AsyncSubject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
 
 export interface RootLinks extends ApiLinksObject {
     doc: LinkObject;
     spec: LinkObject;
     auth: LinkObject;
 };
+
 export interface RootModel extends ApiObject {
     _links: RootLinks;
     [propName: string]: any;
 };
+
+
+export interface AuthRootLinks extends ApiLinksObject {
+    login: LinkObject;
+    check: LinkObject;
+    refresh_login: LinkObject;
+};
+
+export interface AuthRootModel extends ApiObject {
+    _links: RootLinks;
+    [propName: string]: any;
+};
+
 
 @Injectable()
 export class ApiService implements OnInit {
@@ -25,9 +41,13 @@ export class ApiService implements OnInit {
 
     private currentSpec = this.specSource.asObservable();
 
+    private authSource = new AsyncSubject<AuthRootModel>();
+
+    private currentAuth = this.authSource.asObservable();
+
     private streams: {[propName: string]: BehaviorSubject<ApiObject | ApiObject[]>} = {};
 
-    constructor(private rest: BaseApiService) { }
+    constructor(private rest: BaseApiService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.getRoot();
@@ -60,6 +80,29 @@ export class ApiService implements OnInit {
         });
         return this.currentSpec;
     }
+
+    getAuthRoot(): Observable<AuthRootModel> {
+        this.getRoot().subscribe(root => {
+            if (!this.authSource.isStopped) {
+                this.rest.get(root._links.auth).subscribe(data => {
+                    this.authSource.next((data as any));
+                    this.authSource.complete();
+                });
+            }
+        });
+        return this.currentAuth;
+    }
+
+    login(username: string, password: string) {
+        this.getAuthRoot().subscribe(auth => {
+            this.rest.post(auth._links.login, {username: username, password: password}).subscribe(data => {
+                this.jwt.updateTokens(data.access_token, data.refresh_token);
+                console.log(this.jwt.isAdmin());
+            });
+        });
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
 
     private getStreamSource(streamID: string) {
         if (this.streams[streamID] == null) {

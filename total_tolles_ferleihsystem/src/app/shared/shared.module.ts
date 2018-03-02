@@ -9,6 +9,10 @@ import { QuestionControlService } from './forms/question-control.service';
 import { QuestionService } from './forms/question.service';
 import { BaseApiService } from './rest/api-base.service';
 import { ApiService } from './rest/api.service';
+import { JWTService } from './rest/jwt.service';
+import { LoginGuard } from './rest/guards/login.guard';
+import { ModGuard } from './rest/guards/mod.guard';
+import { AdminGuard } from './rest/guards/admin.guard';
 
 
 import { myBoxComponent } from './box/box.component';
@@ -32,6 +36,10 @@ import { ClickOutsideDirective } from './click-outside.directive';
         QuestionControlService,
         ApiService,
         BaseApiService,
+        JWTService,
+        LoginGuard,
+        ModGuard,
+        AdminGuard,
     ],
     exports: [
         myBoxComponent,

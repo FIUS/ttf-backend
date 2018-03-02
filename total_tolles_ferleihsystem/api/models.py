@@ -13,7 +13,7 @@ root_links = api.inherit('RootLinks', with_curies, {
     'self': HaLUrl(UrlData('api.default_root_resource', absolute=True)),
     'doc': HaLUrl(UrlData('api.doc', absolute=True)),
     'spec': HaLUrl(UrlData('api.specs', absolute=True)),
-    'auth': HaLUrl(UrlData('api.auth_authenticate', absolute=True)),
+    'auth': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
 })
 
 root_model = api.model('RootModel', {

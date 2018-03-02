@@ -12,6 +12,7 @@ import { TitleBarComponent } from './navigation/title-bar.component';
 import { NavigationService } from './navigation/navigation-service';
 
 import { HomeComponent } from './home/home.component';
+import { LoginComponent } from './login/login.component';
 
 import { AppComponent } from './app.component';
 
@@ -21,6 +22,7 @@ import { AppComponent } from './app.component';
     AppComponent,
 
     HomeComponent,
+    LoginComponent,
     BreadcrumbsComponent,
     TitleBarComponent,
   ],
