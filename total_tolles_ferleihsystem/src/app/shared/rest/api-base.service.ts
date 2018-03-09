@@ -54,13 +54,23 @@ export class BaseApiService {
         return url;
     }
 
-    get(url: string|LinkObject|ApiLinksObject|ApiObject): Observable<ApiObject | ApiObject[]> {
+    private headers(token?: string): RequestOptions {
+        const headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        if (token != undefined) {
+            headers.append('Authorization', 'Bearer ' + token);
+        }
+
+        return new RequestOptions({ headers: headers });
+    }
+
+    get(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<ApiObject | ApiObject[]> {
         url = this.extractUrl(url);
         if (this.runningRequests.has(url)) {
             return this.runningRequests.get(url);
         }
         console.log(url);
-        const request = this.http.get(url)
+        const request = this.http.get(url, this.headers(token))
             .map((res: Response) => {
                 this.runningRequests.delete(url as string);
                 return res.json();
@@ -73,24 +83,16 @@ export class BaseApiService {
         return request;
     }
 
-    private headers(): RequestOptions {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        // TODO headers.append('authentication', `${student.token}`);
-
-        return new RequestOptions({ headers: headers });
-    }
-
-    put(url: string|LinkObject|ApiLinksObject|ApiObject, data): Observable<ApiObject> {
+    put(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<ApiObject> {
         url = this.extractUrl(url);
-        return this.http.put(url, JSON.stringify(data), this.headers())
+        return this.http.put(url, JSON.stringify(data), this.headers(token))
             .map((res: Response) => res.json())
             .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
     }
 
-    post(url: string|LinkObject|ApiLinksObject|ApiObject, data): Observable<ApiObject> {
+    post(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<ApiObject> {
         url = this.extractUrl(url);
-        return this.http.post(url, JSON.stringify(data), this.headers())
+        return this.http.post(url, JSON.stringify(data), this.headers(token))
             .map((res: Response) => res.json())
             .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
     }

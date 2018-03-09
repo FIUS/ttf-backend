@@ -21,7 +21,7 @@ export interface RootModel extends ApiObject {
 export interface AuthRootLinks extends ApiLinksObject {
     login: LinkObject;
     check: LinkObject;
-    refresh_login: LinkObject;
+    refresh: LinkObject;
 };
 
 export interface AuthRootModel extends ApiObject {
@@ -97,7 +97,14 @@ export class ApiService implements OnInit {
         this.getAuthRoot().subscribe(auth => {
             this.rest.post(auth._links.login, {username: username, password: password}).subscribe(data => {
                 this.jwt.updateTokens(data.access_token, data.refresh_token);
-                console.log(this.jwt.isAdmin());
+            });
+        });
+    }
+
+    refreshLogin(refreshToken: string) {
+        this.getAuthRoot().subscribe(auth => {
+            this.rest.post(auth._links.refresh, {}, refreshToken).subscribe(data => {
+                this.jwt.updateTokens(data.access_token);
             });
         });
     }

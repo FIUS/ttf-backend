@@ -1,10 +1,34 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit, Injector } from '@angular/core';
+import { ApiService } from './api.service';
+import { Observable, } from 'rxjs/Rx';
+
 
 @Injectable()
-export class JWTService {
+export class JWTService implements OnInit {
 
     readonly TOKEN = 'token';
     readonly REFRESH_TOKEN = 'refresh_token';
+
+    private api;
+
+    constructor (private injector: Injector) {
+        Observable.timer(1).take(1).subscribe((() => {
+            this.ngOnInit()
+        }).bind(this))
+    }
+
+    ngOnInit(): void {
+        this.api = this.injector.get(ApiService);
+        Observable.timer(1, 60000).subscribe((() => {
+            if (this.loggedIn()) {
+                let future = new Date();
+                future = new Date(future.getTime() + (3 * 60 * 1000))
+                if (this.expiration(this.token()) < future) {
+                    this.api.refreshLogin(this.refreshToken());
+                }
+            }
+        }).bind(this));
+    }
 
     updateTokens(loginToken: string, refreshToken?: string) {
         localStorage.setItem(this.TOKEN, loginToken);
@@ -27,7 +51,7 @@ export class JWTService {
     }
 
     private tokenToJson(token: string) {
-        return JSON.parse(atob(this.token().split('.')[1]));
+        return JSON.parse(atob(token.split('.')[1]));
     }
 
     private expiration(token: string): Date {
