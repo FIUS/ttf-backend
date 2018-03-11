@@ -1,4 +1,5 @@
 import { Injectable, OnInit, Injector } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from './api.service';
 import { Observable, } from 'rxjs/Rx';
 
@@ -11,7 +12,7 @@ export class JWTService implements OnInit {
 
     private api;
 
-    constructor (private injector: Injector) {
+    constructor (private injector: Injector, private router: Router) {
         Observable.timer(1).take(1).subscribe((() => {
             this.ngOnInit()
         }).bind(this))
@@ -35,11 +36,15 @@ export class JWTService implements OnInit {
         if (refreshToken != null) {
             localStorage.setItem(this.REFRESH_TOKEN, refreshToken);
         }
+        if (this.router.url === '/login' && this.loggedIn()) {
+            this.router.navigate(['/']);
+        }
     }
 
     logout() {
         localStorage.removeItem(this.TOKEN);
         localStorage.removeItem(this.REFRESH_TOKEN);
+        this.router.navigate(['/login']);
     }
 
     token() {

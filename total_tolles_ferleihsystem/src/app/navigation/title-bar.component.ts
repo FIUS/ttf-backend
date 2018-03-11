@@ -1,6 +1,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { NavigationService } from './navigation-service';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-title-bar',
@@ -11,7 +12,7 @@ export class TitleBarComponent implements OnInit {
 
     title: string;
 
-    constructor(private data: NavigationService) { }
+    constructor(private data: NavigationService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.data.currentTitle.subscribe(title => this.title = title);
