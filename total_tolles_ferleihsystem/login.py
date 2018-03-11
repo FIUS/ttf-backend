@@ -67,6 +67,11 @@ class LoginService():
 
         return user
 
+    def get_guest_user(self) -> User:
+        user = User('Guest')
+
+        return user
+
     def check_password(self, user: User, password: str) -> bool:
         return self._login_provider.valid_password(user.username, password)
 

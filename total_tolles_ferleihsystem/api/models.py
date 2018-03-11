@@ -23,6 +23,7 @@ root_model = api.model('RootModel', {
 auth_links = api.inherit('AuthLinks', with_curies, {
     'self': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
     'login': HaLUrl(UrlData('api.auth_login', absolute=True)),
+    'guest_login': HaLUrl(UrlData('api.auth_guest_login', absolute=True)),
     'fresh_login': HaLUrl(UrlData('api.auth_fresh_login', absolute=True)),
     'refresh': HaLUrl(UrlData('api.auth_refresh', absolute=True)),
     'check': HaLUrl(UrlData('api.auth_check', absolute=True)),

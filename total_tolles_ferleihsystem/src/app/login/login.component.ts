@@ -26,4 +26,8 @@ export class LoginComponent implements OnInit {
         this.api.login('mod', 'mod');
     }
 
+    loginAsGuest() {
+        this.api.guestLogin();
+    }
+
 }

@@ -66,6 +66,22 @@ class AuthenticationRoutes(Resource):
     def get(self):
         return
 
+@ns.route('/guest-login/')
+class GuestLogin(Resource):
+    """Login resource."""
+
+    @api.doc(security=None)
+    @api.marshal_with(jwt_response_full)
+    def post(self):
+        """Login as guest to get a new token and refresh token."""
+        user = login_service.get_guest_user()
+
+        ret = {
+            'access_token': create_access_token(identity=user, fresh=True),
+            'refresh_token': create_refresh_token(identity=user)
+        }
+        return ret
+
 @ns.route('/login/')
 class Login(Resource):
     """Login resource."""

@@ -101,6 +101,14 @@ export class ApiService implements OnInit {
         });
     }
 
+    guestLogin() {
+        this.getAuthRoot().subscribe(auth => {
+            this.rest.post(auth._links.guest_login, {}).subscribe(data => {
+                this.jwt.updateTokens(data.access_token, data.refresh_token);
+            });
+        });
+    }
+
     refreshLogin(refreshToken: string) {
         this.getAuthRoot().subscribe(auth => {
             this.rest.post(auth._links.refresh, {}, refreshToken).subscribe(data => {
