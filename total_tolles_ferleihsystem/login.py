@@ -45,6 +45,8 @@ class LoginProvider(ABC):
 
 class LoginService():
 
+    GUEST_IDENTITY: str = 'Guest'
+
     _login_provider: LoginProvider
 
     def __init__(self, loginProvider: LoginProvider):
@@ -55,6 +57,8 @@ class LoginService():
         return self._login_provider
 
     def get_user_by_id(self, id: str) -> User:
+        if id == LoginService.GUEST_IDENTITY:
+            return User(LoginService.GUEST_IDENTITY)
         if not self._login_provider.valid_user(id):
             return None
 
@@ -68,9 +72,7 @@ class LoginService():
         return user
 
     def get_guest_user(self) -> User:
-        user = User('Guest')
-
-        return user
+        return self.get_user_by_id(LoginService.GUEST_IDENTITY)
 
     def check_password(self, user: User, password: str) -> bool:
         return self._login_provider.valid_password(user.username, password)
