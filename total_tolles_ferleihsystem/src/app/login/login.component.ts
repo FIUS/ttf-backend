@@ -11,6 +11,9 @@ import { JWTService } from '../shared/rest/jwt.service';
 })
 export class LoginComponent implements OnInit {
 
+    private username: string;
+    private password: string;
+
     constructor(private data: NavigationService, private api: ApiService,
         private jwt: JWTService, private router: Router) { }
 
@@ -22,8 +25,22 @@ export class LoginComponent implements OnInit {
         this.data.changeBreadcrumbs([]);
     }
 
+    credentialsValid(): boolean {
+        if (this.username != null && this.username.length >= 3) {
+            if (this.password != null && this.password.length >= 3) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     login() {
-        this.api.login('mod', 'mod');
+        this.api.login(this.username, this.password).subscribe(success => {
+            if (!success) {
+                console.log('Wrong Username or Password!');
+            }
+        });
+        this.password = '';
     }
 
     loginAsGuest() {

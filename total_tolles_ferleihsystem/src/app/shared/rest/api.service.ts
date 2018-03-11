@@ -93,12 +93,19 @@ export class ApiService implements OnInit {
         return this.currentAuth;
     }
 
-    login(username: string, password: string) {
+    login(username: string, password: string): Observable<boolean> {
+        const success = new AsyncSubject<boolean>();
         this.getAuthRoot().subscribe(auth => {
             this.rest.post(auth._links.login, {username: username, password: password}).subscribe(data => {
                 this.jwt.updateTokens(data.access_token, data.refresh_token);
+                success.next(true);
+                success.complete();
+            }, error => {
+                success.next(false);
+                success.complete();
             });
         });
+        return success.asObservable();
     }
 
     guestLogin() {

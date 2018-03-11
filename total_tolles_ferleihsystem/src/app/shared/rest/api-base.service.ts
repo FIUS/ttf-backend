@@ -94,6 +94,11 @@ export class BaseApiService {
         url = this.extractUrl(url);
         return this.http.post(url, JSON.stringify(data), this.headers(token))
             .map((res: Response) => res.json())
-            .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+            .catch((error: any) => {
+                if (error.status != null) {
+                    return Observable.throw({status: error.status, message: JSON.parse(error._body).message});
+                }
+                return Observable.throw(error.json().error || 'Server error')
+            });
     }
 }
