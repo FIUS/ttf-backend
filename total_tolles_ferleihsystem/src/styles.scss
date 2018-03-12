@@ -30,6 +30,7 @@ body {
     border-radius: .125rem;
     opacity: 0;
     transition: opacity 0.2s ease-in;
+    pointer-events: none;
 }
 .tooltip-left:before {
     content: "";
@@ -43,7 +44,9 @@ body {
     border-color: transparent transparent transparent black;
     opacity: 0;
     transition: opacity 0.2s ease-in;
+    pointer-events: none;
 }
 .tooltip-left:hover:after, .tooltip-left:hover:before {
     opacity: 0.8;
+    pointer-events: all;
 }
