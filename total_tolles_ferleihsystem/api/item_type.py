@@ -9,8 +9,8 @@ from .. import jwt, db
 
 from ..db_models.itemType import ItemType
 
-
-ns = api.namespace('item_type', description='ItemTypes', path='/items/item_types')
+PATH: str= '/catalog/item_types'
+ns = api.namespace('item_type', description='ItemTypes', path=PATH)
 
 
 @ns.route('/')
