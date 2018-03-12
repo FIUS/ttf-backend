@@ -10,7 +10,7 @@ from .. import jwt, db
 from ..db_models.itemType import ItemType
 
 
-ns = api.namespace('item_types', description='ItemTypes')
+ns = api.namespace('item_type', description='ItemTypes', path='/items/item_types')
 
 
 @ns.route('/')
@@ -36,3 +36,19 @@ class ItemTypeList(Resource):
             if 'UNIQUE constraint failed' in message:
                 abort(409, 'Name is not unique!')
             abort(500)
+
+@ns.route('/<int:id>/')
+class ItemTypeDetail(Resource):
+
+    @api.doc(security=None)
+    @api.marshal_with(item_type_get)
+    def get(self, id):
+        return ItemType.query.filter(ItemType.id == id).first()
+    
+    @ns.response(404, 'Item type not found.')
+    def delete(self, id):
+        item_type = ItemType.get_by_id(id)
+        if item_type is None:
+            abort(404, 'Requested item type was not found!')
+        db.session.delete(item_type)
+        db.session.commit()
