@@ -100,14 +100,14 @@ class BasicAuthProvider(LoginProvider):
     def init(self) -> None:
         pass
 
-    def valid_user(self, id: str) -> bool:
-        return id in self._authDB
+    def valid_user(self, user_id: str) -> bool:
+        return user_id in self._authDB
 
-    def valid_password(self, id: str, password: str) -> bool:
-        return self._authDB[id] == password
+    def valid_password(self, user_id: str, password: str) -> bool:
+        return self._authDB[user_id] == password
 
-    def is_admin(self, id: str) -> bool:
-        return id in self._admin
+    def is_admin(self, user_id: str) -> bool:
+        return user_id in self._admin
 
-    def is_moderator(self, id: str) -> bool:
-        return id in self._mod
+    def is_moderator(self, user_id: str) -> bool:
+        return user_id in self._mod
