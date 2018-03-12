@@ -3,11 +3,11 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
 from sqlalchemy.exc import IntegrityError
 
-from . import api as api
-from .models import item_type_get, item_type_post
-from .. import jwt, db
+from .. import api as api
+from ..models import item_type_get, item_type_post
+from ... import jwt, db
 
-from ..db_models.itemType import ItemType
+from ...db_models.itemType import ItemType
 
 PATH: str= '/catalog/item_types'
 ns = api.namespace('item_type', description='ItemTypes', path=PATH)
