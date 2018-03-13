@@ -1,15 +1,40 @@
-"""Module containing the root resource of the API."""
+"""
+Module containing the root resource of the API.
+"""
 
 from flask_restplus import Resource
 from . import api
-from .models import root_model
+from .models import ROOT_MODEL, CATALOG_MODEL
 
-ns = api.namespace('default', path='/')
+ANS = api.namespace('default', path='/')
 
-@ns.route('/')
+@ANS.route('/')
 class RootResource(Resource):
+    """
+    The API root element
+    """
 
     @api.doc(security=None)
-    @api.marshal_with(root_model)
+    @api.marshal_with(ROOT_MODEL)
+    # pylint: disable=R0201
     def get(self):
-        return 'TODO'
+        """
+        Get the root element
+        """
+        return
+
+
+@ANS.route('/catalog/')
+class CatalogResource(Resource):
+    """
+    The catalog root element
+    """
+
+    @api.doc(security=None)
+    @api.marshal_with(CATALOG_MODEL)
+    # pylint: disable=R0201
+    def get(self):
+        """
+        Get the catalog element
+        """
+        return

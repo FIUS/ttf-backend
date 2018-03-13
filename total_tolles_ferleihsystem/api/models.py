@@ -4,24 +4,23 @@ from flask_restplus import fields
 from . import api
 from ..hal_field import HaLUrl, UrlData, NestedFields
 
-with_curies = api.model('WithCuries', {
+WITH_CURIES = api.model('WithCuries', {
     'curies': HaLUrl(UrlData('api.doc', absolute=True, templated=True,
                              hashtag='!{rel}', name='rel')),
 })
 
-root_links = api.inherit('RootLinks', with_curies, {
+ROOT_LINKS = api.inherit('RootLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.default_root_resource', absolute=True)),
-    'item_type': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
+    'auth': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
+    'catalog': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
     'doc': HaLUrl(UrlData('api.doc', absolute=True)),
     'spec': HaLUrl(UrlData('api.specs', absolute=True)),
-    'auth': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
+})
+ROOT_MODEL = api.model('RootModel', {
+    '_links': NestedFields(ROOT_LINKS),
 })
 
-root_model = api.model('RootModel', {
-    '_links': NestedFields(root_links),
-})
-
-auth_links = api.inherit('AuthLinks', with_curies, {
+AUTHENTICATION_ROUTES_LINKS = api.inherit('AuthenticationRoutesLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
     'login': HaLUrl(UrlData('api.auth_login', absolute=True)),
     'guest_login': HaLUrl(UrlData('api.auth_guest_login', absolute=True)),
@@ -29,17 +28,24 @@ auth_links = api.inherit('AuthLinks', with_curies, {
     'refresh': HaLUrl(UrlData('api.auth_refresh', absolute=True)),
     'check': HaLUrl(UrlData('api.auth_check', absolute=True)),
 })
-
-authentication_routes_model = api.model('AuthenticationRoutesModel', {
-    '_links': NestedFields(auth_links),
+AUTHENTICATION_ROUTES_MODEL = api.model('AuthenticationRoutesModel', {
+    '_links': NestedFields(AUTHENTICATION_ROUTES_LINKS),
 })
 
-item_type_links = api.inherit('ItemTypeLinks', with_curies, {
+CATALOG_LINKS = api.inherit('CatalogLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
+    'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
+})
+CATALOG_MODEL = api.model('CatalogModel', {
+    '_links': NestedFields(CATALOG_LINKS),
+})
+
+item_type_links = api.inherit('ItemTypeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'id': 'id'}),
                    required=False),
 })
 
-item_type_list_links = api.inherit('ItemTypeLinks', with_curies, {
+item_type_list_links = api.inherit('ItemTypeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
 })
 
@@ -55,6 +61,6 @@ item_type_put = api.inherit('ItemTypePUT', item_type_post, {
 })
 
 item_type_get = api.inherit('ItemType', item_type_put, {
-    '_links': NestedFields(item_type_links),
     'id': fields.Integer(),
+    '_links': NestedFields(item_type_links),
 })

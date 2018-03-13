@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, create_access_token, \
 
 from . import api as api
 from .import auth_logger, satisfies_role
-from .models import authentication_routes_model
+from .models import AUTHENTICATION_ROUTES_MODEL
 from .. import jwt
 from .. import app
 
@@ -62,7 +62,7 @@ class AuthenticationRoutes(Resource):
     """Authentication Routes Hal resource."""
 
     @api.doc(security=None)
-    @api.marshal_with(authentication_routes_model)
+    @api.marshal_with(AUTHENTICATION_ROUTES_MODEL)
     def get(self):
         return
 
