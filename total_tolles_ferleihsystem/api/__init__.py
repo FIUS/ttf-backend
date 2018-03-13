@@ -70,7 +70,7 @@ api = Api(api_blueprint, version='0.1', title='TTF API', doc='/doc/',
 
 @jwt.user_identity_loader
 def load_user_identity(user: User):
-    return user.username
+    return user.name
 
 
 @jwt.user_claims_loader

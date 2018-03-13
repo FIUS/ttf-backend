@@ -74,7 +74,7 @@ class GuestLogin(Resource):
     @api.marshal_with(jwt_response_full)
     def post(self):
         """Login as guest to get a new token and refresh token."""
-        user = login_service.get_guest_user()
+        user = login_service.get_anonymous_user()
 
         ret = {
             'access_token': create_access_token(identity=user, fresh=True),
