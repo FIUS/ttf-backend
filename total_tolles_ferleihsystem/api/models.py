@@ -1,4 +1,6 @@
-"""Module containing models for whole API to use."""
+"""
+Module containing models for whole API to use.
+"""
 
 from flask_restplus import fields
 from . import api
