@@ -12,7 +12,7 @@ import { JWTService } from '../shared/rest/jwt.service';
 export class LoginComponent implements OnInit {
 
     private username: string;
-    private password: string;
+    private password: string = '';
 
     constructor(private data: NavigationService, private api: ApiService,
         private jwt: JWTService, private router: Router) { }
@@ -27,7 +27,9 @@ export class LoginComponent implements OnInit {
 
     credentialsValid(): boolean {
         if (this.username != null && this.username.length >= 3) {
-            if (this.password != null && this.password.length >= 3) {
+            if (this.password !== undefined && this.password !== null &&
+                (this.password.length >= 3 ||
+                (this.username === 'Guest' && this.password === ''))) {
                 return true;
             }
         }
@@ -35,12 +37,14 @@ export class LoginComponent implements OnInit {
     }
 
     login() {
-        this.api.login(this.username, this.password).subscribe(success => {
-            if (!success) {
-                console.log('Wrong Username or Password!');
-            }
-        });
-        this.password = '';
+        if (this.credentialsValid()) {
+            this.api.login(this.username, this.password).subscribe(success => {
+                if (!success) {
+                    console.log('Wrong Username or Password!');
+                }
+            });
+            this.password = '';
+        }
     }
 
     loginAsGuest() {

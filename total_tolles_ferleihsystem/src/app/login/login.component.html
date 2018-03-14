@@ -1,7 +1,7 @@
 <div class="h-100 w-100 pa5 self-stretch flex items-center justify-around">
     <div class="flex flex-column">
         <input class="input-reset pa2 ba br2 br--top b--gray" type="text" name="username" placeholder="Username" autofocus [(ngModel)]="username">
-        <input class="input-reset pa2 ba br2 br--bottom b--gray" type="password" name="password" placeholder="Password" [(ngModel)]="password">
+        <input class="input-reset pa2 ba br2 br--bottom b--gray" type="password" name="password" placeholder="Password" [(ngModel)]="password" (keyup.enter)="login()">
         <input class="mt2 pa2 bn br2 bg-light-gray bg-animate" [ngClass]="{'bg-light-green': credentialsValid(), 'hover-bg-green': credentialsValid(), pointer: credentialsValid()}" [disabled]="!credentialsValid()" type="button" name="login" value="login" (click)="login()">
         <input class="mt2 pa2 bn br2 bg-light-gray bg-animate hover-bg-black-20 pointer" type="button" name="login" value="login as guest" (click)="loginAsGuest()">
     </div>
