@@ -66,3 +66,22 @@ item_type_get = api.inherit('ItemType', item_type_put, {
     'id': fields.Integer(),
     '_links': NestedFields(item_type_links),
 })
+
+ITEM_TAG_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', absolute=True, url_data={'id' : 'id'}),
+                   required=False),
+})
+
+ITEM_TAG_LIST_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
+})
+
+ITEM_TAG_POST = api.model('ItemTagPOST', {
+    'name': fields.String(),
+    'visible_for': fields.String(),
+})
+
+ITEM_TAG_GET = api.inherit('ItemTag', ITEM_TAG_POST, {
+    'id': fields.Integer(),
+    '_links': NestedFields(ITEM_TAG_LINKS),
+})
