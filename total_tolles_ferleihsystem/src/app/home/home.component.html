@@ -1,7 +1,7 @@
 <div class="flex flex-wrap">
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/people">
+    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()"  routerLink="/item-types">
         <i class="f2 fa fa-users"></i>
-        <a class="f3 black">Personen</a>
+        <a class="f3 black">Item Types</a>
     </div>
     <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/opuses">
         <i class="f2 fa fa-music"></i>

@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable, OnInit, Injector } from '@angular/core';
 import { Observable, } from 'rxjs/Rx';
 import { BaseApiService, ApiObject, LinkObject, ApiLinksObject } from './api-base.service';
 import { JWTService } from './jwt.service';
@@ -10,6 +10,7 @@ export interface RootLinks extends ApiLinksObject {
     doc: LinkObject;
     spec: LinkObject;
     auth: LinkObject;
+    catalog: LinkObject;
 };
 
 export interface RootModel extends ApiObject {
@@ -20,18 +21,32 @@ export interface RootModel extends ApiObject {
 
 export interface AuthRootLinks extends ApiLinksObject {
     login: LinkObject;
-    check: LinkObject;
+    guest_login: LinkObject;
+    fresh_login: LinkObject;
     refresh: LinkObject;
+    check: LinkObject;
 };
 
 export interface AuthRootModel extends ApiObject {
-    _links: RootLinks;
+    _links: AuthRootLinks;
+    [propName: string]: any;
+};
+
+
+export interface CatalogLinks extends ApiLinksObject {
+    item_types: LinkObject;
+};
+
+export interface CatalogModel extends ApiObject {
+    _links: CatalogLinks;
     [propName: string]: any;
 };
 
 
 @Injectable()
 export class ApiService implements OnInit {
+
+    private jwt: JWTService;
 
     private rootSource = new AsyncSubject<RootModel>();
 
@@ -41,16 +56,27 @@ export class ApiService implements OnInit {
 
     private currentSpec = this.specSource.asObservable();
 
+    private catalogSource = new AsyncSubject<CatalogModel>();
+
+    private currentCatalog = this.catalogSource.asObservable();
+
     private authSource = new AsyncSubject<AuthRootModel>();
 
     private currentAuth = this.authSource.asObservable();
 
     private streams: {[propName: string]: BehaviorSubject<ApiObject | ApiObject[]>} = {};
 
-    constructor(private rest: BaseApiService, private jwt: JWTService) { }
+    constructor(private rest: BaseApiService, private injector: Injector) {
+        Observable.timer(1).take(1).subscribe((() => {
+            this.ngOnInit()
+        }).bind(this))
+    }
 
     ngOnInit(): void {
+        this.jwt = this.injector.get(JWTService);
         this.getRoot();
+        this.getCatalog();
+        this.getAuthRoot();
     }
 
     getRoot(): Observable<RootModel> {
@@ -81,11 +107,23 @@ export class ApiService implements OnInit {
         return this.currentSpec;
     }
 
+    getCatalog(): Observable<CatalogModel> {
+        this.getRoot().subscribe(root => {
+            if (!this.catalogSource.isStopped) {
+                this.rest.get(root._links.catalog).subscribe(data => {
+                    this.catalogSource.next((data as CatalogModel));
+                    this.catalogSource.complete();
+                });
+            }
+        });
+        return this.currentCatalog;
+    }
+
     getAuthRoot(): Observable<AuthRootModel> {
         this.getRoot().subscribe(root => {
             if (!this.authSource.isStopped) {
                 this.rest.get(root._links.auth).subscribe(data => {
-                    this.authSource.next((data as any));
+                    this.authSource.next((data as AuthRootModel));
                     this.authSource.complete();
                 });
             }
@@ -126,49 +164,54 @@ export class ApiService implements OnInit {
 
     ////////////////////////////////////////////////////////////////////////////
 
-    private getStreamSource(streamID: string) {
-        if (this.streams[streamID] == null) {
+    private getStreamSource(streamID: string, create: boolean = true) {
+        if (this.streams[streamID] == null && create) {
             this.streams[streamID] = new BehaviorSubject<ApiObject | ApiObject[]>(undefined);
         }
-        return this.streams[streamID]
+        return this.streams[streamID];
     }
 
-        /*
-    getPeople(): Observable<Array<ApiObject>> {
-        let stream = this.getStreamSource('persons');
-        this.getRoot().subscribe(root => {
-            this.rest.get(root._links.person).subscribe(data => {
+    private updateResource(streamID: string, data: ApiObject) {
+        const stream = this.getStreamSource(streamID + '/' +  data.id);
+        stream.next(data);
+        const list_stream = this.getStreamSource(streamID, false);
+        if (list_stream != null) {
+            const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
+            if (list != null) {
+                const index = list.findIndex(value => value.id === data.id);
+                list[index] = data;
+                list_stream.next(list);
+            }
+        }
+    }
+
+    get itemTypes(): Observable<Array<ApiObject>> {
+        const stream = this.getStreamSource('item_types');
+        this.getCatalog().subscribe((catalog) => {
+            this.rest.get(catalog._links.item_types).subscribe(data => {
                 stream.next(data);
             });
         });
         return (stream.asObservable() as Observable<ApiObject[]>);
     }
 
-    private personUpdate(data: ApiObject) {
-        let stream = this.getStreamSource('persons/' + data.id);
-        stream.next(data);
-        // TODO update list
-        this.getPeople();
-    }
-
-    getPerson(id: number): Observable<ApiObject> {
-        let stream = this.getStreamSource('persons/' + id);
-        this.getRoot().subscribe(root => {
-            this.rest.get(root._links.person.href + id).subscribe(data => {
-                this.personUpdate(data as ApiObject);
+    private getItemType(id: number): Observable<ApiObject> {
+        const stream = this.getStreamSource('item_types/' + id);
+        this.getCatalog().subscribe((catalog) => {
+            this.rest.get(catalog._links.item_types.href + id).subscribe(data => {
+                this.updateResource('item_types', data as ApiObject);
             });
         });
         return (stream.asObservable() as Observable<ApiObject>);
     }
 
-    postPerson(newData): Observable<ApiObject> {
-        return this.getRoot().flatMap(root => {
-            return this.rest.post(root._links.person, newData).flatMap(data => {
-                let stream = this.getStreamSource('persons/' + data.id);
-                this.personUpdate(data as ApiObject);
+    postItemType(newData): Observable<ApiObject> {
+        return this.getCatalog().flatMap(catalog => {
+            return this.rest.post(catalog._links.item_types, newData).flatMap(data => {
+                const stream = this.getStreamSource('item_types/' + data.id);
+                this.updateResource('item_types', data);
                 return (stream.asObservable() as Observable<ApiObject>);
             });
         });
     }
-    */
 }
