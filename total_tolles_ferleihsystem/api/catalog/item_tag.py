@@ -33,7 +33,7 @@ class ItemTags(Resource):
 
     @api.doc(security=None)
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)
-    @ANS.response(409, 'Name is not Unique.') #TODO: Do we want this?
+    @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
     # pylint: disable=R0201
     def post(self):
@@ -47,7 +47,7 @@ class ItemTags(Resource):
             return marshal(new, ITEM_TAG_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message: #TODO: Do we want this?
+            if 'UNIQUE constraint failed' in message:
                 abort(409, 'Name is not unique!')
             abort(500)
 
@@ -64,7 +64,7 @@ class ItemTagDetail(Resource):
         """
         Get a single item tag object
         """
-        return Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
+        return Tag.query.filter(Tag.id == tag_id).filter(not Tag.deleted).first()
 
     @ANS.response(404, 'Item tag not found.')
     @ANS.response(204, 'Success.')
@@ -77,6 +77,5 @@ class ItemTagDetail(Resource):
         if item_tag is None:
             abort(404, 'Requested item tag was not found!')
         item_tag.deleted = True
-        item_tag.name = "TEST-TEST"
         db.session.commit()
         return "", 204
