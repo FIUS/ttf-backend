@@ -2,18 +2,17 @@ from .. import db
 from . import STD_STRING_SIZE
 from .attribute import AttributeDefinition
 
-
 class Tag (db.Model):
 
     __tablename__ = 'Tag'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(STD_STRING_SIZE))
-    lending_duration = db.Column(db.Time)
+    lending_duration = db.Column(db.Integer)
     deleted = db.Column(db.Boolean, default=False)
     visible_for = db.Column(db.String(STD_STRING_SIZE))
 
-    def __init__(self, name: str, lending_duration: any, visible_for: str):
+    def __init__(self, name: str, lending_duration: int, visible_for: str):
         #TODO Fabi fix date/time formats everywhere
         self.name = name
         self.lending_duration = lending_duration

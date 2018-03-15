@@ -29,11 +29,12 @@ class ItemTags(Resource):
         """
         Get a list of all item tags currently in the system
         """
-        return Tag.query.all()
+        return Tag.query.filter(Tag.deleted == False).all()
 
     @api.doc(security=None)
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)
     @ANS.response(409, 'Name is not Unique.') #TODO: Do we want this?
+    @ANS.response(201, 'Created.')
     # pylint: disable=R0201
     def post(self):
         """
@@ -43,14 +44,14 @@ class ItemTags(Resource):
         try:
             db.session.add(new)
             db.session.commit()
-            return marshal(new, ITEM_TAG_GET)
+            return marshal(new, ITEM_TAG_GET), 201
         except IntegrityError as err:
             message = str(err)
             if 'UNIQUE constraint failed' in message: #TODO: Do we want this?
                 abort(409, 'Name is not unique!')
             abort(500)
 
-@ANS.route('/<int:id>/')
+@ANS.route('/<int:tag_id>/')
 class ItemTagDetail(Resource):
     """
     Single item tag element
@@ -63,16 +64,19 @@ class ItemTagDetail(Resource):
         """
         Get a single item tag object
         """
-        return Tag.query.filter(Tag.id == tag_id).first()
+        return Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
 
     @ANS.response(404, 'Item tag not found.')
+    @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def delete(self, tag_id):
         """
         Delete a item tag object
         """
-        item_tag = Tag.get_by_id(tag_id)
+        item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
             abort(404, 'Requested item tag was not found!')
-        db.session.delete(item_tag)
+        item_tag.deleted = True
+        item_tag.name = "TEST-TEST"
         db.session.commit()
+        return "", 204

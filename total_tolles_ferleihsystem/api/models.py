@@ -68,7 +68,7 @@ item_type_get = api.inherit('ItemType', item_type_put, {
 })
 
 ITEM_TAG_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', absolute=True, url_data={'id' : 'id'}),
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', absolute=True, url_data={'id' : 'tag_id'}),
                    required=False),
 })
 
@@ -78,6 +78,7 @@ ITEM_TAG_LIST_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
 
 ITEM_TAG_POST = api.model('ItemTagPOST', {
     'name': fields.String(),
+    'lending_duration': fields.Integer,
     'visible_for': fields.String(),
 })
 
