@@ -13,6 +13,10 @@ body {
     width: 32rem;
 }
 
+.bg-black-a40 {
+    background-color: rgba($color: #000000, $alpha: 0.4);
+}
+
 .tooltip-left {
     position: relative;
     text-decoration: none;

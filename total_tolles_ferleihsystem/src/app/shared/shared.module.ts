@@ -16,6 +16,7 @@ import { AdminGuard } from './rest/guards/admin.guard';
 
 
 import { myBoxComponent } from './box/box.component';
+import { myDialogComponent } from './dialog/dialog.component';
 import { myDropdownComponent } from './dropdown/dropdown.component';
 import { myTableComponent } from './table/table.component';
 
@@ -25,6 +26,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
     imports:      [ CommonModule, FormsModule, ReactiveFormsModule ],
     declarations: [
         myBoxComponent,
+        myDialogComponent,
         myDropdownComponent,
         myTableComponent,
         DynamicFormComponent,
@@ -43,6 +45,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
     ],
     exports: [
         myBoxComponent,
+        myDialogComponent,
         myDropdownComponent,
         myTableComponent,
         DynamicFormComponent,
