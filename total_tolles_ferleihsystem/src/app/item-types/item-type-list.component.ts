@@ -12,7 +12,7 @@ export class ItemTypeListComponent implements OnInit, OnDestroy {
 
     filter: string = null;
 
-    alphabet: Array<string> = ['0', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+    alphabet: Array<string> = ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, any>;
@@ -40,7 +40,7 @@ export class ItemTypeListComponent implements OnInit, OnDestroy {
                     letter = 'S';
                 }
                 if (letter.match(/^[A-Z]/) == null) {
-                    letter = '0';
+                    letter = '#';
                 }
                 const list = map.get(letter);
                 if (list != null) {
