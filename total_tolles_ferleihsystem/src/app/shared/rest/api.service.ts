@@ -49,7 +49,7 @@ export class ApiService implements OnInit {
 
     private jwt: JWTService;
 
-    private warningSet = new Set([409, ]);
+    private warningSet = new Set([404, 409, ]);
 
     private errorSet = new Set([500, 501, ]);
 
