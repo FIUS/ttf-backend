@@ -1,0 +1,14 @@
+<div class="mb3 flex flex-wrap justify-center">
+    <div class="mr1 underline pointer" (click)="setFilter(null)">ALL</div>
+    <div class="mr1" (click)="setFilter(letter)" [ngClass]="{underline: data?.get(letter).length > 0, pointer: data?.get(letter).length > 0, 'black-60': data?.get(letter).length <= 0}"  *ngFor="let letter of alphabet">{{letter}}</div>
+</div>
+<ng-container *ngFor="let letter of alphabet">
+    <div class="flex" [ngClass]="{flex: (filter == null || filter === letter), dn: true}">
+        <ng-container *ngIf="data?.get(letter).length > 0">
+            <div class="f3 gray">{{letter}}</div>
+            <ul class="mt0 list">
+                <li class="mb1" *ngFor="let itemType of data?.get(letter)">{{itemType.name}}</li>
+            </ul>
+        </ng-container>
+    </div>
+</ng-container>

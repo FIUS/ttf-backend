@@ -179,30 +179,34 @@ export class ApiService implements OnInit {
             const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
             if (list != null) {
                 const index = list.findIndex(value => value.id === data.id);
-                list[index] = data;
+                if (index < 0) {
+                    list.push(data);
+                } else {
+                    list[index] = data;
+                }
                 list_stream.next(list);
             }
         }
     }
 
-    get itemTypes(): Observable<Array<ApiObject>> {
+    getItemTypes(): Observable<Array<ApiObject>> {
         const stream = this.getStreamSource('item_types');
         this.getCatalog().subscribe((catalog) => {
             this.rest.get(catalog._links.item_types).subscribe(data => {
                 stream.next(data);
             });
         });
-        return (stream.asObservable() as Observable<ApiObject[]>);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    private getItemType(id: number): Observable<ApiObject> {
+    getItemType(id: number): Observable<ApiObject> {
         const stream = this.getStreamSource('item_types/' + id);
         this.getCatalog().subscribe((catalog) => {
             this.rest.get(catalog._links.item_types.href + id).subscribe(data => {
                 this.updateResource('item_types', data as ApiObject);
             });
         });
-        return (stream.asObservable() as Observable<ApiObject>);
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
     postItemType(newData): Observable<ApiObject> {
@@ -210,7 +214,7 @@ export class ApiService implements OnInit {
             return this.rest.post(catalog._links.item_types, newData).flatMap(data => {
                 const stream = this.getStreamSource('item_types/' + data.id);
                 this.updateResource('item_types', data);
-                return (stream.asObservable() as Observable<ApiObject>);
+                return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
             });
         });
     }

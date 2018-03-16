@@ -14,17 +14,23 @@ import { NavigationService } from './navigation/navigation-service';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
+import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
+import { ItemTypeListComponent } from './item-types/item-type-list.component';
+
 import { AppComponent } from './app.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-
-    HomeComponent,
-    LoginComponent,
     BreadcrumbsComponent,
     TitleBarComponent,
+
+    LoginComponent,
+
+    HomeComponent,
+    ItemTypesOverviewComponent,
+    ItemTypeListComponent,
   ],
   imports: [
     HttpModule,
