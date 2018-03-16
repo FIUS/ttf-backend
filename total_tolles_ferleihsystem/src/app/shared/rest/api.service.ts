@@ -2,6 +2,7 @@ import { Injectable, OnInit, Injector } from '@angular/core';
 import { Observable, } from 'rxjs/Rx';
 import { BaseApiService, ApiObject, LinkObject, ApiLinksObject } from './api-base.service';
 import { JWTService } from './jwt.service';
+import { InfoService } from '../info/info.service';
 import { AsyncSubject } from 'rxjs/AsyncSubject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -66,7 +67,7 @@ export class ApiService implements OnInit {
 
     private streams: {[propName: string]: BehaviorSubject<ApiObject | ApiObject[]>} = {};
 
-    constructor(private rest: BaseApiService, private injector: Injector) {
+    constructor(private rest: BaseApiService, private info: InfoService, private injector: Injector) {
         Observable.timer(1).take(1).subscribe((() => {
             this.ngOnInit()
         }).bind(this))
@@ -139,6 +140,11 @@ export class ApiService implements OnInit {
                 success.next(true);
                 success.complete();
             }, error => {
+                if (error.status === 401 ) {
+                    this.info.emitWarning('Wrong username or password!', null, 5000);
+                } else {
+                    this.info.emitError('Something went wrong with that login. Please try again.', 'Ooops', 10000);
+                }
                 success.next(false);
                 success.complete();
             });

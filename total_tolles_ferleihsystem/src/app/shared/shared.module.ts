@@ -15,6 +15,9 @@ import { ModGuard } from './rest/guards/mod.guard';
 import { AdminGuard } from './rest/guards/admin.guard';
 
 
+import { InfoComponent } from './info/info.component';
+import { InfoService } from './info/info.service';
+
 import { myBoxComponent } from './box/box.component';
 import { myDialogComponent } from './dialog/dialog.component';
 import { myDropdownComponent } from './dropdown/dropdown.component';
@@ -25,6 +28,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
 @NgModule({
     imports:      [ CommonModule, FormsModule, ReactiveFormsModule ],
     declarations: [
+        InfoComponent,
         myBoxComponent,
         myDialogComponent,
         myDropdownComponent,
@@ -34,6 +38,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         ClickOutsideDirective,
     ],
     providers: [
+        InfoService,
         QuestionService,
         QuestionControlService,
         ApiService,
@@ -44,6 +49,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         AdminGuard,
     ],
     exports: [
+        InfoComponent,
         myBoxComponent,
         myDialogComponent,
         myDropdownComponent,

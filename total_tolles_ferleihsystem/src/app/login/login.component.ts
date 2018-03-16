@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { Router } from '@angular/router';
-import { InfoService } from '../info/info.service';
 import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { timeout } from 'q';
@@ -17,8 +16,7 @@ export class LoginComponent implements OnInit {
     private password: string = '';
 
     constructor(private data: NavigationService, private api: ApiService,
-        private jwt: JWTService, private router: Router,
-        private info: InfoService) { }
+        private jwt: JWTService, private router: Router) { }
 
     ngOnInit(): void {
         if (this.jwt.loggedIn()) {
@@ -41,11 +39,7 @@ export class LoginComponent implements OnInit {
 
     login() {
         if (this.credentialsValid()) {
-            this.api.login(this.username, this.password).subscribe(success => {
-                if (!success) {
-                    this.info.emitWarning('Wrong Username or Password!', null, 5000);
-                }
-            });
+            this.api.login(this.username, this.password);
             this.password = '';
         }
     }
