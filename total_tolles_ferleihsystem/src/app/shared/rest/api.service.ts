@@ -49,6 +49,10 @@ export class ApiService implements OnInit {
 
     private jwt: JWTService;
 
+    private warningSet = new Set([409, ]);
+
+    private errorSet = new Set([500, 501, ]);
+
     private rootSource = new AsyncSubject<RootModel>();
 
     private currentRoot = this.rootSource.asObservable();
@@ -78,6 +82,34 @@ export class ApiService implements OnInit {
         this.getRoot();
         this.getCatalog();
         this.getAuthRoot();
+    }
+
+    private errorHandler(error, resource: string, method: string) {
+        let title;
+        let message = 'Unknown Error.';
+        switch (method) {
+            case 'POST':
+                title = 'Error while creating new resource under "' + resource + '".';
+                break;
+            case 'PUT':
+                title = 'Error while updating existing resource "' + resource + '".';
+                break;
+
+            default:
+                title = 'Error while retrieving resource "' + resource + '".'
+                break;
+        }
+        if (error.message != null) {
+            message = error.message;
+        }
+
+        if (this.errorSet.has(error.status)) {
+            this.info.emitError(message, title);
+        } else if (this.warningSet.has(error.status)) {
+            this.info.emitWarning(message, title, 7000);
+        } else {
+            this.info.emitInfo(message, title, 5000);
+        }
     }
 
     getRoot(): Observable<RootModel> {
@@ -196,31 +228,38 @@ export class ApiService implements OnInit {
     }
 
     getItemTypes(): Observable<Array<ApiObject>> {
-        const stream = this.getStreamSource('item_types');
+        const resource = 'item_types';
+        const stream = this.getStreamSource(resource);
         this.getCatalog().subscribe((catalog) => {
             this.rest.get(catalog._links.item_types).subscribe(data => {
                 stream.next(data);
             });
-        });
+        }, error => this.errorHandler(error, resource, 'GET'));
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
     getItemType(id: number): Observable<ApiObject> {
-        const stream = this.getStreamSource('item_types/' + id);
+        const baseResource = 'item_types';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
         this.getCatalog().subscribe((catalog) => {
             this.rest.get(catalog._links.item_types.href + id).subscribe(data => {
-                this.updateResource('item_types', data as ApiObject);
+                this.updateResource(baseResource, data as ApiObject);
             });
-        });
+        }, error => this.errorHandler(error, resource, 'GET'));
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
     postItemType(newData): Observable<ApiObject> {
+        const resource = 'item_types';
         return this.getCatalog().flatMap(catalog => {
             return this.rest.post(catalog._links.item_types, newData).flatMap(data => {
-                const stream = this.getStreamSource('item_types/' + data.id);
-                this.updateResource('item_types', data);
+                const stream = this.getStreamSource(resource + '/' + data.id);
+                this.updateResource(resource, data);
                 return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+            }).catch(error => {
+                this.errorHandler(error, resource, 'POST');
+                return Observable.throw(error);
             });
         });
     }
