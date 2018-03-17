@@ -43,7 +43,7 @@ CATALOG_MODEL = api.model('CatalogModel', {
 })
 
 item_type_links = api.inherit('ItemTypeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'id': 'id'}),
+    'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'id': 'type_id'}),
                    required=False),
 })
 

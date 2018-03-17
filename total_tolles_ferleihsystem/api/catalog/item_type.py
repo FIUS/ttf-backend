@@ -50,7 +50,7 @@ class ItemTypeList(Resource):
                 abort(409, 'Name is not unique!')
             abort(500)
 
-@ANS.route('/<int:id>/')
+@ANS.route('/<int:type_id>/')
 class ItemTypeDetail(Resource):
     """
     Single item type element
