@@ -37,6 +37,7 @@ AUTHENTICATION_ROUTES_MODEL = api.model('AuthenticationRoutesModel', {
 CATALOG_LINKS = api.inherit('CatalogLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
     'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
+    'item_tags': HaLUrl(UrlData('api.item_tag_item_tags', absolute=True)),
 })
 CATALOG_MODEL = api.model('CatalogModel', {
     '_links': NestedFields(CATALOG_LINKS),
@@ -82,7 +83,10 @@ ITEM_TAG_POST = api.model('ItemTagPOST', {
     'visible_for': fields.String(),
 })
 
-ITEM_TAG_GET = api.inherit('ItemTag', ITEM_TAG_POST, {
+ITEM_TAG_PUT = api.inherit('ItemTagPUT', ITEM_TAG_POST, {
+})
+
+ITEM_TAG_GET = api.inherit('ItemTagGET', ITEM_TAG_PUT, {
     'id': fields.Integer(),
     '_links': NestedFields(ITEM_TAG_LINKS),
 })
