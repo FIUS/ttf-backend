@@ -77,7 +77,8 @@ export class BaseApiService {
             }).catch((error: any) => {
                 this.runningRequests.delete(url as string);
                 if (error.status != null) {
-                    return Observable.throw({status: error.status, message: JSON.parse(error._body).message});
+                    return Observable.throw({status: error.status,
+                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : 'Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error');
             }).publishReplay(1);
@@ -92,7 +93,8 @@ export class BaseApiService {
             .map((res: Response) => res.json())
             .catch((error: any) => {
                 if (error.status != null) {
-                    return Observable.throw({status: error.status, message: JSON.parse(error._body).message});
+                    return Observable.throw({status: error.status,
+                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : 'Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
             });
@@ -104,7 +106,8 @@ export class BaseApiService {
             .map((res: Response) => res.json())
             .catch((error: any) => {
                 if (error.status != null) {
-                    return Observable.throw({status: error.status, message: JSON.parse(error._body).message});
+                    return Observable.throw({status: error.status,
+                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : 'Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
             });
