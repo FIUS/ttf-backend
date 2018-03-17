@@ -21,9 +21,13 @@ export class myDialogComponent {
 
     close() {
         if (this.closable || this.dialogType === 'info') {
-            this.isOpen = false;
-            this.cancelCallback();
+            this.cancel();
         }
+    }
+
+    cancel() {
+        this.isOpen = false;
+        this.cancelCallback();
     }
 
     ok() {

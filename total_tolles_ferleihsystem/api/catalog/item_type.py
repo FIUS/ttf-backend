@@ -71,7 +71,7 @@ class ItemTypeDetail(Resource):
         """
         Delete a item type object
         """
-        item_type = ItemType.get_by_id(type_id)
+        item_type = ItemType.query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(404, 'Requested item type was not found!')
         db.session.delete(item_type)

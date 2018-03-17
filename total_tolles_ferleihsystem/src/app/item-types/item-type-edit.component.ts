@@ -47,8 +47,8 @@ export class ItemTypeEditComponent implements OnChanges {
         }
     }
 
-    delete() {
-        this.api.deleteItemType(this.itemType.id);
-    }
+    delete = (() => {
+        this.api.deleteItemType(this.itemType.id).take(1).subscribe(() => this.router.navigate(['item-types']));
+    }).bind(this);
 
 }
