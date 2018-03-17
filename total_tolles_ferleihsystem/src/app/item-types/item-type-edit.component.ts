@@ -1,5 +1,5 @@
 import { Component, OnChanges, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
@@ -22,7 +22,7 @@ export class ItemTypeEditComponent implements OnChanges {
     valid: boolean = false;
     data: any = {};
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private router: Router) { }
 
     ngOnChanges(): void {
         if (this.subscription != null) {
@@ -45,6 +45,10 @@ export class ItemTypeEditComponent implements OnChanges {
         if (this.valid) {
             this.api.putItemType(this.itemType.id, this.data);
         }
+    }
+
+    delete() {
+        this.api.deleteItemType(this.itemType.id);
     }
 
 }

@@ -92,6 +92,9 @@ export class ApiService implements OnInit {
             case 'PUT':
                 title = 'Error while updating existing resource "' + resource + '".';
                 break;
+            case 'DELETE':
+                title = 'Error while deleting existing resource "' + resource + '".';
+                break;
 
             default:
                 title = 'Error while retrieving resource "' + resource + '".'
@@ -226,6 +229,23 @@ export class ApiService implements OnInit {
         }
     }
 
+    private removeResource(streamID: string, id: number) {
+        const stream = this.getStreamSource(streamID + '/' + id);
+        stream.next(null);
+
+        const list_stream = this.getStreamSource(streamID, false);
+        if (list_stream != null) {
+            const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
+            if (list != null) {
+                const index = list.findIndex(value => value.id === id);
+                if (index >= 0) {
+                    list.splice(index, 1);
+                }
+                list_stream.next(list);
+            }
+        }
+    }
+
     getItemTypes(): Observable<Array<ApiObject>> {
         const resource = 'item_types';
         const stream = this.getStreamSource(resource);
@@ -282,10 +302,26 @@ export class ApiService implements OnInit {
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
-                this.rest.put(catalog._links.item_types.href + id, newData, token).subscribe(data => {
+                this.rest.put(catalog._links.item_types.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
                 }, error => this.errorHandler(error, resource, 'PUT'));
             }, error => this.errorHandler(error, resource, 'PUT'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    deleteItemType(id: number): Observable<ApiObject> {
+        const baseResource = 'item_types';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.delete(catalog._links.item_types.href + id + '/', token).subscribe(() => {
+                    this.removeResource(baseResource, id);
+                }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE'));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
