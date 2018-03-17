@@ -16,6 +16,8 @@ import { LoginComponent } from './login/login.component';
 
 import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
 import { ItemTypeListComponent } from './item-types/item-type-list.component';
+import { ItemTypeDetailComponent } from './item-types/item-type-detail.component';
+import { ItemTypeEditComponent } from './item-types/item-type-edit.component';
 
 import { AppComponent } from './app.component';
 
@@ -31,6 +33,8 @@ import { AppComponent } from './app.component';
         HomeComponent,
         ItemTypesOverviewComponent,
         ItemTypeListComponent,
+        ItemTypeDetailComponent,
+        ItemTypeEditComponent,
     ],
     imports: [
         HttpModule,

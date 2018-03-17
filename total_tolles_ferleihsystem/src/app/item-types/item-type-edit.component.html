@@ -1,0 +1,7 @@
+<ttf-box>
+    <h1 class="mv0" title>Edit: {{itemType?.name}}</h1>
+    <div class="w-100 ph3 pv2" body>
+        <dynamic-form [objectModel]="'ItemTypePUT'" [startValues]="itemType" (valid)="onValidChange($event)" (data)="onDataChange($event)"></dynamic-form>
+        <div class="button h2 pv1 ph2 br2 bg-light-silver link bg-animate" [ngClass]="{'hover-bg-light-blue': valid, 'pointer': valid, 'bg-light-red': !valid}" (click)="save($event)" >Save<i class="fa fa-check mr2"></i></div>
+    </div>
+</ttf-box>

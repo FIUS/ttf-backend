@@ -1,10 +1,14 @@
 <div class="flex flex-wrap">
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()"  routerLink="/item-types">
-        <i class="f2 fa fa-users"></i>
+    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
+        <i class="f2 fa fa-folder"></i>
         <a class="f3 black">Item Types</a>
     </div>
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/opuses">
-        <i class="f2 fa fa-music"></i>
-        <a class="f3 black">Opuses</a>
+    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/tags">
+        <i class="f2 fa fa-tags"></i>
+        <a class="f3 black">Tags</a>
+    </div>
+    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/items">
+        <i class="f2 fa fa-list"></i>
+        <a class="f3 black">Items</a>
     </div>
 </div>
