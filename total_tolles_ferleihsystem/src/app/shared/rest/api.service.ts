@@ -233,7 +233,7 @@ export class ApiService implements OnInit {
         this.getCatalog().subscribe((catalog) => {
             this.rest.get(catalog._links.item_types).subscribe(data => {
                 stream.next(data);
-            });
+            }, error => this.errorHandler(error, resource, 'GET'));
         }, error => this.errorHandler(error, resource, 'GET'));
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
@@ -245,7 +245,7 @@ export class ApiService implements OnInit {
         this.getCatalog().subscribe((catalog) => {
             this.rest.get(catalog._links.item_types.href + id).subscribe(data => {
                 this.updateResource(baseResource, data as ApiObject);
-            });
+            }, error => this.errorHandler(error, resource, 'GET'));
         }, error => this.errorHandler(error, resource, 'GET'));
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
