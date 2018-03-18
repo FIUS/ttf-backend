@@ -38,9 +38,8 @@ CATALOG_LINKS = api.inherit('CatalogLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
     'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
     'item_tags': HaLUrl(UrlData('api.item_tag_item_tags', absolute=True)),
-    'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_item_tags', absolute=True)),
+    'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_attribute_definitions', absolute=True)),
 })
-
 CATALOG_MODEL = api.model('CatalogModel', {
     '_links': NestedFields(CATALOG_LINKS),
 })
