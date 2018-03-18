@@ -30,7 +30,6 @@ export class DynamicFormComponent implements OnInit, OnChanges {
         this.qs.getQuestions(this.objectModel).subscribe(questions => {
             this.questions = questions;
             this.customNull = {};
-            this.conversions = {};
             for (let question of this.questions) {
                 if (question.nullValue != undefined) {
                     this.customNull[question.key] = question.nullValue;
