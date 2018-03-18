@@ -19,7 +19,6 @@ export class DynamicFormComponent implements OnInit, OnChanges {
 
     questions: QuestionBase<any>[] = [];
     customNull: {[propName: string]: any} = {};
-    conversions: {[propName: string]: string} = {};
     form: FormGroup;
 
     @Output() valid: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -36,9 +35,6 @@ export class DynamicFormComponent implements OnInit, OnChanges {
                 if (question.nullValue != undefined) {
                     this.customNull[question.key] = question.nullValue;
                 }
-                if (question.valueType === 'integer') {
-                    this.conversions[question.key] = question.valueType;
-                }
             }
             this.form = this.qcs.toFormGroup(this.questions);
             this.form.statusChanges.subscribe(status => {
@@ -46,11 +42,7 @@ export class DynamicFormComponent implements OnInit, OnChanges {
                 let patched = {};
                 for (let key in this.form.value) {
                     if (this.form.value[key] != null && this.form.value[key] != '') {
-                        if (this.conversions[key] === 'integer') {
-                            patched[key] = parseInt(this.form.value[key], 10);
-                        } else {
-                            patched[key] = this.form.value[key];
-                        }
+                        patched[key] = this.form.value[key];
                     } else {
                         patched[key] = this.customNull[key];
                     }

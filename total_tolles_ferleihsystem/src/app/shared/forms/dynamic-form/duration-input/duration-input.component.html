@@ -1,0 +1,7 @@
+<div class="w5 bb b--gray flex items-center">
+    <input class="input-reset flex-grow bn pa1" style="min-width: 3rem" [ngModel]="days" (ngModelChange)="updateDays($event)" [id]="question.key + 'days'" [type]="question.type" min="0">
+    <span class="mr2">days</span>
+    <input class="input-reset bn pa1" style="width: 3rem" [ngModel]="hours" (ngModelChange)="updateHours($event)" [id]="question.key + 'hours'" [type]="question.type" max="24" min="0">
+    <span>:</span>
+    <input class="input-reset bn pa1" style="width: 3rem" [ngModel]="minutes" (ngModelChange)="updateMinutes($event)" [id]="question.key + 'minutes'" [type]="question.type" max="60" min="0">
+</div>

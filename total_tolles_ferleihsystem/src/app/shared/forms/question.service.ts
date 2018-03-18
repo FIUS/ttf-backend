@@ -10,6 +10,7 @@ import { StringQuestion } from './question-string';
 import { TextQuestion } from './question-text';
 import { DateQuestion } from './question-date';
 import { IntegerQuestion } from './question-integer';
+import { DurationQuestion } from './question-duration';
 import { DropdownQuestion } from './question-dropdown';
 import { BooleanQuestion } from './question-boolean';
 
@@ -143,6 +144,13 @@ export class QuestionService implements OnInit {
             options.max = prop.maxLength;
         }
 
+        if (prop.minimum != undefined) {
+            options.min = prop.minimum;
+        }
+        if (prop.maximum != undefined) {
+            options.max = prop.maximum;
+        }
+
         questionOptions.set(propID, options);
     }
 
@@ -157,6 +165,9 @@ export class QuestionService implements OnInit {
             return new BooleanQuestion(options);
         }
         if (options.controlType === 'integer') {
+            if (options.key.toUpperCase().includes('DURATION')) {
+                return new DurationQuestion(options);
+            }
             return new IntegerQuestion(options);
         }
         if (options.controlType === 'string') {
