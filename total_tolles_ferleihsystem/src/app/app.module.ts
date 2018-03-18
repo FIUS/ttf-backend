@@ -24,6 +24,12 @@ import { TagListComponent } from './tags/tag-list.component';
 import { TagDetailComponent } from './tags/tag-detail.component';
 import { TagEditComponent } from './tags/tag-edit.component';
 
+import { AttributeDefinitionsOverviewComponent } from './attribute-definitions/attribute-definitions-overview.component';
+import { AttributeDefinitionCreateComponent } from './attribute-definitions/attribute-definition-create.component';
+import { AttributeDefinitionListComponent } from './attribute-definitions/attribute-definition-list.component';
+import { AttributeDefinitionDetailComponent } from './attribute-definitions/attribute-definition-detail.component';
+import { AttributeDefinitionEditComponent } from './attribute-definitions/attribute-definition-edit.component';
+
 import { AppComponent } from './app.component';
 
 
@@ -46,6 +52,12 @@ import { AppComponent } from './app.component';
         TagListComponent,
         TagDetailComponent,
         TagEditComponent,
+
+        AttributeDefinitionsOverviewComponent,
+        AttributeDefinitionCreateComponent,
+        AttributeDefinitionListComponent,
+        AttributeDefinitionDetailComponent,
+        AttributeDefinitionEditComponent,
     ],
     imports: [
         HttpModule,
