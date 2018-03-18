@@ -113,7 +113,10 @@ ATTRIBUTE_DEFINITION_POST = api.model('AttributeDefinitionPOST', {
     'visible_for': fields.String(),
 })
 
-ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_POST, {
+ATTRIBUTE_DEFINITION_PUT = api.inherit('AttributeDefinitionPUT', ATTRIBUTE_DEFINITION_POST, {
+})
+
+ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_PUT, {
     'id': fields.Integer(),
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
 })
