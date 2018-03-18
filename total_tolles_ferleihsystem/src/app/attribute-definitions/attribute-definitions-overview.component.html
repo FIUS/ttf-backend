@@ -1,0 +1,11 @@
+<ttf-box>
+    <h1 class="mv0" title>Attribute Definitions:</h1>
+    <div class="button h2 pv1 ph2 br2 bg-light-silver link bg-animate hover-bg-light-green pointer" (click)="newAttrDef.open()" title-right>
+        <i class="fa fa-plus mr2"></i>New
+    </div>
+    <div class="w-100 ph3 pv2" body>
+        <ttf-attribute-definition-list></ttf-attribute-definition-list>
+    </div>
+</ttf-box>
+
+<ttf-attribute-definition-create #newAttrDef ></ttf-attribute-definition-create>

@@ -1,0 +1,6 @@
+<ttf-dialog [dialogType]="'save-cancel'" [valid]="form.valid" [okCallback]="save" >
+    <h1 class="mv0" title>New Attribute Definition:</h1>
+    <div class="w-100 ph3 pv2" body>
+        <dynamic-form [objectModel]="'AttributeDefinitionPOST'" (data)="onDataChange($event)" #form ></dynamic-form>
+    </div>
+</ttf-dialog>

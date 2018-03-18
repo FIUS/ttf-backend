@@ -7,6 +7,10 @@
         <i class="f2 fa fa-tags"></i>
         <a class="f3 black">Tags</a>
     </div>
+    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/attribute-definitions">
+        <i class="f2 fa fa-clipboard"></i>
+        <a class="f3 black">Attribute Definitions</a>
+    </div>
     <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/items">
         <i class="f2 fa fa-list"></i>
         <a class="f3 black">Items</a>
