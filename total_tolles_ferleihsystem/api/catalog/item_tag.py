@@ -7,10 +7,10 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_TAG_GET, ITEM_TAG_POST
+from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID
 from ... import db
 
-from ...db_models.tag import Tag
+from ...db_models.tag import Tag, TagToAttributeDefinition
 
 PATH: str = '/catalog/item_tags'
 ANS = api.namespace('item_tag', description='ItemTags', path=PATH)
@@ -64,8 +64,10 @@ class ItemTagDetail(Resource):
         """
         Get a single item tag object
         """
-        return Tag.query.filter(Tag.id == tag_id).first()
+        tag = Tag.query.filter(Tag.id == tag_id).first()
+        print(tag._tag_to_attribute_definitions)
 
+        return tag
     @ANS.response(404, 'Item tag not found.')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -79,3 +81,43 @@ class ItemTagDetail(Resource):
         item_tag.deleted = True
         db.session.commit()
         return "", 204
+
+@ANS.route('/<int:tag_id>/attributes/')
+class ItemTagAttributes(Resource):
+    """
+    The attributes of a single item tag element
+    """
+
+    @api.doc(security=None)
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    # pylint: disable=R0201
+    def get(self, tag_id):
+        """
+        Get all attribute definitions for this tag.
+        """
+       
+       # Two possibilitys:
+       # return [e.attribute_definition for e in TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()]
+       # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id).first()._tag_to_attribute_definitions ]
+        tagToAttrDefs = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
+        return [e.attribute_definition for e in tagToAttrDefs]
+
+    @api.doc(security=None)
+    @ANS.doc(body=ID)
+    @ANS.response(409, 'Attribute definition is already asociated with this tag!')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def post(self,tag_id):
+        """
+        Associate a new attribute definition with the tag.
+        """
+        new = TagToAttributeDefinition(tag_id,request.get_json()["id"])
+        try:
+            db.session.add(new)
+            db.session.commit()
+            return '', 204
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Attribute definition is already asociated with this tag!')
+            abort(500)

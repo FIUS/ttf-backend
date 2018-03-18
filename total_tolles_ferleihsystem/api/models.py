@@ -117,6 +117,6 @@ ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFIN
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
 })
 
-ATTRIBUTE_DEFINITION_GET_ALL = api.inherit('AttributeDefinitionGETAll', ATTRIBUTE_DEFINITION_GET, {
-    'deleted': fields.Boolean(),
+ID = api.model('Id', {
+    'id': fields.Integer(),
 })

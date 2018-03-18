@@ -31,12 +31,10 @@ class TagToAttributeDefinition (db.Model):
 
     tag_id = db.Column(db.Integer, db.ForeignKey('Tag.id'), primary_key=True)
     attribute_definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'), primary_key=True)
-    lending_duration = db.Column(db.Integer)
 
     tag = db.relationship(Tag, backref=db.backref('_tag_to_attribute_definitions', lazy='joined'))
     attribute_definition = db.relationship('AttributeDefinition')
 
-    def __init__(self, tag: Tag, attribute_definition: AttributeDefinition, lending_duration: int):
-        self.tag = tag
-        self.attribute_definition = attribute_definition
-        self.lending_duration = lending_duration
+    def __init__(self, tag_id: int, attribute_definition_id: int):
+        self.tag_id = tag_id
+        self.attribute_definition_id = attribute_definition_id
