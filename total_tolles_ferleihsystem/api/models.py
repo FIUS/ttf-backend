@@ -82,7 +82,36 @@ ITEM_TAG_POST = api.model('ItemTagPOST', {
     'visible_for': fields.String(),
 })
 
-ITEM_TAG_GET = api.inherit('ItemTag', ITEM_TAG_POST, {
+ITEM_TAG_GET = api.inherit('ItemTagGET', ITEM_TAG_POST, {
     'id': fields.Integer(),
     '_links': NestedFields(ITEM_TAG_LINKS),
+})
+
+ITEM_TAG_GET_ALL = api.inherit('ItemTagGETAll', ITEM_TAG_GET, {
+    'deleted': fields.Boolean(),
+})
+
+ATTRIBUTE_DEFINITION_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_detail', absolute=True,
+                           url_data={'id' : 'definition_id'}), required=False),
+})
+
+ATTRIBUTE_DEFINITION_LIST_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
+})
+
+ATTRIBUTE_DEFINITION_POST = api.model('AttributeDefinitionPOST', {
+    'name': fields.String(),
+    'type': fields.String(),
+    'jsonschema': fields.String(),
+    'visible_for': fields.String(),
+})
+
+ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_POST, {
+    'id': fields.Integer(),
+    '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
+})
+
+ATTRIBUTE_DEFINITION_GET_ALL = api.inherit('AttributeDefinitionGETAll', ATTRIBUTE_DEFINITION_GET, {
+    'deleted': fields.Boolean(),
 })
