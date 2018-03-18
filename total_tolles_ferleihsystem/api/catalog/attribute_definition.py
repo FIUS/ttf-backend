@@ -17,16 +17,16 @@ ANS = api.namespace('attribute_definition', description='The attribute definitio
 
 
 @ANS.route('/')
-class AttributeDefinitions(Resource):
+class AttributeDefinitionList(Resource):
     """
     Attribute definitions root element
     """
 
     @api.doc(security=None)
     @api.marshal_list_with(ATTRIBUTE_DEFINITION_GET)
-    # pylint: disable=R0201
+    # pylint: disable=R0201,C0121
     def get(self):
-        """
+        """ 
         Get a list of all attribute definitions currently in the system
         """
         return AttributeDefinition.query.filter(AttributeDefinition.deleted == False).all()
@@ -52,7 +52,7 @@ class AttributeDefinitions(Resource):
             abort(500)
 
 @ANS.route('/<int:definition_id>/')
-class AttributeDefinitionDetails(Resource):
+class AttributeDefinitionDetail(Resource):
     """
     Single attribute definition element
     """

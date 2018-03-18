@@ -17,7 +17,7 @@ ANS = api.namespace('item_tag', description='ItemTags', path=PATH)
 
 
 @ANS.route('/')
-class ItemTags(Resource):
+class ItemTagList(Resource):
     """
     Item tags root element
     """
