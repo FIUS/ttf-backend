@@ -9,7 +9,7 @@
     </div>
 </ttf-box>
 
-<ttf-dialog [closable]="false" [dialogType]="'delete-cancel'" [okCallback]="delete" #confirm>
+<ttf-dialog [closable]="false" [dialogType]="'delete-cancel'" [icon]="'delete'" [okCallback]="delete" #confirm>
     <h1 class="mv0" title>Delete "{{attrDef?.name}}"</h1>
     <div class="w-100 ph3 pv2" body>
         Do you want to delete "{{attrDef?.name}}"?

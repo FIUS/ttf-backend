@@ -8,8 +8,8 @@
     </div>
 </ttf-box>
 
-<ttf-dialog [dialogType]="'save-cancel'" [valid]="form.valid" [okCallback]="save" #newItemType >
-    <h1 class="mv0" title>New Item Types:</h1>
+<ttf-dialog [dialogType]="'save-cancel'" [valid]="form.valid" [icon]="'save'" [okCallback]="save" #newItemType >
+    <h1 class="mv0" title>Item Type:</h1>
     <div class="w-100 ph3 pv2" body>
         <dynamic-form [objectModel]="'ItemTypePOST'" (data)="onDataChange($event)" #form ></dynamic-form>
     </div>
