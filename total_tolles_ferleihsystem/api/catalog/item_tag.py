@@ -99,8 +99,8 @@ class ItemTagAttributes(Resource):
        # Two possibilitys:
        # return [e.attribute_definition for e in TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()]
        # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id).first()._tag_to_attribute_definitions ]
-        tagToAttrDefs = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
-        return [e.attribute_definition for e in tagToAttrDefs]
+        TagToAttrDefs = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
+        return [e.attribute_definition for e in TagToAttrDefs]
 
     @api.doc(security=None)
     @ANS.doc(body=ID)
@@ -140,6 +140,5 @@ class ItemTagAttributes(Resource):
             db.session.delete(association)
             db.session.commit()
             return '', 204
-        except IntegrityError as err:
-            message = str(err)
+        except IntegrityError:
             abort(500)

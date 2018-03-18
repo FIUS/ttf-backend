@@ -45,7 +45,7 @@ CATALOG_MODEL = api.model('CatalogModel', {
 })
 
 item_type_links = api.inherit('ItemTypeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'id': 'type_id'}),
+    'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'type_id': 'id'}),
                    required=False),
 })
 
@@ -70,8 +70,9 @@ item_type_get = api.inherit('ItemType', item_type_put, {
 })
 
 ITEM_TAG_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', absolute=True, url_data={'id' : 'tag_id'}),
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', absolute=True, url_data={'tag_id' : 'id'}),
                    required=False),
+    'attributes': HaLUrl(UrlData('api.item_tag_item_tag_attributes', url_data={'tag_id' : 'id'}, absolute=True)),
 })
 
 ITEM_TAG_LIST_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
@@ -98,7 +99,7 @@ ITEM_TAG_GET_ALL = api.inherit('ItemTagGETAll', ITEM_TAG_GET, {
 
 ATTRIBUTE_DEFINITION_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_detail', absolute=True,
-                           url_data={'id' : 'definition_id'}), required=False),
+                           url_data={'definition_id' : 'id'}), required=False),
 })
 
 ATTRIBUTE_DEFINITION_LIST_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES, {
