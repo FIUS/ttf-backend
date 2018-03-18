@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_GET_ALL
+from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST
 from ... import db
 
 from ...db_models.attribute import AttributeDefinition
@@ -17,7 +17,7 @@ ANS = api.namespace('attribute_definition', description='The attribute definitio
 
 
 @ANS.route('/')
-class ItemTags(Resource):
+class AttributeDefinitions(Resource):
     """
     Attribute definitions root element
     """
@@ -52,13 +52,13 @@ class ItemTags(Resource):
             abort(500)
 
 @ANS.route('/<int:definition_id>/')
-class ItemTagDetail(Resource):
+class AttributeDefinitionDetails(Resource):
     """
     Single attribute definition element
     """
 
     @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET_ALL)
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def get(self, definition_id):
         """
@@ -75,7 +75,7 @@ class ItemTagDetail(Resource):
         """
         definition = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if definition is None:
-            abort(404, 'Requested item tag was not found!')
+            abort(404, 'Requested attribute definition was not found!')
         definition.deleted = True
         db.session.commit()
         return "", 204

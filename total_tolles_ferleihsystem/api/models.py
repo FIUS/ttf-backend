@@ -37,8 +37,10 @@ AUTHENTICATION_ROUTES_MODEL = api.model('AuthenticationRoutesModel', {
 CATALOG_LINKS = api.inherit('CatalogLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
     'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
-    'item_tags': HaLUrl(UrlData('api.item_tag_item_tags', absolute=True)),
+    'item_tags': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
+    'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
 })
+
 CATALOG_MODEL = api.model('CatalogModel', {
     '_links': NestedFields(CATALOG_LINKS),
 })
@@ -66,6 +68,7 @@ item_type_put = api.inherit('ItemTypePUT', item_type_post, {
 item_type_get = api.inherit('ItemType', item_type_put, {
     'id': fields.Integer(),
     '_links': NestedFields(item_type_links),
+    'deleted': fields.Boolean(),
 })
 
 ITEM_TAG_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
@@ -89,9 +92,6 @@ ITEM_TAG_PUT = api.inherit('ItemTagPUT', ITEM_TAG_POST, {
 ITEM_TAG_GET = api.inherit('ItemTagGET', ITEM_TAG_PUT, {
     'id': fields.Integer(),
     '_links': NestedFields(ITEM_TAG_LINKS),
-})
-
-ITEM_TAG_GET_ALL = api.inherit('ItemTagGETAll', ITEM_TAG_GET, {
     'deleted': fields.Boolean(),
 })
 
@@ -114,8 +114,5 @@ ATTRIBUTE_DEFINITION_POST = api.model('AttributeDefinitionPOST', {
 ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_POST, {
     'id': fields.Integer(),
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
-})
-
-ATTRIBUTE_DEFINITION_GET_ALL = api.inherit('AttributeDefinitionGETAll', ATTRIBUTE_DEFINITION_GET, {
     'deleted': fields.Boolean(),
 })

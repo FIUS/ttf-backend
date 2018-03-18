@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ITEM_TAG_GET_ALL
+from ..models import ITEM_TAG_GET, ITEM_TAG_POST
 from ... import db
 
 from ...db_models.tag import Tag
@@ -58,7 +58,7 @@ class ItemTagDetail(Resource):
     """
 
     @api.doc(security=None)
-    @api.marshal_with(ITEM_TAG_GET_ALL)
+    @api.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self, tag_id):
         """
