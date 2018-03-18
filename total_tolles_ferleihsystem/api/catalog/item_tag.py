@@ -104,7 +104,7 @@ class ItemTagAttributes(Resource):
 
     @api.doc(security=None)
     @ANS.doc(body=ID)
-    @ANS.response(409, 'Attribute definition is already asociated with this tag!')
+    @ANS.response(409, 'Attribute definition is already associated with this tag!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def post(self,tag_id):
@@ -120,4 +120,26 @@ class ItemTagAttributes(Resource):
             message = str(err)
             if 'UNIQUE constraint failed' in message:
                 abort(409, 'Attribute definition is already asociated with this tag!')
+            abort(500)
+
+    @api.doc(security=None)
+    @ANS.doc(body=ID)
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def delete(self,tag_id):
+        """
+        Remove association of a attribute definition with the tag.
+        """
+        association = (TagToAttributeDefinition.query
+                                               .filter(TagToAttributeDefinition.tag_id == tag_id)
+                                               .filter(TagToAttributeDefinition.attribute_definition_id == request.get_json()["id"])
+                                               .first())
+        if association is None: 
+            return '', 204
+        try:
+            db.session.delete(association)
+            db.session.commit()
+            return '', 204
+        except IntegrityError as err:
+            message = str(err)
             abort(500)
