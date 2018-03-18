@@ -36,6 +36,7 @@ export interface AuthRootModel extends ApiObject {
 
 export interface CatalogLinks extends ApiLinksObject {
     item_types: LinkObject;
+    item_tags: LinkObject;
 };
 
 export interface CatalogModel extends ApiObject {
@@ -47,38 +48,36 @@ export interface CatalogModel extends ApiObject {
 @Injectable()
 export class ApiService implements OnInit {
 
-    private jwt: JWTService;
+    private jwtSource = new AsyncSubject<JWTService>();
+    private currentJWT = this.jwtSource.asObservable();
 
     private warningSet = new Set([404, 409, ]);
 
     private errorSet = new Set([500, 501, ]);
 
     private rootSource = new AsyncSubject<RootModel>();
-
     private currentRoot = this.rootSource.asObservable();
 
     private specSource = new AsyncSubject<any>();
-
     private currentSpec = this.specSource.asObservable();
 
     private catalogSource = new AsyncSubject<CatalogModel>();
-
     private currentCatalog = this.catalogSource.asObservable();
 
     private authSource = new AsyncSubject<AuthRootModel>();
-
     private currentAuth = this.authSource.asObservable();
 
     private streams: {[propName: string]: BehaviorSubject<ApiObject | ApiObject[]>} = {};
 
     constructor(private rest: BaseApiService, private info: InfoService, private injector: Injector) {
-        Observable.timer(1).take(1).subscribe((() => {
+        Observable.timer(0).take(1).subscribe((() => {
             this.ngOnInit()
         }).bind(this))
     }
 
     ngOnInit(): void {
-        this.jwt = this.injector.get(JWTService);
+        this.jwtSource.next(this.injector.get(JWTService));
+        this.jwtSource.complete();
         this.getRoot();
         this.getCatalog();
         this.getAuthRoot();
@@ -93,6 +92,9 @@ export class ApiService implements OnInit {
                 break;
             case 'PUT':
                 title = 'Error while updating existing resource "' + resource + '".';
+                break;
+            case 'DELETE':
+                title = 'Error while deleting existing resource "' + resource + '".';
                 break;
 
             default:
@@ -168,7 +170,7 @@ export class ApiService implements OnInit {
         const success = new AsyncSubject<boolean>();
         this.getAuthRoot().subscribe(auth => {
             this.rest.post(auth._links.login, {username: username, password: password}).subscribe(data => {
-                this.jwt.updateTokens(data.access_token, data.refresh_token);
+                this.currentJWT.subscribe(jwt => jwt.updateTokens(data.access_token, data.refresh_token));
                 success.next(true);
                 success.complete();
             }, error => {
@@ -187,7 +189,7 @@ export class ApiService implements OnInit {
     guestLogin() {
         this.getAuthRoot().subscribe(auth => {
             this.rest.post(auth._links.guest_login, {}).subscribe(data => {
-                this.jwt.updateTokens(data.access_token, data.refresh_token);
+                this.currentJWT.subscribe(jwt => jwt.updateTokens(data.access_token, data.refresh_token));
             });
         });
     }
@@ -195,7 +197,7 @@ export class ApiService implements OnInit {
     refreshLogin(refreshToken: string) {
         this.getAuthRoot().subscribe(auth => {
             this.rest.post(auth._links.refresh, {}, refreshToken).subscribe(data => {
-                this.jwt.updateTokens(data.access_token);
+                this.currentJWT.subscribe(jwt => jwt.updateTokens(data.access_token));
             });
         });
     }
@@ -212,6 +214,7 @@ export class ApiService implements OnInit {
     private updateResource(streamID: string, data: ApiObject) {
         const stream = this.getStreamSource(streamID + '/' +  data.id);
         stream.next(data);
+
         const list_stream = this.getStreamSource(streamID, false);
         if (list_stream != null) {
             const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
@@ -227,14 +230,37 @@ export class ApiService implements OnInit {
         }
     }
 
+    private removeResource(streamID: string, id: number) {
+        const stream = this.getStreamSource(streamID + '/' + id);
+        stream.next(null);
+
+        const list_stream = this.getStreamSource(streamID, false);
+        if (list_stream != null) {
+            const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
+            if (list != null) {
+                const index = list.findIndex(value => value.id === id);
+                if (index >= 0) {
+                    list.splice(index, 1);
+                }
+                list_stream.next(list);
+            }
+        }
+    }
+
+
+    // Item Types //////////////////////////////////////////////////////////////
     getItemTypes(): Observable<Array<ApiObject>> {
         const resource = 'item_types';
         const stream = this.getStreamSource(resource);
-        this.getCatalog().subscribe((catalog) => {
-            this.rest.get(catalog._links.item_types).subscribe(data => {
-                stream.next(data);
-            });
-        }, error => this.errorHandler(error, resource, 'GET'));
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.item_types, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
@@ -242,25 +268,149 @@ export class ApiService implements OnInit {
         const baseResource = 'item_types';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
-        this.getCatalog().subscribe((catalog) => {
-            this.rest.get(catalog._links.item_types.href + id).subscribe(data => {
-                this.updateResource(baseResource, data as ApiObject);
-            });
-        }, error => this.errorHandler(error, resource, 'GET'));
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.item_types.href + id, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
     postItemType(newData): Observable<ApiObject> {
         const resource = 'item_types';
-        return this.getCatalog().flatMap(catalog => {
-            return this.rest.post(catalog._links.item_types, newData).flatMap(data => {
-                const stream = this.getStreamSource(resource + '/' + data.id);
-                this.updateResource(resource, data);
-                return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
-            }).catch(error => {
-                this.errorHandler(error, resource, 'POST');
-                return Observable.throw(error);
+
+        return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
+            return this.getCatalog().flatMap(catalog => {
+                return this.rest.post(catalog._links.item_types, newData, token).flatMap(data => {
+                    const stream = this.getStreamSource(resource + '/' + data.id);
+                    this.updateResource(resource, data);
+                    return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+                })
+                .catch(error => {
+                    this.errorHandler(error, resource, 'POST');
+                    return Observable.throw(error);
+                });
             });
         });
+    }
+
+    putItemType(id: number, newData): Observable<ApiObject> {
+        const baseResource = 'item_types';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.put(catalog._links.item_types.href + id + '/', newData, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'PUT'));
+            }, error => this.errorHandler(error, resource, 'PUT'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    deleteItemType(id: number): Observable<ApiObject> {
+        const baseResource = 'item_types';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.delete(catalog._links.item_types.href + id + '/', token).subscribe(() => {
+                    this.removeResource(baseResource, id);
+                }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+
+
+    // Tags ////////////////////////////////////////////////////////////////////
+    getTags(): Observable<Array<ApiObject>> {
+        const resource = 'tags';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.item_tags, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    getTag(id: number): Observable<ApiObject> {
+        const baseResource = 'tags';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.item_tags.href + id, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    postTag(newData): Observable<ApiObject> {
+        const resource = 'tags';
+
+        return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
+            return this.getCatalog().flatMap(catalog => {
+                return this.rest.post(catalog._links.item_tags, newData, token).flatMap(data => {
+                    const stream = this.getStreamSource(resource + '/' + data.id);
+                    this.updateResource(resource, data);
+                    return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+                })
+                .catch(error => {
+                    this.errorHandler(error, resource, 'POST');
+                    return Observable.throw(error);
+                });
+            });
+        });
+    }
+
+    putTag(id: number, newData): Observable<ApiObject> {
+        const baseResource = 'tags';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.put(catalog._links.item_tags.href + id + '/', newData, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'PUT'));
+            }, error => this.errorHandler(error, resource, 'PUT'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    deleteTag(id: number): Observable<ApiObject> {
+        const baseResource = 'tags';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.delete(catalog._links.item_tags.href + id + '/', token).subscribe(() => {
+                    this.removeResource(baseResource, id);
+                }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 }

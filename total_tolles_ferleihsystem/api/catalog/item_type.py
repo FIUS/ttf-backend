@@ -50,7 +50,7 @@ class ItemTypeList(Resource):
                 abort(409, 'Name is not unique!')
             abort(500)
 
-@ANS.route('/<int:id>/')
+@ANS.route('/<int:type_id>/')
 class ItemTypeDetail(Resource):
     """
     Single item type element
@@ -71,7 +71,7 @@ class ItemTypeDetail(Resource):
         """
         Delete a item type object
         """
-        item_type = ItemType.get_by_id(type_id)
+        item_type = ItemType.query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(404, 'Requested item type was not found!')
         db.session.delete(item_type)

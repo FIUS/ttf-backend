@@ -17,7 +17,7 @@
                         </div>
                     </div>
                     <div *ngSwitchCase="'ok-cancel'" class="w100 h2 bt b--black-10 flex flex-row-reverse items-center">
-                        <div class="button pv1 ph2 br2 dim pointer" (click)="close()">
+                        <div class="button pv1 ph2 br2 dim pointer" (click)="cancel()">
                             Cancel
                         </div>
                         <div class="button pv1 ph2 br2 dim pointer" (click)="ok()">
@@ -30,7 +30,7 @@
                         </div>
                     </div>
                     <div *ngSwitchCase="'save-cancel'" class="w100 h2 bt b--black-10 flex flex-row-reverse items-center">
-                        <div class="button pv1 ph2 br2 dim pointer" (click)="close()">
+                        <div class="button pv1 ph2 br2 dim pointer" (click)="cancel()">
                             Cancel
                         </div>
                         <div class="button pv1 ph2 br2" [ngClass]="{dim: valid, pointer: valid, 'o-50': !valid}" (click)="ok()">
@@ -43,7 +43,7 @@
                         </div>
                     </div>
                     <div *ngSwitchCase="'delete-cancel'" class="w100 h2 bt b--black-10 flex flex-row-reverse items-center">
-                        <div class="button pv1 ph2 br2 dim pointer" (click)="close()">
+                        <div class="button pv1 ph2 br2 dim pointer" (click)="cancel()">
                             Cancel
                         </div>
                         <div class="button pv1 ph2 br2 dim pointer" (click)="ok()">

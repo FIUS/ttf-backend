@@ -16,6 +16,13 @@ import { LoginComponent } from './login/login.component';
 
 import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
 import { ItemTypeListComponent } from './item-types/item-type-list.component';
+import { ItemTypeDetailComponent } from './item-types/item-type-detail.component';
+import { ItemTypeEditComponent } from './item-types/item-type-edit.component';
+
+import { TagsOverviewComponent } from './tags/tags-overview.component';
+import { TagListComponent } from './tags/tag-list.component';
+import { TagDetailComponent } from './tags/tag-detail.component';
+import { TagEditComponent } from './tags/tag-edit.component';
 
 import { AppComponent } from './app.component';
 
@@ -29,8 +36,16 @@ import { AppComponent } from './app.component';
         LoginComponent,
 
         HomeComponent,
+
         ItemTypesOverviewComponent,
         ItemTypeListComponent,
+        ItemTypeDetailComponent,
+        ItemTypeEditComponent,
+
+        TagsOverviewComponent,
+        TagListComponent,
+        TagDetailComponent,
+        TagEditComponent,
     ],
     imports: [
         HttpModule,
