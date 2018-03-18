@@ -29,6 +29,7 @@ import { AttributeDefinitionCreateComponent } from './attribute-definitions/attr
 import { AttributeDefinitionListComponent } from './attribute-definitions/attribute-definition-list.component';
 import { AttributeDefinitionDetailComponent } from './attribute-definitions/attribute-definition-detail.component';
 import { AttributeDefinitionEditComponent } from './attribute-definitions/attribute-definition-edit.component';
+import { LinkedAttributeDefinitionComponent } from './linked-attribute-definitions/linked-attribute-definitions.component';
 
 import { AppComponent } from './app.component';
 
@@ -58,6 +59,7 @@ import { AppComponent } from './app.component';
         AttributeDefinitionListComponent,
         AttributeDefinitionDetailComponent,
         AttributeDefinitionEditComponent,
+        LinkedAttributeDefinitionComponent,
     ],
     imports: [
         HttpModule,
