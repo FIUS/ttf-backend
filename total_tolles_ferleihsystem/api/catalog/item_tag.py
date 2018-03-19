@@ -103,9 +103,9 @@ class ItemTagAttributes(Resource):
         return [e.attribute_definition for e in TagToAttrDefs]
 
     @api.doc(security=None)
-    @ANS.doc(body=ID)
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
     @ANS.response(409, 'Attribute definition is already associated with this tag!')
-    @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def post(self,tag_id):
         """
@@ -115,7 +115,8 @@ class ItemTagAttributes(Resource):
         try:
             db.session.add(new)
             db.session.commit()
-            return '', 204
+            TagToAttrDefs = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
+            return [e.attribute_definition for e in TagToAttrDefs]
         except IntegrityError as err:
             message = str(err)
             if 'UNIQUE constraint failed' in message:

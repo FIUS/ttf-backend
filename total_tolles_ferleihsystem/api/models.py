@@ -93,10 +93,6 @@ ITEM_TAG_GET = api.inherit('ItemTagGET', ITEM_TAG_PUT, {
     '_links': NestedFields(ITEM_TAG_LINKS),
 })
 
-ITEM_TAG_GET_ALL = api.inherit('ItemTagGETAll', ITEM_TAG_GET, {
-    'deleted': fields.Boolean(),
-})
-
 ATTRIBUTE_DEFINITION_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_detail', absolute=True,
                            url_data={'definition_id' : 'id'}), required=False),
