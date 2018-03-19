@@ -54,6 +54,6 @@ class ItemTypeToAttributeDefinition (db.Model):
     item_type = db.relationship('ItemType', backref=db.backref('_item_type_to_attribute_definitions', lazy='joined'))
     attribute_definition = db.relationship('AttributeDefinition', lazy='joined')
 
-    def __init__(self, item_type: ItemType, attribute_definition: AttributeDefinition):
-        self.item_type = item_type
-        self.attribute_definition = attribute_definition
+    def __init__(self, item_type_id: int, attribute_definition_id: int):
+        self.item_type_id = item_type_id
+        self.attribute_definition_id = attribute_definition_id

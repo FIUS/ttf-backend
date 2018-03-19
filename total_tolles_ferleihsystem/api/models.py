@@ -44,29 +44,30 @@ CATALOG_MODEL = api.model('CatalogModel', {
     '_links': NestedFields(CATALOG_LINKS),
 })
 
-item_type_links = api.inherit('ItemTypeLinks', WITH_CURIES, {
+ITEM_TYPE_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'type_id': 'id'}),
                    required=False),
+    'attributes': HaLUrl(UrlData('api.item_type_item_type_attributes', url_data={'type_id' : 'id'}, absolute=True)),
 })
 
-item_type_list_links = api.inherit('ItemTypeLinks', WITH_CURIES, {
+ITEM_TYPE_LIST_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
 })
 
-item_type_post = api.model('ItemTypePOST', {
+ITEM_TYPE_POST = api.model('ItemTypePOST', {
     'name': fields.String(),
     'name_schema': fields.String(),
     'visible_for': fields.String(),
     'how_to': fields.String(),
 })
 
-item_type_put = api.inherit('ItemTypePUT', item_type_post, {
+ITEM_TYPE_PUT = api.inherit('ItemTypePUT', ITEM_TYPE_POST, {
     'lendable': fields.Boolean(default=True),
 })
 
-item_type_get = api.inherit('ItemType', item_type_put, {
+ITEM_TYPE_GET = api.inherit('ItemType', ITEM_TYPE_PUT, {
     'id': fields.Integer(),
-    '_links': NestedFields(item_type_links),
+    '_links': NestedFields(ITEM_TYPE_LINKS),
 })
 
 ITEM_TAG_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
