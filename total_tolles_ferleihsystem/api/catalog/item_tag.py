@@ -65,7 +65,6 @@ class ItemTagDetail(Resource):
         Get a single item tag object
         """
         tag = Tag.query.filter(Tag.id == tag_id).first()
-        print(tag._tag_to_attribute_definitions)
 
         return tag
     @ANS.response(404, 'Item tag not found.')
@@ -99,8 +98,8 @@ class ItemTagAttributes(Resource):
        # Two possibilitys:
        # return [e.attribute_definition for e in TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()]
        # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id).first()._tag_to_attribute_definitions ]
-        TagToAttrDefs = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
-        return [e.attribute_definition for e in TagToAttrDefs]
+        associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
+        return [e.attribute_definition for e in associations]
 
     @api.doc(security=None)
     @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
@@ -115,8 +114,8 @@ class ItemTagAttributes(Resource):
         try:
             db.session.add(new)
             db.session.commit()
-            TagToAttrDefs = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
-            return [e.attribute_definition for e in TagToAttrDefs]
+            associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
+            return [e.attribute_definition for e in associations]
         except IntegrityError as err:
             message = str(err)
             if 'UNIQUE constraint failed' in message:
