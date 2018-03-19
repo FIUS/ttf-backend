@@ -22,7 +22,7 @@ export class DurationInputComponent implements ControlValueAccessor {
     days: string;
     hours: string;
     minutes: string;
-    seconds: number;
+    seconds: number = 0;
 
     onChange: any = () => {};
 
@@ -35,9 +35,15 @@ export class DurationInputComponent implements ControlValueAccessor {
             return this.question.nullValue;
         } else {
             let val = this.seconds;
-            val += parseInt(this.minutes, 10) * 60;
-            val += parseInt(this.hours, 10) * 60 * 60;
-            val += parseInt(this.days, 10) * 60 * 60 * 24;
+            if (this.minutes != null && this.minutes !== '') {
+                val += parseInt(this.minutes, 10) * 60;
+            }
+            if (this.hours != null && this.hours !== '') {
+                val += parseInt(this.hours, 10) * 60 * 60;
+            }
+            if (this.days != null && this.days !== '') {
+                val += parseInt(this.days, 10) * 60 * 60 * 24;
+            }
             return val;
         }
     }
@@ -48,6 +54,7 @@ export class DurationInputComponent implements ControlValueAccessor {
             this.days = undefined;
             this.hours = undefined;
             this.minutes = undefined;
+            this.seconds = 0;
         } else {
             this.seconds = val % 60;
             this.minutes = Math.floor((val / 60) % 60).toString();
@@ -59,7 +66,6 @@ export class DurationInputComponent implements ControlValueAccessor {
     }
 
     update() {
-        console.log(this.value);
         this.onChange(this.value);
         this.onTouched();
     }
