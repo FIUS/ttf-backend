@@ -7,7 +7,7 @@
         <ng-container *ngIf="data?.get(letter).length > 0">
             <div class="f3 gray">{{letter}}</div>
             <ul class="mt0 list">
-                <li class="min-w2 mb1 link pointer" *ngFor="let attrDef of data?.get(letter)" (click)="select(attrDef)"><i class="mr1 fa fa-check" [hidden]="!selected.has(attrDef.id)"></i>{{attrDef.id}} {{attrDef.name}} ({{attrDef.type}}) <a routerLink="/attribute-definitions/{{attrDef.id}}">bearbeiten</a></li>
+                <li class="min-w2 mb1 hide-child link pointer" *ngFor="let attrDef of data?.get(letter)" (click)="select(attrDef)"><i class="mr1 fa fa-check" [hidden]="!selected.has(attrDef.id)"></i>{{attrDef.name}} ({{attrDef.type}}) <span class="ml1 child link pointer" routerLink="/attribute-definitions/{{attrDef.id}}"><i class="dim fa fa-pencil"></i></span></li>
             </ul>
         </ng-container>
     </div>

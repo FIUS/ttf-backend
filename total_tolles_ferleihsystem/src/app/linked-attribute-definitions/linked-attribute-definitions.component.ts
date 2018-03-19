@@ -71,7 +71,6 @@ export class LinkedAttributeDefinitionComponent implements OnInit, OnDestroy, On
             selected.add(attrDef.id);
         });
         this.selected = selected;
-        console.log(this.selected);
     }).bind(this);
 
     ngOnDestroy(): void {
