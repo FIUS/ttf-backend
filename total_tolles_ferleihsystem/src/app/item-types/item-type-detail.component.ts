@@ -14,6 +14,7 @@ export class ItemTypeDetailComponent implements OnInit, OnDestroy {
     private itemTypeSubscription: Subscription;
 
     itemTypeID: number;
+    itemType;
 
     constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
 
@@ -32,6 +33,7 @@ export class ItemTypeDetailComponent implements OnInit, OnDestroy {
         this.data.changeBreadcrumbs([new Breadcrumb('ItemTypes', '/item-types'),
             new Breadcrumb('"' + typeID.toString() + '"', '/item-types/' + typeID)]);
         this.itemTypeSubscription = this.api.getItemType(typeID).subscribe(itemType => {
+            this.itemType = itemType;
             this.data.changeBreadcrumbs([new Breadcrumb('ItemTypes', '/item-types'),
                 new Breadcrumb('"' + itemType.name + '"', '/item-types/' + typeID)]);
         });

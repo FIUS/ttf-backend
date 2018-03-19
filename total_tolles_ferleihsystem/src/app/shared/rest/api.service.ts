@@ -497,4 +497,47 @@ export class ApiService implements OnInit {
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
+
+    getLinkedAttributeDefinitions(linkedObject: ApiObject): Observable<ApiObject[]> {
+        const url = linkedObject._links.attributes.href;
+        const resource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(url, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    linkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject): Observable<ApiObject[]> {
+        const url = linkedObject._links.attributes.href;
+        const resource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.post(url, attributeDefinition, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'POST'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    unlinkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject): Observable<ApiObject[]> {
+        const url = linkedObject._links.attributes.href;
+        const baseResource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');
+        const resource = baseResource + attributeDefinition.id;
+        const stream = this.getStreamSource(baseResource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.delete(url + attributeDefinition.id, token).subscribe(data => {
+                this.getLinkedAttributeDefinitions(linkedObject);
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
 }

@@ -14,6 +14,7 @@ export class TagDetailComponent implements OnInit, OnDestroy {
     private tagSubscription: Subscription;
 
     tagID: number;
+    tag;
 
     constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
 
@@ -32,6 +33,7 @@ export class TagDetailComponent implements OnInit, OnDestroy {
         this.data.changeBreadcrumbs([new Breadcrumb('Tags', '/tags'),
             new Breadcrumb('"' + tagID.toString() + '"', '/tags/' + tagID)]);
         this.tagSubscription = this.api.getTag(tagID).subscribe(tag => {
+            this.tag = tag;
             this.data.changeBreadcrumbs([new Breadcrumb('Tags', '/tags'),
                 new Breadcrumb('"' + tag.name + '"', '/tags/' + tagID)]);
         });
