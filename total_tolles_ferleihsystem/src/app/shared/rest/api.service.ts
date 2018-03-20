@@ -533,7 +533,7 @@ export class ApiService implements OnInit {
         const stream = this.getStreamSource(baseResource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.delete(url + attributeDefinition.id, token).subscribe(data => {
+            this.rest.delete(url, token, attributeDefinition).subscribe(data => {
                 this.getLinkedAttributeDefinitions(linkedObject);
             }, error => this.errorHandler(error, resource, 'DELETE'));
         });
