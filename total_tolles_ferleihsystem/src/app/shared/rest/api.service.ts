@@ -249,13 +249,18 @@ export class ApiService implements OnInit {
 
 
     // Item Types //////////////////////////////////////////////////////////////
-    getItemTypes(): Observable<Array<ApiObject>> {
-        const resource = 'item_types';
+    getItemTypes(deleted: boolean=false): Observable<Array<ApiObject>> {
+        let resource = 'item_types';
+        let params = null;
+        if (deleted) {
+            resource += '?deleted=true';
+            params = {deleted: true};
+        }
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
-                this.rest.get(catalog._links.item_types, token).subscribe(data => {
+                this.rest.get(catalog._links.item_types, token, params).subscribe(data => {
                     stream.next(data);
                 }, error => this.errorHandler(error, resource, 'GET'));
             }, error => this.errorHandler(error, resource, 'GET'));
@@ -323,6 +328,7 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.delete(catalog._links.item_types.href + id + '/', token).subscribe(() => {
                     this.removeResource(baseResource, id);
+                    this.getItemTypes(true);
                 }, error => this.errorHandler(error, resource, 'DELETE'));
             }, error => this.errorHandler(error, resource, 'DELETE'));
         });

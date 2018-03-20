@@ -64,13 +64,16 @@ export class BaseApiService {
         return new RequestOptions({ headers: headers });
     }
 
-    get(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<ApiObject | ApiObject[]> {
+    get(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, params?): Observable<ApiObject | ApiObject[]> {
         url = this.extractUrl(url);
-        if (this.runningRequests.has(url)) {
+        if (this.runningRequests.has(url) && params == null) {
             return this.runningRequests.get(url);
         }
-        console.log(url);
-        const request = this.http.get(url, this.headers(token))
+        const options = this.headers(token);
+        if (params != null) {
+            options.params = params;
+        }
+        const request = this.http.get(url, options)
             .map((res: Response) => {
                 this.runningRequests.delete(url as string);
                 return res.json();

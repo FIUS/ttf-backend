@@ -23,13 +23,15 @@ class ItemTypeList(Resource):
     """
 
     @api.doc(security=None)
+    @api.param('deleted', 'get all deleted elements', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def get(self):
         """
         Get a list of all item types currently in the system
         """
-        return ItemType.query.filter(ItemType.deleted == False).all()
+        testFor = request.args.get('deleted', 'false') == 'true'
+        return ItemType.query.filter(ItemType.deleted == testFor).all()
 
     @api.doc(security=None)
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_POST)
@@ -129,7 +131,7 @@ class ItemTypeAttributes(Resource):
                                                     .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                                                     .filter(ItemTypeToAttributeDefinition.attribute_definition_id == request.get_json()["id"])
                                                     .first())
-        if association is None: 
+        if association is None:
             return '', 204
         try:
             db.session.delete(association)
@@ -188,7 +190,7 @@ class ItemTypeCanContainTypes(Resource):
                                          .filter(ItemTypeToItemType.parent_id == type_id)
                                          .filter(ItemTypeToItemType.item_type_id == request.get_json()["id"])
                                          .first())
-        if association is None: 
+        if association is None:
             return '', 204
         try:
             db.session.delete(association)

@@ -16,8 +16,10 @@ export class ItemTypeListComponent implements OnInit, OnDestroy {
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, any>;
+    deleted: any[];
 
     private subscription: Subscription;
+    private deletedSubscription: Subscription;
 
     constructor(private api: ApiService) { }
 
@@ -49,16 +51,23 @@ export class ItemTypeListComponent implements OnInit, OnDestroy {
             });
             this.data = map;
         });
+        this.deletedSubscription = this.api.getItemTypes(true).subscribe(data => {
+            this.deleted = data;
+        });
     }
 
     ngOnDestroy(): void {
         if (this.subscription != null) {
             this.subscription.unsubscribe();
         }
+        if (this.deletedSubscription != null) {
+            this.deletedSubscription.unsubscribe();
+        }
     }
 
     setFilter(value) {
-        if (value == null || this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
+        if (value == null || value === 'DELETED'
+            || this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
             this.filter = value;
         }
     }
