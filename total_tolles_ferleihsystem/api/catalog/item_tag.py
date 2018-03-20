@@ -23,13 +23,15 @@ class ItemTagList(Resource):
     """
 
     @api.doc(security=None)
+    @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self):
         """
         Get a list of all item tags currently in the system
         """
-        return Tag.query.filter(Tag.deleted == False).all()
+        test_for = request.args.get('deleted', 'false') == 'true'
+        return Tag.query.filter(Tag.deleted == test_for).all()
 
     @api.doc(security=None)
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)

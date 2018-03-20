@@ -23,15 +23,15 @@ class ItemTypeList(Resource):
     """
 
     @api.doc(security=None)
-    @api.param('deleted', 'get all deleted elements', type=bool, required=False, default=False)
+    @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def get(self):
         """
         Get a list of all item types currently in the system
         """
-        testFor = request.args.get('deleted', 'false') == 'true'
-        return ItemType.query.filter(ItemType.deleted == testFor).all()
+        test_for = request.args.get('deleted', 'false') == 'true'
+        return ItemType.query.filter(ItemType.deleted == test_for).all()
 
     @api.doc(security=None)
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_POST)

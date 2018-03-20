@@ -23,13 +23,15 @@ class AttributeDefinitionList(Resource):
     """
 
     @api.doc(security=None)
+    @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201,C0121
     def get(self):
         """ 
         Get a list of all attribute definitions currently in the system
         """
-        return AttributeDefinition.query.filter(AttributeDefinition.deleted == False).all()
+        test_for = request.args.get('deleted', 'false') == 'true'
+        return AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for).all()
 
     @api.doc(security=None)
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_POST)
