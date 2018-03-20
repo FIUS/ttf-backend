@@ -48,6 +48,7 @@ ITEM_TYPE_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'type_id': 'id'}),
                    required=False),
     'attributes': HaLUrl(UrlData('api.item_type_item_type_attributes', url_data={'type_id' : 'id'}, absolute=True)),
+    'can_contain': HaLUrl(UrlData('api.item_type_item_type_can_contain_types', url_data={'type_id' : 'id'}, absolute=True)),
 })
 
 ITEM_TYPE_LIST_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {

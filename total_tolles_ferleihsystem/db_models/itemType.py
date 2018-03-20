@@ -39,9 +39,9 @@ class ItemTypeToItemType (db.Model):
                                                 single_parent=True, cascade="all, delete-orphan"))
     item_type = db.relationship('ItemType', foreign_keys=[item_type_id], lazy='joined')
 
-    def __init__(self, parent: ItemType, item_type: ItemType):
-        self.parent = parent
-        self.item_type = item_type
+    def __init__(self, parent_id: int, item_type_id: int):
+        self.parent_id = parent_id
+        self.item_type_id = item_type_id
 
 
 class ItemTypeToAttributeDefinition (db.Model):

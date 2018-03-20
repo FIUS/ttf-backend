@@ -10,7 +10,7 @@ from .. import api as api
 from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID
 from ... import db
 
-from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition
+from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
 
 PATH: str = '/catalog/item_types'
 ANS = api.namespace('item_type', description='ItemTypes', path=PATH)
@@ -91,7 +91,7 @@ class ItemTypeAttributes(Resource):
     # pylint: disable=R0201
     def get(self, type_id):
         """
-        Get all attribute definitions for this tag.
+        Get all attribute definitions for this item type.
         """
         associations = ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.item_type_id == type_id).all()
         return [e.attribute_definition for e in associations]
@@ -126,9 +126,68 @@ class ItemTypeAttributes(Resource):
         Remove association of a attribute definition with the item type.
         """
         association = (ItemTypeToAttributeDefinition.query
-                                               .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
-                                               .filter(ItemTypeToAttributeDefinition.attribute_definition_id == request.get_json()["id"])
-                                               .first())
+                                                    .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
+                                                    .filter(ItemTypeToAttributeDefinition.attribute_definition_id == request.get_json()["id"])
+                                                    .first())
+        if association is None: 
+            return '', 204
+        try:
+            db.session.delete(association)
+            db.session.commit()
+            return '', 204
+        except IntegrityError:
+            abort(500)
+
+
+@ANS.route('/<int:type_id>/can_contain/')
+class ItemTypeCanContainTypes(Resource):
+    """
+    The item types that a item of this type can contain.
+    """
+
+    @api.doc(security=None)
+    @api.marshal_with(ITEM_TYPE_GET)
+    # pylint: disable=R0201
+    def get(self, type_id):
+        """
+        Get all item types, this item_type may contain.
+        """
+        associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
+        return [e.item_type for e in associations]
+
+    @api.doc(security=None)
+    @api.marshal_with(ITEM_TYPE_GET)
+    @ANS.doc(model=ITEM_TYPE_GET, body=ID)
+    @ANS.response(409, 'Item type can already be contained in this item type.')
+    # pylint: disable=R0201
+    def post(self,type_id):
+        """
+        Add new item type to be able to be contained in this item type.
+        """
+        new = ItemTypeToItemType(type_id,request.get_json()["id"])
+        try:
+            db.session.add(new)
+            db.session.commit()
+            associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
+            return [e.item_type for e in associations]
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Item type can already be contained in this item type.')
+            abort(500)
+
+    @api.doc(security=None)
+    @ANS.doc(body=ID)
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def delete(self,type_id):
+        """
+        Remove item type from being able to be contained in this item type
+        """
+        association = (ItemTypeToItemType.query
+                                         .filter(ItemTypeToItemType.parent_id == type_id)
+                                         .filter(ItemTypeToItemType.item_type_id == request.get_json()["id"])
+                                         .first())
         if association is None: 
             return '', 204
         try:
