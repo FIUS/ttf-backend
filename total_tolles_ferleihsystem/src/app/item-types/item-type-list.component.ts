@@ -66,7 +66,7 @@ export class ItemTypeListComponent implements OnInit, OnDestroy {
     }
 
     setFilter(value) {
-        if (value == null || value === 'DELETED'
+        if (value == null || value === 'DELETED' && this.deleted != null && this.deleted.length > 0
             || this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
             this.filter = value;
         }

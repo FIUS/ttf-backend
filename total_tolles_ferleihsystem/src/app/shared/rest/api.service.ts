@@ -339,13 +339,18 @@ export class ApiService implements OnInit {
 
 
     // Tags ////////////////////////////////////////////////////////////////////
-    getTags(): Observable<Array<ApiObject>> {
-        const resource = 'tags';
+    getTags(deleted: boolean=false): Observable<Array<ApiObject>> {
+        let resource = 'tags';
+        let params = null;
+        if (deleted) {
+            resource += '?deleted=true';
+            params = {deleted: true};
+        }
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
-                this.rest.get(catalog._links.item_tags, token).subscribe(data => {
+                this.rest.get(catalog._links.item_tags, token, params).subscribe(data => {
                     stream.next(data);
                 }, error => this.errorHandler(error, resource, 'GET'));
             }, error => this.errorHandler(error, resource, 'GET'));
@@ -423,13 +428,18 @@ export class ApiService implements OnInit {
 
 
     // Attribute Definitions ///////////////////////////////////////////////////
-    getAttributeDefinitions(): Observable<Array<ApiObject>> {
-        const resource = 'attribute_definitions';
+    getAttributeDefinitions(deleted: boolean=false): Observable<Array<ApiObject>> {
+        let resource = 'attribute_definitions';
+        let params = null;
+        if (deleted) {
+            resource += '?deleted=true';
+            params = {deleted: true};
+        }
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
-                this.rest.get(catalog._links.attribute_definitions, token).subscribe(data => {
+                this.rest.get(catalog._links.attribute_definitions, token, params).subscribe(data => {
                     stream.next(data);
                 }, error => this.errorHandler(error, resource, 'GET'));
             }, error => this.errorHandler(error, resource, 'GET'));
