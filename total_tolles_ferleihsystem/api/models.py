@@ -68,6 +68,7 @@ ITEM_TYPE_PUT = api.inherit('ItemTypePUT', ITEM_TYPE_POST, {
 })
 
 ITEM_TYPE_GET = api.inherit('ItemType', ITEM_TYPE_PUT, {
+    'deleted': fields.Boolean(readonly=True),
     'id': fields.Integer(),
     '_links': NestedFields(ITEM_TYPE_LINKS),
 })
@@ -92,6 +93,7 @@ ITEM_TAG_PUT = api.inherit('ItemTagPUT', ITEM_TAG_POST, {
 })
 
 ITEM_TAG_GET = api.inherit('ItemTagGET', ITEM_TAG_PUT, {
+    'deleted': fields.Boolean(readonly=True),
     'id': fields.Integer(),
     '_links': NestedFields(ITEM_TAG_LINKS),
 })
@@ -116,6 +118,7 @@ ATTRIBUTE_DEFINITION_PUT = api.inherit('AttributeDefinitionPUT', ATTRIBUTE_DEFIN
 })
 
 ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_PUT, {
+    'deleted': fields.Boolean(readonly=True),
     'id': fields.Integer(),
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
 })
