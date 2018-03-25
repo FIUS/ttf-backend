@@ -6,6 +6,15 @@ from flask_restplus import fields
 from . import api
 from ..hal_field import HaLUrl, UrlData, NestedFields
 
+class OptionalString(fields.String):
+    """
+    A string with required flag
+    """
+    def __init__(self, required=None, *args, **kwargs):
+        self.required = required
+        super(OptionalString, self).__init__(*args, **kwargs)
+
+
 WITH_CURIES = api.model('WithCuries', {
     'curies': HaLUrl(UrlData('api.doc', absolute=True, templated=True,
                              hashtag='!{rel}', name='rel')),
@@ -59,6 +68,7 @@ ITEM_TYPE_LIST_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
 ITEM_TYPE_POST = api.model('ItemTypePOST', {
     'name': fields.String(),
     'name_schema': fields.String(),
+    'lendingDuration': fields.Integer(),
     'visible_for': fields.String(),
     'how_to': fields.String(),
 })
@@ -83,9 +93,9 @@ ITEM_TAG_LIST_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
 })
 
 ITEM_TAG_POST = api.model('ItemTagPOST', {
-    'name': fields.String(),
-    'lending_duration': fields.Integer,
-    'visible_for': fields.String(),
+    'name': OptionalString(required=False),
+    'lending_duration': fields.Integer(required=False),
+    'visible_for': OptionalString(required=False),
 })
 
 ITEM_TAG_PUT = api.inherit('ItemTagPUT', ITEM_TAG_POST, {

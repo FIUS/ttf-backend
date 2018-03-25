@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID
+from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TAG_PUT
 from ... import db
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
@@ -82,6 +82,26 @@ class ItemTagDetail(Resource):
         item_tag.deleted = True
         db.session.commit()
         return "", 204
+    @ANS.response(204, 'Sucess.')
+    @ANS.doc(body=ITEM_TAG_PUT)
+    # pylint: disable=R0201
+    def put(self, tag_id):
+        """
+        Updates the item tag object
+        """
+        item_tag = Tag.query.filter(Tag.id == tag_id).first()
+        newInfo = request.get_json()
+        item_tag.deleted = False
+
+        if("name" in newInfo):
+            item_tag.name = newInfo["name"]
+        if("lending_duration" in newInfo):
+            item_tag.lending_duration = newInfo["lending_duration"]
+        if("visible_for" in newInfo):
+            item_tag.visible_for = newInfo["visible_for"]
+        db.session.commit()
+        return "", 204
+
 
 @ANS.route('/<int:tag_id>/attributes/')
 class ItemTagAttributes(Resource):
