@@ -82,6 +82,40 @@ class ItemTagDetail(Resource):
         item_tag.deleted = True
         db.session.commit()
         return "", 204
+    @ANS.response(404, 'Item tag not found.')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def post(self, tag_id):
+        """
+        Undelete a item tag object
+        """
+        item_tag = Tag.query.filter(Tag.id == tag_id).first()
+        if item_tag is None:
+            abort(404, 'Requested item tag was not found!')
+        item_tag.deleted = False
+        db.session.commit()
+        return "", 204
+    @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)
+    @ANS.response(409, 'Name is not Unique.')
+    @ANS.response(404, 'Item tag not found.')
+    def put(self, tag_id):
+        """
+        Replace a item tag object
+        """
+        item_tag = Tag.query.filter(Tag.id == tag_id).first()
+        if item_tag is None:
+            abort(404, 'Requested item tag was not found!')
+        item_tag.update(**request.get_json())
+        try:
+            db.session.commit()
+            return marshal(item_tag, ITEM_TAG_GET), 200
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)
+
+
 
 @ANS.route('/<int:tag_id>/attributes/')
 class ItemTagAttributes(Resource):

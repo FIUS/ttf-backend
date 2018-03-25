@@ -24,6 +24,10 @@ class Tag(db.Model):
         self.lending_duration = lending_duration
         self.visible_for = visible_for
 
+    def update(self, name: str, lending_duration: int, visible_for: str):
+        self.name = name
+        self.lending_duration = lending_duration
+        self.visible_for = visible_for
 
 class TagToAttributeDefinition (db.Model):
 
