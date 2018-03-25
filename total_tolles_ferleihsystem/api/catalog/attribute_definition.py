@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST
+from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT
 from ... import db
 
 from ...db_models.attribute import AttributeDefinition
@@ -81,3 +81,35 @@ class AttributeDefinitionDetail(Resource):
         definition.deleted = True
         db.session.commit()
         return "", 204
+    @ANS.response(404, 'Attribute definition not found.')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def post(self, definition_id):
+        """
+        Undelete a attribute definition
+        """
+        definition = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        if definition is None:
+            abort(404, 'Requested attribute definition was not found!')
+        definition.deleted = False
+        db.session.commit()
+        return "", 204
+    @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_PUT)
+    @ANS.response(409, 'Name is not Unique.')
+    @ANS.response(404, 'Attribute definition not found.')
+    def put(self, definition_id):
+        """
+        Replace a attribute definition
+        """
+        definition = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        if definition is None:
+            abort(404, 'Requested attribute definition was not found!')
+        definition.update(**request.get_json())
+        try:
+            db.session.commit()
+            return marshal(definition, ATTRIBUTE_DEFINITION_GET), 200
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)

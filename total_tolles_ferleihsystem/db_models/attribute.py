@@ -19,6 +19,11 @@ class AttributeDefinition (db.Model):
         self.jsonschema = jsonschema
         self.visible_for = visible_for
 
+    def update(self, name: str, type: str, jsonschema: str, visible_for: str):
+        self.name = name
+        self.type = type
+        self.jsonschema = jsonschema
+        self.visible_for = visible_for
 
 class Attribute (db.Model):
 

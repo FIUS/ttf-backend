@@ -11,7 +11,7 @@ class ItemType (db.Model):
     name = db.Column(db.String(STD_STRING_SIZE), unique=True)
     name_schema = db.Column(db.String(STD_STRING_SIZE))
     lendable = db.Column(db.Boolean, default=True)
-    lending_duration = db.Column(db.Time, nullable=True)
+    lending_duration = db.Column(db.Integer, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
     visible_for = db.Column(db.String(STD_STRING_SIZE), nullable=True)
     how_to = db.Column(db.Text, nullable=True)
@@ -25,6 +25,14 @@ class ItemType (db.Model):
 
         if how_to != '' and how_to != None:
             self.how_to = how_to
+
+    def update(self, name: str, name_schema: str, lendable: bool, lending_duration: int, visible_for: str, how_to:str):
+        self.name = name
+        self.name_schema = name_schema
+        self.lendable = lendable
+        self.lending_duration = lending_duration
+        self.visible_for = visible_for
+        self.how_to = how_to
 
 
 class ItemTypeToItemType (db.Model):

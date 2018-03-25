@@ -65,6 +65,7 @@ ITEM_TYPE_POST = api.model('ItemTypePOST', {
 
 ITEM_TYPE_PUT = api.inherit('ItemTypePUT', ITEM_TYPE_POST, {
     'lendable': fields.Boolean(default=True),
+    'lending_duration': fields.Integer,
 })
 
 ITEM_TYPE_GET = api.inherit('ItemType', ITEM_TYPE_PUT, {

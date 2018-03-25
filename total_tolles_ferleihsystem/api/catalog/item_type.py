@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID
+from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TYPE_PUT
 from ... import db
 
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
@@ -81,6 +81,39 @@ class ItemTypeDetail(Resource):
         item_type.deleted = True
         db.session.commit()
         return "", 204
+    @ANS.response(404, 'Item type not found.')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def post(self, type_id):
+        """
+        Undelete a item type object
+        """
+        item_type = ItemType.query.filter(ItemType.id == type_id).first()
+        if item_type is None:
+            abort(404, 'Requested item type was not found!')
+        item_type.deleted = False
+        db.session.commit()
+        return "", 204
+    @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_PUT)
+    @ANS.response(409, 'Name is not Unique.')
+    @ANS.response(404, 'Item type not found.')
+    def put(self, type_id):
+        """
+        Replace a item tag object
+        """
+        item_type = ItemType.query.filter(ItemType.id == type_id).first()
+        if item_type is None:
+            abort(404, 'Requested item tag was not found!')
+        item_type.update(**request.get_json())
+        try:
+            db.session.commit()
+            return marshal(item_type, ITEM_TYPE_GET), 200
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)
+
 
 @ANS.route('/<int:type_id>/attributes/')
 class ItemTypeAttributes(Resource):

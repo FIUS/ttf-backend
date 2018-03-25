@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID
+from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TAG_PUT
 from ... import db
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
@@ -95,7 +95,7 @@ class ItemTagDetail(Resource):
         item_tag.deleted = False
         db.session.commit()
         return "", 204
-    @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)
+    @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Item tag not found.')
     def put(self, tag_id):
