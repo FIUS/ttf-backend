@@ -2,7 +2,7 @@ from .. import db
 from . import STD_STRING_SIZE
 from .itemType import ItemType
 from .tag import Tag
-from .attribute import Attribute
+from .attributeDefinition import AttributeDefinition
 
 
 class Item (db.Model):
@@ -12,15 +12,15 @@ class Item (db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(STD_STRING_SIZE), unique=True)
     type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'))
-    lending_duration = db.Column(db.Time) #TODO add default value
-    delted = db.Column(db.Boolean, default=False)
+    lending_duration = db.Column(db.Integer) #TODO add default value
+    deleted = db.Column(db.Boolean, default=False)
     visible_for = db.Column(db.String(STD_STRING_SIZE), nullable=True)
 
     type = db.relationship('ItemType', lazy='joined')
 
-    def __init__(self, name: str, type: ItemType, lending_duration: int=0, visible_for: str=''):
+    def __init__(self, name: str, type_id: int, lending_duration: int=0, visible_for: str=''):
         self.name = name
-        self.type = type
+        self.type_id = type_id
 
         if lending_duration != 0:
            self.lending_duration = lending_duration
@@ -29,6 +29,11 @@ class Item (db.Model):
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
+    def update(self, name: str, type_id: int, lending_duration: int=0, visible_for: str=''):
+        self.name = name
+        self.type_id = type_id
+        self.lending_duration = lending_duration
+        self.visible_for = visible_for
 
 class File (db.Model):
 
@@ -117,22 +122,24 @@ class ItemToTag (db.Model):
                                                       single_parent=True, cascade="all, delete-orphan"))
     tag = db.relationship('Tag', lazy='joined')
 
-    def __init__(self, item: Item, tag: Tag):
-        self.item = item
-        self.tag = tag
+    def __init__(self, item_id: int, tag_id: int):
+        self.item_id = item_id
+        self.tag_id = tag_id
 
 
-class ItemToAttribute (db.Model):
+class Attributes (db.Model):
 
-    __tablename__ = 'ItemToAttribute'
+    __tablename__ = 'ItemAttributes'
 
     item_id = db.Column(db.Integer, db.ForeignKey('Item.id'), primary_key=True)
-    attribute_id = db.Column(db.Integer, db.ForeignKey('Attribute.id'), primary_key=True)
+    attribute_definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'), primary_key=True)
+    value = db.Column(db.String(STD_STRING_SIZE))
 
     item = db.relationship('Item', backref=db.backref('_attributes', lazy='joined',
                                                       single_parent=True, cascade="all, delete-orphan"))
-    attribute = db.relationship('Attribute', lazy='joined')
+    attribute_definition = db.relationship('AttributeDefinition', lazy='joined')
 
-    def __init__(self, item: Item, attribute: Attribute):
-        self.item = item
-        self.attribute = attribute
+    def __init__(self, item_id: int, attribute_definition_id: int, value: str):
+        self.item_id = item_id
+        self.attribute_definition_id = attribute_definition_id
+        self.value = value

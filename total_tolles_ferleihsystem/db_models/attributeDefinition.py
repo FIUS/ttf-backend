@@ -24,17 +24,4 @@ class AttributeDefinition (db.Model):
         self.type = type
         self.jsonschema = jsonschema
         self.visible_for = visible_for
-
-class Attribute (db.Model):
-
-    __tablename__ = 'Attribute'
-
-    id = db.Column(db.Integer, primary_key=True)
-    definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'))
-    value = db.Column(db.String(STD_STRING_SIZE))
-
-    definition = db.relationship('AttributeDefinition', lazy='joined')
-
-    def __init__(self, definition: AttributeDefinition, value: str):
-        self.definition = definition
-        self.value = value
+        

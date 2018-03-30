@@ -7,3 +7,4 @@ from .. import api
 from . import item_type
 from . import item_tag
 from . import attribute_definition
+from . import item

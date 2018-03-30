@@ -10,7 +10,7 @@ from .. import api as api
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT
 from ... import db
 
-from ...db_models.attribute import AttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/attribute_definitions'
 ANS = api.namespace('attribute_definition', description='The attribute definitions', path=PATH)

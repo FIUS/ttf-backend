@@ -127,3 +127,34 @@ ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFIN
 ID = api.model('Id', {
     'id': fields.Integer(),
 })
+
+ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
+    'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
+    'attributes': HaLUrl(UrlData('api.item_attributes', url_data={'item_id' : 'id'}, absolute=True)),
+})
+
+ITEM_LIST_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_item_list', absolute=True)),
+})
+
+ITEM_POST = api.model('ItemPOST', {
+    'name': fields.String(),
+    'type_id': fields.Integer(),
+    'lending_duration': fields.Integer(),
+    'visible_for': fields.String(),
+})
+
+ITEM_PUT = api.inherit('ItemPUT', ITEM_POST, {
+})
+
+ITEM_GET = api.inherit('ItemGET', ITEM_PUT, {
+    'deleted': fields.Boolean(readonly=True),
+    'id': fields.Integer(),
+    '_links': NestedFields(ITEM_LINKS)
+})
+
+ATTRIBUTE = api.model('Attribute', {
+    'defenition_id': fields.Integer(),
+    'value': fields.String(),
+})
