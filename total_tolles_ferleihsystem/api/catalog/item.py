@@ -238,8 +238,8 @@ class ItemAttributeDetail(Resource):
                              .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
                              .first())
 
-    @api.marshal_with(ATTRIBUTE_GET)
-    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
+    @api.marshal_with(ATTRIBUTE_GET_FULL)
+    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET_FULL)
     @ANS.response(404, "This item doesn't have that type of attribute!")
     def put(self, item_id, attribute_definition_id):
         """
