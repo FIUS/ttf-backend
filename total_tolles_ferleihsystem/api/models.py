@@ -132,7 +132,7 @@ ID = api.model('Id', {
 ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
-    'attributes': HaLUrl(UrlData('api.item_attributes', url_data={'item_id' : 'id'}, absolute=True)),
+    'attributes': HaLUrl(UrlData('api.item_item_attributes', url_data={'item_id' : 'id'}, absolute=True)),
 })
 
 ITEM_LIST_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
@@ -155,7 +155,26 @@ ITEM_GET = api.inherit('ItemGET', ITEM_PUT, {
     '_links': NestedFields(ITEM_LINKS)
 })
 
-ATTRIBUTE = api.model('Attribute', {
-    'defenition_id': fields.Integer(),
+ATTRIBUTE_LINKS = api.inherit('AttributeLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_item_attribute_detail', absolute=True,
+                           url_data={'item_id' : 'id', 'attribute_definition_id' : 'attribute_definition_id'}),
+                   required=False),
+})
+
+ATTRIBUTE_LIST_LINKS = api.inherit('AttributeLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_item_attribute_list', absolute=True)),
+})
+
+ATTRIBUTE_PUT = api.model('AttributePUT', {
     'value': fields.String(),
+})
+
+ATTRIBUTE_GET = api.inherit('AttributeGET', ATTRIBUTE_PUT, {
+    'attribute_definition_id': fields.Integer(),
+    '_links': NestedFields(ATTRIBUTE_LINKS)
+})
+
+ATTRIBUTE_GET_FULL = api.inherit('AttributeGET', ATTRIBUTE_PUT, {
+    'attribute_definition': fields.Nested(ATTRIBUTE_DEFINITION_GET),
+    '_links': NestedFields(ATTRIBUTE_LINKS)
 })

@@ -127,7 +127,7 @@ class ItemToTag (db.Model):
         self.tag_id = tag_id
 
 
-class Attributes (db.Model):
+class ItemAttribute (db.Model):
 
     __tablename__ = 'ItemAttributes'
 
