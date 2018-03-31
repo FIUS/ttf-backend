@@ -556,4 +556,93 @@ export class ApiService implements OnInit {
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
+
+
+
+    // Items ///////////////////////////////////////////////////////////////////
+    getItems(deleted: boolean=false): Observable<Array<ApiObject>> {
+        let resource = 'items';
+        let params = null;
+        if (deleted) {
+            resource += '?deleted=true';
+            params = {deleted: true};
+        }
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.items, token, params).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    getItem(id: number): Observable<ApiObject> {
+        const baseResource = 'items';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.items.href + id, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    postItem(newData): Observable<ApiObject> {
+        const resource = 'items';
+
+        return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
+            return this.getCatalog().flatMap(catalog => {
+                return this.rest.post(catalog._links.items, newData, token).flatMap(data => {
+                    const stream = this.getStreamSource(resource + '/' + data.id);
+                    this.updateResource(resource, data);
+                    return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+                })
+                .catch(error => {
+                    this.errorHandler(error, resource, 'POST');
+                    return Observable.throw(error);
+                });
+            });
+        });
+    }
+
+    putItem(id: number, newData): Observable<ApiObject> {
+        const baseResource = 'items';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.put(catalog._links.items.href + id + '/', newData, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'PUT'));
+            }, error => this.errorHandler(error, resource, 'PUT'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    deleteItem(id: number): Observable<ApiObject> {
+        const baseResource = 'items';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.delete(catalog._links.items.href + id + '/', token).subscribe(() => {
+                    this.removeResource(baseResource, id);
+                }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
 }
