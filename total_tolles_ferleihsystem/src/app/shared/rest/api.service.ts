@@ -336,6 +336,23 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
+    undeleteItemType(id: number): Observable<ApiObject> {
+        const baseResource = 'item_types';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.post(catalog._links.item_types.href + id + '/', undefined, token).subscribe(() => {
+                    this.getItemType(id);
+                    this.getItemTypes(true);
+                }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
 
 
     // Tags ////////////////////////////////////////////////////////////////////
@@ -425,6 +442,23 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
+    undeleteTag(id: number): Observable<ApiObject> {
+        const baseResource = 'tags';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.post(catalog._links.item_tags.href + id + '/', undefined, token).subscribe(() => {
+                    this.getTag(id);
+                    this.getTags(true);
+                }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
 
 
     // Attribute Definitions ///////////////////////////////////////////////////
@@ -509,6 +543,23 @@ export class ApiService implements OnInit {
                     this.removeResource(baseResource, id);
                 }, error => this.errorHandler(error, resource, 'DELETE'));
             }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    undeleteAttributeDefinition(id: number): Observable<ApiObject> {
+        const baseResource = 'attribute_definitions';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.post(catalog._links.attribute_definitions.href + id + '/', undefined, token).subscribe(() => {
+                    this.getAttributeDefinition(id);
+                    this.getAttributeDefinitions(true);
+                }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST'));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
@@ -641,6 +692,23 @@ export class ApiService implements OnInit {
                     this.removeResource(baseResource, id);
                 }, error => this.errorHandler(error, resource, 'DELETE'));
             }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    undeleteItem(id: number): Observable<ApiObject> {
+        const baseResource = 'items';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.post(catalog._links.items.href + id + '/', undefined, token).subscribe(() => {
+                    this.getItem(id);
+                    this.getItems(true);
+                }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST'));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);

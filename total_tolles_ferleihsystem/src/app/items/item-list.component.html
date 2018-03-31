@@ -17,6 +17,9 @@
 <div class="flex" [ngClass]="{flex: (filter != null && filter === 'DELETED'), dn: true}">
     <div class="f3 gray"><i class="fa fa-trash"></i></div>
     <ul class="mt0 list">
-        <li class="min-w2 mb1 hide-child" *ngFor="let item of deleted">{{item.name}}<i class="ml1 child grow-large pointer fa fa-reply"></i></li>
+        <li class="min-w2 mb1 hide-child" *ngFor="let item of deleted">
+            {{item.name}}
+            <i class="ml1 child grow-large pointer fa fa-reply" (click)="api.undeleteItem(item.id)"></i>
+        </li>
     </ul>
 </div>
