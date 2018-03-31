@@ -4,6 +4,9 @@ import { NgModule } from '@angular/core';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
+import { ItemsOverviewComponent } from './items/items-overview.component';
+import { ItemDetailComponent } from './items/item-detail.component';
+
 import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
 import { ItemTypeDetailComponent } from './item-types/item-type-detail.component';
 
@@ -18,6 +21,8 @@ import { ModGuard } from './shared/rest/guards/mod.guard';
 import { AdminGuard } from './shared/rest/guards/admin.guard';
 
 const routes: Routes = [
+  { path: 'items', component: ItemsOverviewComponent, canActivate: [LoginGuard] },
+  { path: 'items/:id', component: ItemDetailComponent, canActivate: [LoginGuard] },
   { path: 'item-types', component: ItemTypesOverviewComponent, canActivate: [ModGuard] },
   { path: 'item-types/:id', component: ItemTypeDetailComponent, canActivate: [ModGuard] },
   { path: 'tags', component: TagsOverviewComponent, canActivate: [ModGuard] },
