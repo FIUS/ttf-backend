@@ -8,7 +8,7 @@
     </div>
 </ttf-box>
 
-<ttf-dialog [dialogType]="'save-cancel'" [valid]="form.valid" [icon]="'save'" [okCallback]="save" #newTag >
+<ttf-dialog [dialogType]="'save-cancel'" [valid]="form.valid | async" [icon]="'save'" [okCallback]="save" #newTag >
     <h1 class="mv0" title>Tag:</h1>
     <div class="w-100 ph3 pv2" body>
         <dynamic-form [objectModel]="'ItemTagPOST'" (data)="onDataChange($event)" #form ></dynamic-form>
