@@ -713,4 +713,74 @@ export class ApiService implements OnInit {
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
+
+    getTagsForItem(item: ApiObject): Observable<ApiObject> {
+        const resource = 'items/' + item.id + '/tags';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(item._links.tags.href, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    addTagToItem(item: ApiObject, tag: ApiObject): Observable<ApiObject> {
+        const resource = 'items/' + item.id + '/tags';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.post(item._links.tags.href, tag, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'POST'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    removeTagFromItem(item: ApiObject, tag: ApiObject): Observable<ApiObject> {
+        const resource = 'items/' + item.id + '/tags';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.delete(item._links.tags.href, token, tag).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+
+
+    // Attributes //////////////////////////////////////////////////////////////
+    getAttributes(item: ApiObject): Observable<Array<ApiObject>> {
+        const resource = 'items/' + item.id + '/attributes';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(item._links.attributes, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    getAttribute(item: ApiObject, id: number): Observable<ApiObject> {
+        const baseResource = 'items/' + item.id + '/attributes';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(item._links.attributes.href + id, token).subscribe(data => {
+                this.updateResource(baseResource, data as ApiObject);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
 }

@@ -12,9 +12,11 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     private paramSubscription: Subscription;
     private itemSubscription: Subscription;
+    private attributesSubscription: Subscription;
 
     itemID: number;
     item;
+    attributes;
 
     constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
 
@@ -33,9 +35,19 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         this.data.changeBreadcrumbs([new Breadcrumb('Items', '/items'),
             new Breadcrumb('"' + itemID.toString() + '"', '/items/' + itemID)]);
         this.itemSubscription = this.api.getItem(itemID).subscribe(item => {
+            if (item == null) {
+                return;
+            }
             this.item = item;
             this.data.changeBreadcrumbs([new Breadcrumb('Items', '/items'),
                 new Breadcrumb('"' + item.name + '"', '/items/' + itemID)]);
+
+            if (this.attributesSubscription != null) {
+                this.attributesSubscription.unsubscribe();
+            }
+            this.attributesSubscription = this.api.getAttributes(item).subscribe(attributes => {
+                this.attributes = attributes;
+            })
         });
     }
 
@@ -45,6 +57,9 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         }
         if (this.itemSubscription != null) {
             this.itemSubscription.unsubscribe();
+        }
+        if (this.attributesSubscription != null) {
+            this.attributesSubscription.unsubscribe();
         }
     }
 
