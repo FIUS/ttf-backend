@@ -1,7 +1,10 @@
 <div class="pv2 flex" [formGroup]="form">
+    <div class="w2 tc f5">
+        <i [hidden]="!isValid" class="fa fa-check"></i>
+        <span class="tooltip tooltip-right" [attr.data-tooltip]="error" [hidden]="isValid" ><i class="red fa fa-exclamation"></i></span>
+    </div>
+
     <label class="w5 f4 ws-normal" style="word-wrap: break-word" [attr.for]="question.key">
-        <i [hidden]="!isValid" class="w2 tc f5 fa fa-check"></i>
-        <i [hidden]="isValid" class="w2 tc f5 red fa fa-exclamation"></i>
         {{question.label}}
     </label>
 

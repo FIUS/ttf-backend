@@ -13,4 +13,15 @@ export class DynamicFormQuestionComponent {
     @Input() form: FormGroup;
 
     get isValid() { return this.form.controls[this.question.key].valid; }
+
+    get error() {
+        const errors = this.form.controls[this.question.key].errors;
+        if (errors) {
+            if (errors.maxlength) {
+                return 'Nur '  + errors.maxlength.requiredLength + ' Zeichen erlaubt.';
+            }
+            console.log(errors);
+        }
+        return '';
+    }
 }
