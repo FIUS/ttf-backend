@@ -132,7 +132,7 @@ ID = api.model('Id', {
 ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
-    'attributes': HaLUrl(UrlData('api.item_item_attributes', url_data={'item_id' : 'id'}, absolute=True)),
+    'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'}, absolute=True)),
 })
 
 ITEM_LIST_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
