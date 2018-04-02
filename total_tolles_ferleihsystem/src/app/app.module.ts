@@ -18,6 +18,8 @@ import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemListComponent } from './items/item-list.component';
 import { ItemDetailComponent } from './items/item-detail.component';
 import { ItemEditComponent } from './items/item-edit.component';
+import { TagsChooserComponent } from './items/tags-chooser.component';
+import { AttributeEditComponent } from './items/attribute-edit.component';
 
 import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
 import { ItemTypeListComponent } from './item-types/item-type-list.component';
@@ -53,6 +55,8 @@ import { AppComponent } from './app.component';
         ItemListComponent,
         ItemDetailComponent,
         ItemEditComponent,
+        TagsChooserComponent,
+        AttributeEditComponent,
 
         ItemTypesOverviewComponent,
         ItemTypeListComponent,

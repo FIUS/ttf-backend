@@ -54,7 +54,28 @@ export class QuestionService implements OnInit {
 
     }
 
-    private parseModel(spec:any, modelID: string, questionOptions?: Map<string, QuestionOptions>) {
+    getQuestionsFromScheme(scheme: object): Observable<QuestionBase<any>[]> {
+
+        return this.swagger.flatMap(spec => {
+            if (spec == undefined) {
+                return Observable.of([]);
+            }
+
+            const result = new AsyncSubject<QuestionBase<any>[]>();
+
+            const questionOptions = new Map<string, QuestionOptions>()
+            const model = this.parseJsonSchemeModel(scheme, spec, questionOptions);
+            const questionsArray: QuestionBase<any>[] = [];
+            questionOptions.forEach(options => questionsArray.push(this.getQuestion(options)));
+            result.next(questionsArray.sort((a, b) => a.order - b.order));
+            result.complete();
+
+            return result;
+        });
+
+    }
+
+    private parseModel(spec: any, modelID: string, questionOptions?: Map<string, QuestionOptions>) {
         let recursionStart = false;
         if (questionOptions == undefined) {
             questionOptions = new Map<string, QuestionOptions>();
@@ -66,6 +87,17 @@ export class QuestionService implements OnInit {
 
         let model = spec.definitions[modelID];
 
+        model = this.parseJsonSchemeModel(model, spec, questionOptions);
+
+        if (recursionStart) {
+            let questionsArray: QuestionBase<any>[] = [];
+            questionOptions.forEach(options => questionsArray.push(this.getQuestion(options)));
+            this.observables[modelID].next(questionsArray.sort((a, b) => a.order - b.order));
+            this.observables[modelID].complete();
+        }
+    }
+
+    private parseJsonSchemeModel(model: any, spec: any, questionOptions: Map<string, QuestionOptions>) {
         if (model != undefined) {
             if (model.allOf != undefined) {
                 let tempModel;
@@ -85,13 +117,7 @@ export class QuestionService implements OnInit {
                 }
             }
         }
-
-        if (recursionStart) {
-            let questionsArray: QuestionBase<any>[] = [];
-            questionOptions.forEach(options => questionsArray.push(this.getQuestion(options)));
-            this.observables[modelID].next(questionsArray.sort((a, b) => a.order - b.order));
-            this.observables[modelID].complete();
-        }
+        return model;
     }
 
     private updateOptions(questionOptions: Map<string, QuestionOptions>, propID: string, model: any) {

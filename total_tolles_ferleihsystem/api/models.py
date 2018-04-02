@@ -5,6 +5,7 @@ Module containing models for whole API to use.
 from flask_restplus import fields
 from . import api
 from ..hal_field import HaLUrl, UrlData, NestedFields
+from ..db_models import STD_STRING_SIZE
 
 WITH_CURIES = api.model('WithCuries', {
     'curies': HaLUrl(UrlData('api.doc', absolute=True, templated=True,
@@ -58,9 +59,9 @@ ITEM_TYPE_LIST_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
 })
 
 ITEM_TYPE_POST = api.model('ItemTypePOST', {
-    'name': fields.String(),
-    'name_schema': fields.String(),
-    'visible_for': fields.String(),
+    'name': fields.String(max_length=STD_STRING_SIZE),
+    'name_schema': fields.String(max_length=STD_STRING_SIZE),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
     'how_to': fields.String(),
 })
 
@@ -86,9 +87,9 @@ ITEM_TAG_LIST_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
 })
 
 ITEM_TAG_POST = api.model('ItemTagPOST', {
-    'name': fields.String(),
+    'name': fields.String(max_length=STD_STRING_SIZE),
     'lending_duration': fields.Integer,
-    'visible_for': fields.String(),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
 })
 
 ITEM_TAG_PUT = api.inherit('ItemTagPUT', ITEM_TAG_POST, {
@@ -110,10 +111,10 @@ ATTRIBUTE_DEFINITION_LIST_LINKS = api.inherit('AttributeDefinitionLinks', WITH_C
 })
 
 ATTRIBUTE_DEFINITION_POST = api.model('AttributeDefinitionPOST', {
-    'name': fields.String(),
-    'type': fields.String(),
+    'name': fields.String(max_length=STD_STRING_SIZE),
+    'type': fields.String(enum=('string', 'integer', 'number', 'boolean')),
     'jsonschema': fields.String(),
-    'visible_for': fields.String(),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
 })
 
 ATTRIBUTE_DEFINITION_PUT = api.inherit('AttributeDefinitionPUT', ATTRIBUTE_DEFINITION_POST, {
@@ -132,7 +133,7 @@ ID = api.model('Id', {
 ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
-    'attributes': HaLUrl(UrlData('api.item_item_attributes', url_data={'item_id' : 'id'}, absolute=True)),
+    'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'}, absolute=True)),
 })
 
 ITEM_LIST_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
@@ -140,10 +141,10 @@ ITEM_LIST_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
 })
 
 ITEM_POST = api.model('ItemPOST', {
-    'name': fields.String(),
-    'type_id': fields.Integer(),
+    'name': fields.String(max_length=STD_STRING_SIZE),
+    'type_id': fields.Integer(min=1),
     'lending_duration': fields.Integer(),
-    'visible_for': fields.String(),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
 })
 
 ITEM_PUT = api.inherit('ItemPUT', ITEM_POST, {

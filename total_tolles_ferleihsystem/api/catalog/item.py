@@ -47,7 +47,7 @@ class ItemList(Resource):
         Add a new item to the system
         """
         new = Item(**request.get_json())
-       
+
         try:
             db.session.add(new)
             db.session.commit()
@@ -55,7 +55,7 @@ class ItemList(Resource):
             type_id = new.type_id
             item_type_attribute_definitions = ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.item_type_id == type_id).all()
             attributes = []
-            for e in item_type_attribute_definitions: 
+            for e in item_type_attribute_definitions:
                 a = ItemAttribute(item_id, e.attribute_definition_id, "") #TODO: Get default if possible.
                 attributes.append(a)
             db.session.add_all(attributes)
@@ -129,7 +129,7 @@ class ItemDetail(Resource):
                 abort(409, 'Name is not unique!')
             abort(500)
 
-@ANS.route('/<int:item_id>/tags')
+@ANS.route('/<int:item_id>/tags/')
 class ItemItemTags(Resource):
     """
     The item tags of a single item
@@ -195,7 +195,7 @@ class ItemItemTags(Resource):
                                 .filter(ItemToTag.tag_id == item_id)
                                 .filter(ItemToTag.attribute_definition_id == request.get_json()["id"])
                                 .first())
-        if association is None: 
+        if association is None:
             return '', 204
         try:
             db.session.delete(association)
@@ -204,7 +204,7 @@ class ItemItemTags(Resource):
         except IntegrityError:
             abort(500)
 
-@ANS.route('/<int:item_id>/attributes')
+@ANS.route('/<int:item_id>/attributes/')
 class ItemAttributeList(Resource):
     """
     The attributes of a single item
@@ -219,7 +219,7 @@ class ItemAttributeList(Resource):
         """
 
         return ItemAttribute.query.filter(ItemAttribute.item_id == item_id).all()
- 
+
 @ANS.route('/<int:item_id>/attributes/<int:attribute_definition_id>/')
 class ItemAttributeDetail(Resource):
     """
