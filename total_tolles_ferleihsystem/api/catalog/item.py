@@ -190,6 +190,7 @@ class ItemItemTags(Resource):
         """
         Remove association of a tag with the item.
         """
+        #TODO: delete attributes, if no other tag or the type defines them.
         association = (ItemToTag.query
                                 .filter(ItemToTag.tag_id == item_id)
                                 .filter(ItemToTag.attribute_definition_id == request.get_json()["id"])
