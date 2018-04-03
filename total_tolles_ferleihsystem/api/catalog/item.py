@@ -12,9 +12,7 @@ from ... import db
 
 from ...db_models.item import Item, ItemToTag, ItemAttribute
 from ...db_models.itemType import ItemTypeToAttributeDefinition
-from ...db_models.tag import TagToAttributeDefinition
-
-from ... import app
+from ...db_models.tag import TagToAttributeDefinition, Tag
 
 PATH: str = '/catalog/item'
 ANS = api.namespace('item', description='Items', path=PATH)
@@ -53,11 +51,15 @@ class ItemList(Resource):
             db.session.commit()
             item_id = new.id
             type_id = new.type_id
-            item_type_attribute_definitions = ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.item_type_id == type_id).all()
+            item_type_attribute_definitions = (ItemTypeToAttributeDefinition
+                                               .query
+                                               .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
+                                               .all())
             attributes = []
-            for e in item_type_attribute_definitions:
-                a = ItemAttribute(item_id, e.attribute_definition_id, "") #TODO: Get default if possible.
-                attributes.append(a)
+            for element in item_type_attribute_definitions:
+                attributes.append(ItemAttribute(item_id,
+                                                element.attribute_definition_id,
+                                                "")) #TODO: Get default if possible.
             db.session.add_all(attributes)
             db.session.commit()
             return marshal(new, ITEM_GET), 201
@@ -70,20 +72,24 @@ class ItemList(Resource):
 @ANS.route('/<int:item_id>/')
 class ItemDetail(Resource):
     """
-    Single item element
+    Single item object
     """
 
     @api.doc(security=None)
     @api.marshal_with(ITEM_GET)
+    @ANS.response(404, 'Requested item not found!')
     # pylint: disable=R0201
     def get(self, item_id):
         """
         Get a single item object
         """
         item = Item.query.filter(Item.id == item_id).first()
+        if item is None:
+            abort(404, 'Requested item not found!')
 
         return item
-    @ANS.response(404, 'Item not found.')
+
+    @ANS.response(404, 'Requested item not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def delete(self, item_id):
@@ -92,11 +98,12 @@ class ItemDetail(Resource):
         """
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
-            abort(404, 'Requested item was not found!')
+            abort(404, 'Requested item not found!')
         item.deleted = True
         db.session.commit()
         return "", 204
-    @ANS.response(404, 'Item not found.')
+
+    @ANS.response(404, 'Requested item not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def post(self, item_id):
@@ -105,20 +112,22 @@ class ItemDetail(Resource):
         """
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
-            abort(404, 'Requested item was not found!')
+            abort(404, 'Requested item not found!')
         item.deleted = False
         db.session.commit()
         return "", 204
+
     @ANS.doc(model=ITEM_GET, body=ITEM_PUT)
     @ANS.response(409, 'Name is not Unique.')
-    @ANS.response(404, 'Item not found.')
+    @ANS.response(404, 'Requested item not found!')
+    # pylint: disable=R0201
     def put(self, item_id):
         """
         Replace a item object
         """
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
-            abort(404, 'Requested item was not found!')
+            abort(404, 'Requested item not found!')
         item.update(**request.get_json())
         try:
             db.session.commit()
@@ -137,11 +146,14 @@ class ItemItemTags(Resource):
 
     @api.doc(security=None)
     @api.marshal_with(ITEM_TAG_GET)
+    @ANS.response(404, 'Requested item not found!')
     # pylint: disable=R0201
     def get(self, item_id):
         """
         Get all tags for this item.
         """
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
 
         associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
         return [e.tag for e in associations]
@@ -149,30 +161,43 @@ class ItemItemTags(Resource):
     @api.doc(security=None)
     @api.marshal_with(ITEM_TAG_GET)
     @ANS.doc(model=ITEM_TAG_GET, body=ID)
+    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, 'Requested item tag not found!')
     @ANS.response(409, 'Tag is already associated with this item!')
     # pylint: disable=R0201
-    def post(self,item_id):
+    def post(self, item_id):
         """
         Associate a new tag with the item.
         """
         tag_id = request.get_json()["id"]
+
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(400, 'Requested item tag not found!')
+
         new = ItemToTag(item_id, tag_id)
         attributes = ItemAttribute.query.filter(ItemAttribute.item_id == item_id).all()
 
         attributes_dict = {}
-        newAttributes = []
+        new_attributes = []
 
-        for e in attributes:
-            attributes_dict[e.attribute_definition_id] = e.value
+        for element in attributes:
+            attributes_dict[element.attribute_definition_id] = element.value
 
-        item_tag_attribute_definitions = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
-        for e in item_tag_attribute_definitions:
-            if not e.attribute_definition_id in attributes_dict :
-                attributes_dict[e.attribute_definition_id] = ""
-                newAttributes.append(ItemAttribute(item_id, e.attribute_definition_id, "")) #TODO: Get default values
+        item_tag_attribute_definitions = (TagToAttributeDefinition
+                                          .query
+                                          .filter(TagToAttributeDefinition.tag_id == tag_id)
+                                          .all())
+        for element in item_tag_attribute_definitions:
+            if not element.attribute_definition_id in attributes_dict:
+                attributes_dict[element.attribute_definition_id] = ""
+                new_attributes.append(ItemAttribute(item_id,
+                                                    element.attribute_definition_id,
+                                                    "")) #TODO: Get default values
         try:
             db.session.add(new)
-            db.session.add_all(newAttributes)
+            db.session.add_all(new_attributes)
             db.session.commit()
             associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
             return [e.tag for e in associations]
@@ -184,17 +209,28 @@ class ItemItemTags(Resource):
 
     @api.doc(security=None)
     @ANS.doc(body=ID)
+    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
-    def delete(self,item_id):
+    def delete(self, item_id):
         """
         Remove association of a tag with the item.
         """
         #TODO: delete attributes, if no other tag or the type defines them.
-        association = (ItemToTag.query
-                                .filter(ItemToTag.tag_id == item_id)
-                                .filter(ItemToTag.attribute_definition_id == request.get_json()["id"])
-                                .first())
+        tag_id = request.get_json()["id"]
+
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(400, 'Requested item tag not found!')
+
+        association = (ItemToTag
+                       .query
+                       .filter(ItemToTag.item_id == item_id)
+                       .filter(ItemToTag.tag_id == tag_id)
+                       .first())
+
         if association is None:
             return '', 204
         try:
@@ -212,11 +248,14 @@ class ItemAttributeList(Resource):
 
     @api.doc(security=None)
     @api.marshal_with(ATTRIBUTE_GET)
+    @ANS.response(404, 'Requested item not found!')
     # pylint: disable=R0201
     def get(self, item_id):
         """
         Get the attributes of this item.
         """
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
 
         return ItemAttribute.query.filter(ItemAttribute.item_id == item_id).all()
 
@@ -228,31 +267,51 @@ class ItemAttributeDetail(Resource):
 
     @api.doc(security=None)
     @api.marshal_with(ATTRIBUTE_GET_FULL)
+    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, "This item doesn't have that type of attribute!")
     # pylint: disable=R0201
     def get(self, item_id, attribute_definition_id):
         """
-        Get the attributes of this item.
+        Get a single attribute of this item.
         """
 
-        return (ItemAttribute.query
-                             .filter(ItemAttribute.item_id == item_id)
-                             .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
-                             .first())
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+
+        attribute = (ItemAttribute
+                     .query
+                     .filter(ItemAttribute.item_id == item_id)
+                     .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
+                     .first())
+
+        if attribute is None:
+            abort(400, "This item doesn't have that type of attribute!")
+
+        return attribute
 
     @api.marshal_with(ATTRIBUTE_GET_FULL)
     @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET_FULL)
-    @ANS.response(404, "This item doesn't have that type of attribute!")
+    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, "This item doesn't have that type of attribute!")
+    # pylint: disable=R0201
     def put(self, item_id, attribute_definition_id):
         """
-        Set a attribute of this item.
+        Set a single attribute of this item.
         """
+
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+
         value = request.get_json()["value"]
-        attribute = (ItemAttribute.query
-                                  .filter(ItemAttribute.item_id == item_id)
-                                  .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
-                                  .first())
+        attribute = (ItemAttribute
+                     .query
+                     .filter(ItemAttribute.item_id == item_id)
+                     .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
+                     .first())
+
         if attribute is None:
-            abort(404, "This item doesn't have that type of attribute!")
+            abort(400, "This item doesn't have that type of attribute!")
+
         attribute.value = value
         try:
             db.session.commit()

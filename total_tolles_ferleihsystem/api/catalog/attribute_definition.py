@@ -19,15 +19,15 @@ ANS = api.namespace('attribute_definition', description='The attribute definitio
 @ANS.route('/')
 class AttributeDefinitionList(Resource):
     """
-    Attribute definitions root element
+    Attribute definitions root attribute
     """
 
     @api.doc(security=None)
-    @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
+    @api.param('deleted', 'get all deleted attributes (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ATTRIBUTE_DEFINITION_GET)
-    # pylint: disable=R0201,C0121
+    # pylint: disable=R0201
     def get(self):
-        """ 
+        """
         Get a list of all attribute definitions currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
@@ -56,58 +56,65 @@ class AttributeDefinitionList(Resource):
 @ANS.route('/<int:definition_id>/')
 class AttributeDefinitionDetail(Resource):
     """
-    Single attribute definition element
+    Single attribute definition attribute
     """
 
     @api.doc(security=None)
     @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @ANS.response(404, 'Requested attribute not found!')
     # pylint: disable=R0201
     def get(self, definition_id):
         """
         Get a single attribute definition
         """
-        return AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        if attribute is None:
+            abort(404, 'Requested attribute not found!')
+        return attribute
 
-    @ANS.response(404, 'Attribute definition not found.')
+    @ANS.response(404, 'Requested attribute not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def delete(self, definition_id):
         """
         Delete a attribute definition
         """
-        definition = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
-        if definition is None:
-            abort(404, 'Requested attribute definition was not found!')
-        definition.deleted = True
+        attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        if attribute is None:
+            abort(404, 'Requested attribute not found!')
+        attribute.deleted = True
         db.session.commit()
         return "", 204
-    @ANS.response(404, 'Attribute definition not found.')
+
+    @ANS.response(404, 'Requested attribute not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def post(self, definition_id):
         """
         Undelete a attribute definition
         """
-        definition = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
-        if definition is None:
-            abort(404, 'Requested attribute definition was not found!')
-        definition.deleted = False
+        attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        if attribute is None:
+            abort(404, 'Requested attribute not found!')
+        attribute.deleted = False
         db.session.commit()
         return "", 204
+
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_PUT)
     @ANS.response(409, 'Name is not Unique.')
-    @ANS.response(404, 'Attribute definition not found.')
+    @ANS.response(404, 'Requested attribute not found!')
+    # pylint: disable=R0201
     def put(self, definition_id):
         """
         Replace a attribute definition
         """
-        definition = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
-        if definition is None:
-            abort(404, 'Requested attribute definition was not found!')
-        definition.update(**request.get_json())
+        attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        if attribute is None:
+            abort(404, 'Requested attribute not found!')
+        attribute.update(**request.get_json())
         try:
             db.session.commit()
-            return marshal(definition, ATTRIBUTE_DEFINITION_GET), 200
+            return marshal(attribute, ATTRIBUTE_DEFINITION_GET), 200
         except IntegrityError as err:
             message = str(err)
             if 'UNIQUE constraint failed' in message:

@@ -11,6 +11,7 @@ from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID, 
 from ... import db
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item_tags'
 ANS = api.namespace('item_tag', description='ItemTags', path=PATH)
@@ -19,11 +20,11 @@ ANS = api.namespace('item_tag', description='ItemTags', path=PATH)
 @ANS.route('/')
 class ItemTagList(Resource):
     """
-    Item tags root element
+    Item tags root item tag
     """
 
     @api.doc(security=None)
-    @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
+    @api.param('deleted', 'get all deleted item tags (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self):
@@ -56,20 +57,22 @@ class ItemTagList(Resource):
 @ANS.route('/<int:tag_id>/')
 class ItemTagDetail(Resource):
     """
-    Single item tag element
+    Single item tag object
     """
 
     @api.doc(security=None)
     @api.marshal_with(ITEM_TAG_GET)
+    @ANS.response(404, 'Requested item tag not found!')
     # pylint: disable=R0201
     def get(self, tag_id):
         """
         Get a single item tag object
         """
-        tag = Tag.query.filter(Tag.id == tag_id).first()
-
-        return tag
-    @ANS.response(404, 'Item tag not found.')
+        item_tag = Tag.query.filter(Tag.id == tag_id).first()
+        if item_tag is None:
+            abort(404, 'Requested item tag not found!')
+        return item_tag
+    @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def delete(self, tag_id):
@@ -78,11 +81,11 @@ class ItemTagDetail(Resource):
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
-            abort(404, 'Requested item tag was not found!')
+            abort(404, 'Requested item tag not found!')
         item_tag.deleted = True
         db.session.commit()
         return "", 204
-    @ANS.response(404, 'Item tag not found.')
+    @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def post(self, tag_id):
@@ -91,20 +94,21 @@ class ItemTagDetail(Resource):
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
-            abort(404, 'Requested item tag was not found!')
+            abort(404, 'Requested item tag not found!')
         item_tag.deleted = False
         db.session.commit()
         return "", 204
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_PUT)
     @ANS.response(409, 'Name is not Unique.')
-    @ANS.response(404, 'Item tag not found.')
+    @ANS.response(404, 'Requested item tag not found!')
+    # pylint: disable=R0201
     def put(self, tag_id):
         """
         Replace a item tag object
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
-            abort(404, 'Requested item tag was not found!')
+            abort(404, 'Requested item tag not found!')
         item_tag.update(**request.get_json())
         try:
             db.session.commit()
@@ -120,33 +124,46 @@ class ItemTagDetail(Resource):
 @ANS.route('/<int:tag_id>/attributes/')
 class ItemTagAttributes(Resource):
     """
-    The attributes of a single item tag element
+    The attributes of a single item tag object
     """
 
     @api.doc(security=None)
     @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @ANS.response(404, 'Requested item tag not found!')
     # pylint: disable=R0201
     def get(self, tag_id):
         """
         Get all attribute definitions for this tag.
         """
-       
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(404, 'Requested item tag not found!')
        # Two possibilitys:
-       # return [e.attribute_definition for e in TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()]
-       # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id).first()._tag_to_attribute_definitions ]
+       # return [e.attribute_definition for e in TagToAttributeDefinition.query
+       # .filter(TagToAttributeDefinition.tag_id == tag_id).all()]
+       # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id)
+       # .first()._tag_to_attribute_definitions ]
         associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
         return [e.attribute_definition for e in associations]
 
     @api.doc(security=None)
     @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
+    @ANS.response(404, 'Requested item tag not found!')
+    @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(409, 'Attribute definition is already associated with this tag!')
     # pylint: disable=R0201
-    def post(self,tag_id):
+    def post(self, tag_id):
         """
         Associate a new attribute definition with the tag.
         """
-        new = TagToAttributeDefinition(tag_id,request.get_json()["id"])
+        attribute_definition_id = request.get_json()["id"]
+
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(404, 'Requested item tag not found!')
+        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
+            abort(400, 'Requested attribute definition not found!')
+
+        new = TagToAttributeDefinition(tag_id, attribute_definition_id)
         try:
             db.session.add(new)
             db.session.commit()
@@ -160,17 +177,26 @@ class ItemTagAttributes(Resource):
 
     @api.doc(security=None)
     @ANS.doc(body=ID)
+    @ANS.response(404, 'Requested item tag not found!')
+    @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
-    def delete(self,tag_id):
+    def delete(self, tag_id):
         """
         Remove association of a attribute definition with the tag.
         """
-        association = (TagToAttributeDefinition.query
-                                               .filter(TagToAttributeDefinition.tag_id == tag_id)
-                                               .filter(TagToAttributeDefinition.attribute_definition_id == request.get_json()["id"])
-                                               .first())
-        if association is None: 
+        attribute_definition_id = request.get_json()["id"]
+
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(404, 'Requested item tag not found!')
+        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
+            abort(400, 'Requested attribute definition not found!')
+        association = (TagToAttributeDefinition
+                       .query
+                       .filter(TagToAttributeDefinition.tag_id == tag_id)
+                       .filter(TagToAttributeDefinition.attribute_definition_id == attribute_definition_id)
+                       .first())
+        if association is None:
             return '', 204
         try:
             db.session.delete(association)
