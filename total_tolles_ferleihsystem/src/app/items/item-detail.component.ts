@@ -13,10 +13,15 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private paramSubscription: Subscription;
     private itemSubscription: Subscription;
     private attributesSubscription: Subscription;
+    private tagsSubscription: Subscription;
+
+    edit: boolean = true;
 
     itemID: number;
     item;
-    attributes: number[] = [];
+    attributes;
+    tags;
+    attributeIDs: number[] = [];
 
     constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
 
@@ -46,19 +51,26 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 this.attributesSubscription.unsubscribe();
             }
             this.attributesSubscription = this.api.getAttributes(item).subscribe(attributes => {
+                this.attributes = attributes;
                 const ids = [];
                 attributes.forEach(attr => {
                     ids.push(attr.attribute_definition_id)
                 })
-                if (ids.length !== this.attributes.length) {
-                    this.attributes = ids;
+                if (ids.length !== this.attributeIDs.length) {
+                    this.attributeIDs = ids;
                 } else {
                     ids.forEach((id, index) => {
-                        if (this.attributes[index] !== id) {
-                            this.attributes[index] = id;
+                        if (this.attributeIDs[index] !== id) {
+                            this.attributeIDs[index] = id;
                         }
                     })
                 }
+            });
+            if (this.tagsSubscription != null) {
+                this.tagsSubscription.unsubscribe();
+            }
+            this.tagsSubscription = this.api.getTagsForItem(item).subscribe(tags => {
+                this.tags = tags;
             })
         });
     }
@@ -72,6 +84,9 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         }
         if (this.attributesSubscription != null) {
             this.attributesSubscription.unsubscribe();
+        }
+        if (this.tagsSubscription != null) {
+            this.tagsSubscription.unsubscribe();
         }
     }
 
