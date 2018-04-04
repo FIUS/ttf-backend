@@ -45,13 +45,11 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
             }
             this.item = item;
             this.api.getTagsForItem(item).subscribe(tags => {
-                console.log('HI')
                 const selected = new Set<number>();
                 tags.forEach(tag => {
                     selected.add(tag.id);
                 });
                 this.selected = selected;
-                console.log(this.selected);
             });
         });
     }
