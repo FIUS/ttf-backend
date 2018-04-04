@@ -127,7 +127,7 @@ ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFIN
 })
 
 ID = api.model('Id', {
-    'id': fields.Integer(),
+    'id': fields.Integer(min=1),
 })
 
 ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
