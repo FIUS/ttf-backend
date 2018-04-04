@@ -16,7 +16,7 @@ class ItemType (db.Model):
     visible_for = db.Column(db.String(STD_STRING_SIZE), nullable=True)
     how_to = db.Column(db.Text, nullable=True)
 
-    def __init__(self, name: str, name_schema: str, visible_for: str='', how_to: str=''):
+    def __init__(self, name: str, name_schema: str, visible_for: str = '', how_to: str = ''):
         self.name = name
         self.name_schema = name_schema
 
@@ -33,6 +33,14 @@ class ItemType (db.Model):
         self.lending_duration = lending_duration
         self.visible_for = visible_for
         self.how_to = how_to
+
+    def get_attribute_definitions(self):
+        """
+        Returns all attribute definitions associated with this item type by preforming a query on ItemTypeToAttributeDefinition
+        """
+        return [element.attribute_definition
+                for element
+                in ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.item_type_id == self.id).all()]
 
 
 class ItemTypeToItemType (db.Model):

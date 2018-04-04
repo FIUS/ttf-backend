@@ -1,9 +1,8 @@
-from .. import db
+from .. import db,app
 from . import STD_STRING_SIZE
-from .itemType import ItemType
-from .tag import Tag
+from .itemType import ItemType, ItemTypeToAttributeDefinition
+from .tag import Tag, TagToAttributeDefinition
 from .attributeDefinition import AttributeDefinition
-
 
 class Item (db.Model):
 
@@ -34,6 +33,55 @@ class Item (db.Model):
         self.type_id = type_id
         self.lending_duration = lending_duration
         self.visible_for = visible_for
+    
+    def get_tags(self):
+        """
+        Returns all tags associated with this item by preforming a query on ItemToTag
+        """
+        return [element.tag
+                for element
+                in ItemToTag.query.filter(ItemToTag.item_id == self.id).all()]
+
+    def get_attributes(self):
+        """
+        Returns all attributes associated with this item by preforming a query on ItemAttribute
+        """
+        return ItemAttribute.query.filter(ItemAttribute.item_id == self.id).all()
+
+    def get_attributes_that_need_deletion_when_unassociating_tag(self, tag: Tag):
+        """
+        Returns all attributes that would need to be deleted, when the given tag was unassociated with this item.
+        """
+        #TODO: Can we do this directly with SQL? Would propably be more efficient. But persumably doing it as we do right now is easier to read.
+
+        to_delete = []
+        potentially_to_delete = tag.get_attribute_definitions()
+
+        app.logger.info("pot del 1: %s", ''.join(e.name for e in potentially_to_delete)) #TODO:Remove
+
+        for element in self.type.get_attribute_definitions():
+            if element in potentially_to_delete:
+                potentially_to_delete.remove(element)
+        
+        for tag_e in self.get_tags():
+            if tag_e == tag:
+                continue
+            for attr_def_e in tag_e.get_attribute_definitions():
+                if attr_def_e in potentially_to_delete:
+                    potentially_to_delete.remove(attr_def_e)
+        
+        app.logger.info("pot del 2: %s", ''.join(e.name for e in potentially_to_delete)) #TODO:Remove
+
+        for element in self.get_attributes():
+            if element.attribute_definition in potentially_to_delete:
+                to_delete.append(element)
+
+        app.logger.info("del: %s", ''.join(e.attribute_definition.name for e in to_delete)) #TODO:Remove
+
+        return to_delete
+
+    def can_tag_be_unassociated_safely(self, tag: Tag):
+        return len(self.get_attributes_that_need_deletion_when_unassociating_tag(tag)) == 0
 
 class File (db.Model):
 

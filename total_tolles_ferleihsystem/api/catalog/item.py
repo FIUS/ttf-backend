@@ -10,6 +10,8 @@ from .. import api as api
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, ATTRIBUTE_GET_FULL
 from ... import db
 
+from ... import app
+
 from ...db_models.item import Item, ItemToTag, ItemAttribute
 from ...db_models.itemType import ItemTypeToAttributeDefinition
 from ...db_models.tag import TagToAttributeDefinition, Tag
@@ -211,19 +213,25 @@ class ItemItemTags(Resource):
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
+    @ANS.response(400, 'Cannot unassociate that tag without loosing attributes.')
     @ANS.response(204, 'Success.')
+    @api.param('force', 'Force removing the association. Delete attributes of this item if necessary.', type=bool, required=False, default=False)
     # pylint: disable=R0201
     def delete(self, item_id):
         """
         Remove association of a tag with the item.
         """
-        #TODO: delete attributes, if no other tag or the type defines them.
         tag_id = request.get_json()["id"]
-
-        if Item.query.filter(Item.id == item_id).first() is None:
+        item = Item.query.filter(Item.id == item_id).first()
+        tag = Tag.query.filter(Tag.id == tag_id).first()
+        force = request.args.get('force', 'false') == 'true'
+        if item is None:
             abort(404, 'Requested item not found!')
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        if tag is None:
             abort(400, 'Requested item tag not found!')
+
+        if not (force or item.can_tag_be_unassociated_safely(tag)):
+            abort(400, 'Cannot unassociate that tag without loosing attributes.')
 
         association = (ItemToTag
                        .query
@@ -233,8 +241,12 @@ class ItemItemTags(Resource):
 
         if association is None:
             return '', 204
+        
         try:
             db.session.delete(association)
+            if force:
+                for element in item.get_attributes_that_need_deletion_when_unassociating_tag(tag):
+                    db.session.delete(element)
             db.session.commit()
             return '', 204
         except IntegrityError:
