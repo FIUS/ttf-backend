@@ -21,6 +21,8 @@
                 <input class="input-reset w5 bn pa1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
             </div>
 
+            <ttf-type-chooser *ngSwitchCase="'type'" [formControlName]="question.key" [question]="question"></ttf-type-chooser>
+
             <ttf-duration-input *ngSwitchCase="'duration'" [formControlName]="question.key" [question]="question"></ttf-duration-input>
 
             <ttf-number-input *ngSwitchCase="'number'" [formControlName]="question.key" [question]="question"></ttf-number-input>

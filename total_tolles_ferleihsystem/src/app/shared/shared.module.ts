@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { DynamicFormComponent } from './forms/dynamic-form/dynamic-form.component';
 import { DynamicFormQuestionComponent } from './forms/dynamic-form/dynamic-form-question.component';
+import { TypeChooserComponent } from './forms/dynamic-form/type-chooser/type-chooser.component';
 import { NumberInputComponent } from './forms/dynamic-form/number-input/number-input.component';
 import { DurationInputComponent } from './forms/dynamic-form/duration-input/duration-input.component';
 
@@ -37,6 +38,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         myTableComponent,
         DynamicFormComponent,
         DynamicFormQuestionComponent,
+        TypeChooserComponent,
         NumberInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
@@ -60,6 +62,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         myTableComponent,
         DynamicFormComponent,
         DynamicFormQuestionComponent,
+        TypeChooserComponent,
         NumberInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
