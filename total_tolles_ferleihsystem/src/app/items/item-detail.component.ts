@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { ApiService } from '../shared/rest/api.service';
+import { JWTService } from '../shared/rest/jwt.service';
 import { Subscription } from 'rxjs/Rx';
 
 @Component({
@@ -15,7 +16,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private attributesSubscription: Subscription;
     private tagsSubscription: Subscription;
 
-    edit: boolean = true;
+    edit: boolean = false;
 
     itemID: number;
     item;
@@ -23,7 +24,8 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     tags;
     attributeIDs: number[] = [];
 
-    constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
+    constructor(private data: NavigationService, private api: ApiService,
+                private jwt: JWTService, private route: ActivatedRoute) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Item');
@@ -73,6 +75,30 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 this.tags = tags;
             })
         });
+    }
+
+    get lendingDuration() {
+        if (this.item != null && this.item.lending_duration >= 0) {
+            return this.item.lending_duration;
+        }
+        if (this.tags != null) {
+            let duration;
+            this.tags.forEach(tag => {
+                if (tag.lending_duration >= 0 && (duration == null || duration > tag.lending_duration)) {
+                    duration = tag.lending_duration;
+                }
+            });
+            if (duration != null) {
+                return duration;
+            }
+        }
+        if (this.item != null && this.item.type != null) {
+            return this.item.type.lending_duration;
+        }
+    }
+
+    get canEdit() {
+        return this.jwt.isModerator() || this.jwt.isAdmin();
     }
 
     ngOnDestroy(): void {

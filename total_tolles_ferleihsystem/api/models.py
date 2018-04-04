@@ -153,6 +153,7 @@ ITEM_PUT = api.inherit('ItemPUT', ITEM_POST, {
 ITEM_GET = api.inherit('ItemGET', ITEM_PUT, {
     'deleted': fields.Boolean(readonly=True),
     'id': fields.Integer(),
+    'type': fields.Nested(ITEM_TYPE_GET),
     '_links': NestedFields(ITEM_LINKS)
 })
 
