@@ -10,8 +10,6 @@ from .. import api as api
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, ATTRIBUTE_GET_FULL
 from ... import db
 
-from ... import app
-
 from ...db_models.item import Item, ItemToTag, ItemAttribute
 from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
