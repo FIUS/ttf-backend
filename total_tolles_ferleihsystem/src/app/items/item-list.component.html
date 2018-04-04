@@ -6,7 +6,7 @@
 <ng-container *ngFor="let letter of alphabet">
     <div class="flex" [ngClass]="{flex: (filter == null || filter === letter), dn: true}">
         <ng-container *ngIf="data?.get(letter).length > 0">
-            <div class="f3 gray">{{letter}}</div>
+            <div class="f3 gray" style="width: 1em">{{letter}}</div>
             <ul class="mt0 list">
                 <li class="min-w2 mb1 link grow pointer" *ngFor="let item of data?.get(letter)" routerLink="/items/{{item.id}}">{{item.name}}</li>
             </ul>
