@@ -1,4 +1,4 @@
-from .. import db,app
+from .. import db
 from . import STD_STRING_SIZE
 from .itemType import ItemType, ItemTypeToAttributeDefinition
 from .tag import Tag, TagToAttributeDefinition
@@ -57,8 +57,6 @@ class Item (db.Model):
         to_delete = []
         potentially_to_delete = tag.get_attribute_definitions()
 
-        app.logger.info("pot del 1: %s", ''.join(e.name for e in potentially_to_delete)) #TODO:Remove
-
         for element in self.type.get_attribute_definitions():
             if element in potentially_to_delete:
                 potentially_to_delete.remove(element)
@@ -70,13 +68,9 @@ class Item (db.Model):
                 if attr_def_e in potentially_to_delete:
                     potentially_to_delete.remove(attr_def_e)
         
-        app.logger.info("pot del 2: %s", ''.join(e.name for e in potentially_to_delete)) #TODO:Remove
-
         for element in self.get_attributes():
             if element.attribute_definition in potentially_to_delete:
                 to_delete.append(element)
-
-        app.logger.info("del: %s", ''.join(e.attribute_definition.name for e in to_delete)) #TODO:Remove
 
         return to_delete
 

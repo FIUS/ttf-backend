@@ -10,10 +10,8 @@ from .. import api as api
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, ATTRIBUTE_GET_FULL
 from ... import db
 
-from ... import app
-
 from ...db_models.item import Item, ItemToTag, ItemAttribute
-from ...db_models.itemType import ItemTypeToAttributeDefinition
+from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
 
 PATH: str = '/catalog/item'
@@ -40,17 +38,21 @@ class ItemList(Resource):
     @api.doc(security=None)
     @ANS.doc(model=ITEM_GET, body=ITEM_POST)
     @ANS.response(409, 'Name is not Unique.')
+    @ANS.response(400, 'Requested item type not found!')
     @ANS.response(201, 'Created.')
     # pylint: disable=R0201
     def post(self):
         """
         Add a new item to the system
         """
+        item_type = ItemType.query.filter(ItemType.id == request.get_json()["type_id"]).first()
+        if item_type is None:
+            abort(400, 'Requested item type not found!')
+
         new = Item(**request.get_json())
 
         try:
             db.session.add(new)
-            db.session.commit()
             item_id = new.id
             type_id = new.type_id
             item_type_attribute_definitions = (ItemTypeToAttributeDefinition
@@ -122,6 +124,7 @@ class ItemDetail(Resource):
     @ANS.doc(model=ITEM_GET, body=ITEM_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, 'Requested item type not found!')
     # pylint: disable=R0201
     def put(self, item_id):
         """
@@ -130,6 +133,11 @@ class ItemDetail(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
+        
+        item_type = ItemType.query.filter(ItemType.id == request.get_json()["type_id"]).first()
+        if item_type is None:
+            abort(400, 'Requested item type not found!')
+
         item.update(**request.get_json())
         try:
             db.session.commit()
