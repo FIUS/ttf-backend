@@ -734,6 +734,7 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.post(item._links.tags.href, tag, token).subscribe(data => {
                 stream.next(data);
+                this.getAttributes(item);
             }, error => this.errorHandler(error, resource, 'POST'));
         });
 
@@ -747,6 +748,8 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.delete(item._links.tags.href, token, tag).subscribe(data => {
                 stream.next(data);
+                this.getTagsForItem(item);
+                this.getAttributes(item);
             }, error => this.errorHandler(error, resource, 'DELETE'));
         });
 
