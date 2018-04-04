@@ -16,7 +16,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     itemID: number;
     item;
-    attributes;
+    attributes: number[] = [];
 
     constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
 
@@ -46,7 +46,19 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 this.attributesSubscription.unsubscribe();
             }
             this.attributesSubscription = this.api.getAttributes(item).subscribe(attributes => {
-                this.attributes = attributes;
+                const ids = [];
+                attributes.forEach(attr => {
+                    ids.push(attr.attribute_definition_id)
+                })
+                if (ids.length !== this.attributes.length) {
+                    this.attributes = ids;
+                } else {
+                    ids.forEach((id, index) => {
+                        if (this.attributes[index] !== id) {
+                            this.attributes[index] = id;
+                        }
+                    })
+                }
             })
         });
     }
