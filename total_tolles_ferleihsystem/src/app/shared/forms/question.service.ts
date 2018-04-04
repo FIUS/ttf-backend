@@ -13,6 +13,7 @@ import { IntegerQuestion } from './question-integer';
 import { DurationQuestion } from './question-duration';
 import { DropdownQuestion } from './question-dropdown';
 import { BooleanQuestion } from './question-boolean';
+import { TypeQuestion } from './question-type';
 
 import { Options } from 'selenium-webdriver';
 
@@ -191,6 +192,9 @@ export class QuestionService implements OnInit {
             return new BooleanQuestion(options);
         }
         if (options.controlType === 'integer') {
+            if (options.key.toUpperCase().includes('TYPE_ID')) {
+                return new TypeQuestion(options);
+            }
             if (options.key.toUpperCase().includes('DURATION')) {
                 return new DurationQuestion(options);
             }

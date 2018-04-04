@@ -1,4 +1,5 @@
-import { Component, forwardRef, Input, OnInit } from '@angular/core';
+import { Component, forwardRef, Input, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs/Rx';
 
 import { myDropdownComponent } from '../shared/dropdown/dropdown.component';
 import { ApiObject } from '../shared/rest/api-base.service';
@@ -11,7 +12,10 @@ import { ApiService } from '../shared/rest/api.service';
   selector: 'ttf-tags-chooser',
   templateUrl: 'tags-chooser.component.html',
 })
-export class TagsChooserComponent implements OnInit {
+export class TagsChooserComponent implements OnInit, OnDestroy {
+
+    private itemSubscription: Subscription;
+    private tagsSubscription: Subscription;
 
     @Input() itemID: number;
     item: ApiObject;
@@ -28,14 +32,14 @@ export class TagsChooserComponent implements OnInit {
     constructor(private api: ApiService) {}
 
     ngOnInit(): void {
-        this.api.getTags().subscribe(data => {
+        this.tagsSubscription = this.api.getTags().subscribe(data => {
             if (data == undefined) {
                 return;
             }
             this.tags = data;
             this.updateFilter();
         });
-        this.api.getItem(this.itemID).subscribe(item => {
+        this.itemSubscription = this.api.getItem(this.itemID).subscribe(item => {
             if (item == null) {
                 return;
             }
@@ -50,6 +54,15 @@ export class TagsChooserComponent implements OnInit {
                 console.log(this.selected);
             });
         });
+    }
+
+    ngOnDestroy(): void {
+        if (this.tagsSubscription != null) {
+            this.tagsSubscription.unsubscribe();
+        }
+        if (this.itemSubscription != null) {
+            this.itemSubscription.unsubscribe();
+        }
     }
 
     updateFilter() {
