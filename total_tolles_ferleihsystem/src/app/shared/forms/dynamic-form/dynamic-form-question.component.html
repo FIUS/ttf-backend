@@ -27,9 +27,7 @@
 
             <ttf-number-input *ngSwitchCase="'number'" [formControlName]="question.key" [question]="question"></ttf-number-input>
 
-            <div *ngSwitchCase="'boolean'" class="w5 flex">
-                <input [formControlName]="question.key" [id]="question.key" [type]="question.type">
-            </div>
+            <ttf-boolean-input *ngSwitchCase="'boolean'" [formControlName]="question.key" [question]="question"></ttf-boolean-input>
 
             <div *ngSwitchCase="'dropdown'" class="w5 flex bb b--gray gray hover-black">
                 <select [id]="question.key" class="input-reset w5 bn pa1 bg-white black" [formControlName]="question.key" #inputSelect>

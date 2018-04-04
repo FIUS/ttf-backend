@@ -211,15 +211,15 @@ export class ApiService implements OnInit {
         return this.streams[streamID];
     }
 
-    private updateResource(streamID: string, data: ApiObject) {
-        const stream = this.getStreamSource(streamID + '/' +  data.id);
+    private updateResource(streamID: string, data: ApiObject, idField: string = 'id') {
+        const stream = this.getStreamSource(streamID + '/' +  data[idField]);
         stream.next(data);
 
         const list_stream = this.getStreamSource(streamID, false);
         if (list_stream != null) {
             const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
             if (list != null) {
-                const index = list.findIndex(value => value.id === data.id);
+                const index = list.findIndex(value => value[idField] === data[idField]);
                 if (index < 0) {
                     list.push(data);
                 } else {
@@ -775,8 +775,22 @@ export class ApiService implements OnInit {
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.get(item._links.attributes.href + id, token).subscribe(data => {
-                this.updateResource(baseResource, data as ApiObject);
+            this.rest.get(item._links.attributes.href + id + '/', token).subscribe(data => {
+                this.updateResource(baseResource, data as ApiObject, 'attribute_definition_id');
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    putAttribute(item: ApiObject, id: number, value): Observable<ApiObject> {
+        const baseResource = 'items/' + item.id + '/attributes';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.put(item._links.attributes.href + id + '/', {value: value}, token).subscribe(data => {
+                this.updateResource(baseResource, data as ApiObject, 'attribute_definition_id');
             }, error => this.errorHandler(error, resource, 'GET'));
         });
 

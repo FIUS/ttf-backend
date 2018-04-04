@@ -1,6 +1,6 @@
 import { QuestionBase, QuestionOptions } from './question-base';
 
-export class IntegerQuestion extends QuestionBase<number> {
+export class NumberQuestion extends QuestionBase<number> {
     controlType = 'number';
     type: 'number';
 

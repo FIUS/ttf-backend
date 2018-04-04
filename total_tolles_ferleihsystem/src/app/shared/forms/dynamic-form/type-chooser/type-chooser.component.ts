@@ -63,7 +63,7 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
             this.searchTerm = '';
             this.updateFilter();
         }
-        this.onChange(val);
+        this.onChange(this.value);
         this.onTouched();
     }
 
@@ -123,6 +123,7 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
         this.updateFilter();
         this.dropdown.closeDropdown();
         this.onTouched();
+        this.onChange(this.value);
     }
 
     highlightNext() {

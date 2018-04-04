@@ -9,7 +9,7 @@ import { HiddenQuestion } from './question-hidden';
 import { StringQuestion } from './question-string';
 import { TextQuestion } from './question-text';
 import { DateQuestion } from './question-date';
-import { IntegerQuestion } from './question-integer';
+import { NumberQuestion } from './question-number';
 import { DurationQuestion } from './question-duration';
 import { DropdownQuestion } from './question-dropdown';
 import { BooleanQuestion } from './question-boolean';
@@ -198,7 +198,10 @@ export class QuestionService implements OnInit {
             if (options.key.toUpperCase().includes('DURATION')) {
                 return new DurationQuestion(options);
             }
-            return new IntegerQuestion(options);
+            return new NumberQuestion(options);
+        }
+        if (options.controlType === 'number') {
+            return new NumberQuestion(options);
         }
         if (options.controlType === 'string') {
             if (options.pattern != undefined || options.max != undefined) {
