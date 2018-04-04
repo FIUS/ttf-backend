@@ -5,6 +5,7 @@
         <h1 class="mv0" title>Attributes:</h1>
         <div class="w-100 ph3 pv2" body>
             {{attributes | json}}
+            <ttf-attribute-edit *ngFor="let attr of attributes" [itemID]="itemID" [attributeID]="attr"></ttf-attribute-edit>
         </div>
     </ttf-box>
 </div>

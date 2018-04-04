@@ -176,6 +176,7 @@ ATTRIBUTE_GET = api.inherit('AttributeGET', ATTRIBUTE_PUT, {
 })
 
 ATTRIBUTE_GET_FULL = api.inherit('AttributeGET', ATTRIBUTE_PUT, {
+    'attribute_definition_id': fields.Integer(),
     'attribute_definition': fields.Nested(ATTRIBUTE_DEFINITION_GET),
     '_links': NestedFields(ATTRIBUTE_LINKS)
 })
