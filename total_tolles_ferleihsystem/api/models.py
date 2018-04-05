@@ -135,6 +135,10 @@ ID = api.model('Id', {
     'id': fields.Integer(min=1, example=1),
 })
 
+ID_LIST = api.model('IdList', {
+    'ids': fields.List(fields.Integer(min=1, example=1)),
+})
+
 ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
