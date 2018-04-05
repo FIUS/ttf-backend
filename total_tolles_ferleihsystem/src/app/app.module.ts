@@ -10,6 +10,7 @@ import { SharedModule } from './shared/shared.module';
 import { BreadcrumbsComponent } from './navigation/breadcrumbs.component';
 import { TitleBarComponent } from './navigation/title-bar.component';
 import { NavigationService } from './navigation/navigation-service';
+import { StagingService } from './navigation/staging-service';
 
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
@@ -84,6 +85,7 @@ import { AppComponent } from './app.component';
     ],
     providers: [
         NavigationService,
+        StagingService,
     ],
     bootstrap: [AppComponent]
 })
