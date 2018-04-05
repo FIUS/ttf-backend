@@ -159,6 +159,8 @@ ITEM_GET = api.inherit('ItemGET', ITEM_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
     'id': fields.Integer(),
     'type': fields.Nested(ITEM_TYPE_GET),
+    'is_currently_lended': fields.Boolean(),
+    'lending_id': fields.Integer(),
     '_links': NestedFields(ITEM_LINKS)
 })
 
@@ -195,7 +197,7 @@ ITEM_LENDING = api.model('ItemLending', {
 LENDING_BASIC = api.model('LendingBASIC', {
     'moderator': fields.String(),
     'user': fields.String(),
-    'deposit': fields.String(),
+    'deposit': fields.String(example="Studentenausweiß"),
 })
 
 LENDING_POST = api.inherit('LendingPOST', LENDING_BASIC, {

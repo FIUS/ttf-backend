@@ -50,6 +50,25 @@ class Item (db.Model):
         """
         return ItemAttribute.query.filter(ItemAttribute.item_id == self.id).all()
 
+    @property
+    def lending_id(self):
+        """
+        The lending_id this item is currently associated with. -1 if not lended. 
+        """
+        lending_to_item = ItemToLending.query.filter(ItemToLending.item_id == self.id).first()
+        if lending_to_item is None:
+            return -1
+        return lending_to_item.lending_id
+
+    @property
+    def is_currently_lended(self):
+        """
+        If the item is currently lended.
+        """
+        return self.lending_id != -1
+
+
+
     def get_lending_duration(self):
         return self.lending_duration
 
