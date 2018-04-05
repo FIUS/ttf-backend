@@ -33,7 +33,7 @@ class Item (db.Model):
         self.type_id = type_id
         self.lending_duration = lending_duration
         self.visible_for = visible_for
-    
+
     def get_tags(self):
         """
         Returns all tags associated with this item by preforming a query on ItemToTag
@@ -60,14 +60,14 @@ class Item (db.Model):
         for element in self.type.get_attribute_definitions():
             if element in potentially_to_delete:
                 potentially_to_delete.remove(element)
-        
+
         for tag_e in self.get_tags():
             if tag_e == tag:
                 continue
             for attr_def_e in tag_e.get_attribute_definitions():
                 if attr_def_e in potentially_to_delete:
                     potentially_to_delete.remove(attr_def_e)
-        
+
         for element in self.get_attributes():
             if element.attribute_definition in potentially_to_delete:
                 to_delete.append(element)
