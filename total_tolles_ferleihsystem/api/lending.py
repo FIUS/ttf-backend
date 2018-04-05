@@ -43,7 +43,7 @@ class LendingList(Resource):
         Add a new lending to the system
         """
         json = request.get_json()
-        item_ids = json.pop('items')
+        item_ids = json.pop('item_ids')
         items = []
         item_to_lendings = []
 
