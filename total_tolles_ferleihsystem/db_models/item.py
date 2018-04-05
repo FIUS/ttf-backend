@@ -1,3 +1,5 @@
+import datetime
+
 from .. import db
 from . import STD_STRING_SIZE
 from .itemType import ItemType, ItemTypeToAttributeDefinition
@@ -37,7 +39,7 @@ class Item (db.Model):
     @property
     def lending_id(self):
         """
-        The lending_id this item is currently associated with. -1 if not lended. 
+        The lending_id this item is currently associated with. -1 if not lended.
         """
         lending_to_item = ItemToLending.query.filter(ItemToLending.item_id == self.id).first()
         if lending_to_item is None:

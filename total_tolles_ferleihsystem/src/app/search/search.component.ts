@@ -68,7 +68,6 @@ export class SearchComponent  {
             });
             this.data = map;
             this.searchDone = true;
-            console.log('HI');
         });
     }
 

@@ -211,6 +211,11 @@ export class ApiService implements OnInit {
             params.type = type;
         }
 
+        if (tags != null && tags.size > 0) {
+            params.tag = [];
+            tags.forEach(tag => params.tag.push(tag));
+        }
+
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getRoot().subscribe((root) => {
                 this.rest.get(root._links.search, token, params).subscribe(data => {

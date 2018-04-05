@@ -1,11 +1,11 @@
 <div class="flex flex-wrap">
     <ttf-box>
-        <h1 class="mv0" title>Item "{{item?.name}}":</h1>
+        <h1 class="mv0" title>Item "{{item?.name}}" <span class="i gray underline-hover pointer" routerLink="/lendings/{{item.lending_id}}" [hidden]="!item?.is_currently_lended">lent</span>:</h1>
         <div class="flex" title-right>
             <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
                 <i class="fa fa-pencil" [ngClass]="{'fa-inverse': edit}"></i>
             </div>
-            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': staging.isStaged(itemID)}" (click)="staging.stage(itemID)" title-right>
+            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': staging.isStaged(itemID)}" (click)="staging.stage(itemID)" [hidden]="!item?.type.lendable || item?.is_currently_lended" title-right>
                 <i class="fa fa-cart-plus" [hidden]="staging.isStaged(itemID)"></i>
                 <i class="fa fa-shopping-cart fa-inverse" [hidden]="!staging.isStaged(itemID)"></i>
             </div>
