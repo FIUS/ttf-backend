@@ -15,8 +15,14 @@ import { StagingService } from './navigation/staging-service';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
+import { SearchOverviewComponent } from './search/search-overview.component';
+import { SearchComponent } from './search/search.component';
+
 import { StagingComponent } from './staging/staging.component';
 import { StagedItemComponent } from './staging/staged-item.component';
+
+import { LendingComponent } from './lending/lending.component';
+import { ItemLendingComponent } from './lending/item-lending.component';
 
 import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemListComponent } from './items/item-list.component';
@@ -56,8 +62,14 @@ import { AppComponent } from './app.component';
 
         HomeComponent,
 
+        SearchOverviewComponent,
+        SearchComponent,
+
         StagingComponent,
         StagedItemComponent,
+
+        LendingComponent,
+        ItemLendingComponent,
 
         ItemsOverviewComponent,
         ItemListComponent,

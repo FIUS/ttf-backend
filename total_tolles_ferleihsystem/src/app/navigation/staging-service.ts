@@ -53,6 +53,11 @@ export class StagingService {
         this.stagedSource.next(this.staged);
     }
 
+    reset() {
+        this.staged = new Set<number>();
+        this.stagedSource.next(this.staged);
+    }
+
     isStaged(item_id): boolean {
         this.loadStaged();
         return this.staged.has(item_id);

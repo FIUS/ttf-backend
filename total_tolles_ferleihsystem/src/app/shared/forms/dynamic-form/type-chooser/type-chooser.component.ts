@@ -26,6 +26,7 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
     @ViewChild(myDropdownComponent) dropdown: myDropdownComponent
 
     @Input() question: QuestionBase<any>;
+    @Input() allowDeselect: boolean = false;
 
     searchTerm: string = '';
 
@@ -42,7 +43,7 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
 
     get value(): number {
         if (this.types == undefined || this.selected == undefined) {
-            return -1; //{_links: {self: {href: ''}}, id: -1}
+            return -1;
         }
         return this.selected;
     }
@@ -85,10 +86,13 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
         }
     }
 
-    updateFilter() {
+    updateFilter(searchTerm?: string) {
+        if (searchTerm == null) {
+            searchTerm = this.searchTerm;
+        }
         const filter = new Set<number>();
         this.types.forEach(type => {
-            if (!type.name.toUpperCase().includes(this.searchTerm.toUpperCase())) {
+            if (!type.name.toUpperCase().includes(searchTerm.toUpperCase())) {
                 filter.add(type.id);
             }
         });
@@ -118,9 +122,14 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
         if (type == null) {
             return;
         }
-        this.selected = type.id;
-        this.searchTerm = type.name;
-        this.updateFilter();
+        if (this.allowDeselect && this.selected == type.id) {
+            this.selected = undefined;
+            this.searchTerm = '';
+        } else {
+            this.selected = type.id;
+            this.searchTerm = type.name;
+        }
+        this.updateFilter('');
         this.dropdown.closeDropdown();
         this.onTouched();
         this.onChange(this.value);

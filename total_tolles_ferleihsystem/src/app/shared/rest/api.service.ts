@@ -202,6 +202,22 @@ export class ApiService implements OnInit {
         });
     }
 
+    search(search: string, type?: number, tags?: Set<number>): Observable<Array<ApiObject>> {
+        const stream = new AsyncSubject<Array<ApiObject>>();
+
+        const params = {search: search};
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getRoot().subscribe((root) => {
+                this.rest.get(root._links.search, token, params).subscribe(data => {
+                    stream.next(data as ApiObject[]);
+                }, error => this.errorHandler(error, 'search', 'GET'));
+            }, error => this.errorHandler(error, 'search', 'GET'));
+        });
+
+        return stream.asObservable();
+    }
+
     ////////////////////////////////////////////////////////////////////////////
 
     private getStreamSource(streamID: string, create: boolean = true) {
@@ -834,6 +850,22 @@ export class ApiService implements OnInit {
                 });
             });
         });
+    }
+
+    getLending(id: number): Observable<ApiObject> {
+        const baseResource = 'lendings';
+        const resource = baseResource + '/' + id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getRoot().subscribe((root) => {
+                this.rest.get(root._links.lending.href + id, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
 }

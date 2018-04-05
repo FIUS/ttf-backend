@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, forwardRef, Input, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Subscription } from 'rxjs/Rx';
 
 import { myDropdownComponent } from '../shared/dropdown/dropdown.component';
@@ -16,6 +16,10 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
 
     private itemSubscription: Subscription;
     private tagsSubscription: Subscription;
+
+    @Output() selectedTags: EventEmitter<Set<number>> = new EventEmitter();
+
+    @Input() offline: boolean = false;
 
     @Input() itemID: number;
     item: ApiObject;
@@ -39,19 +43,22 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
             this.tags = data;
             this.updateFilter();
         });
-        this.itemSubscription = this.api.getItem(this.itemID).subscribe(item => {
-            if (item == null) {
-                return;
-            }
-            this.item = item;
-            this.api.getTagsForItem(item).subscribe(tags => {
-                const selected = new Set<number>();
-                tags.forEach(tag => {
-                    selected.add(tag.id);
+        if (!this.offline) {
+            this.itemSubscription = this.api.getItem(this.itemID).subscribe(item => {
+                if (item == null) {
+                    return;
+                }
+                this.item = item;
+                this.api.getTagsForItem(item).subscribe(tags => {
+                    const selected = new Set<number>();
+                    tags.forEach(tag => {
+                        selected.add(tag.id);
+                    });
+                    this.selected = selected;
+                    this.selectedTags.emit(this.selected);
                 });
-                this.selected = selected;
             });
-        });
+        }
     }
 
     ngOnDestroy(): void {
@@ -86,7 +93,7 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
     }
 
     select(tag?: ApiObject) {
-        if (this.item != null) {
+        if (this.offline || this.item != null) {
             if (tag == null) {
                 for (const tag2 of this.tags) {
                     if (tag2.id === this.highlighted) {
@@ -101,15 +108,23 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
                 this.deselect(tag);
             } else {
                 this.selected.add(tag.id);
-                this.api.addTagToItem(this.item, tag);
+                if (this.offline) {
+                    this.selectedTags.emit(this.selected);
+                } else {
+                    this.api.addTagToItem(this.item, tag);
+                }
             }
         }
     }
 
     deselect(tag: ApiObject) {
-        if (this.item != null) {
+        if (this.offline || this.item != null) {
             this.selected.delete(tag.id);
-            this.api.removeTagFromItem(this.item, tag);
+            if (this.offline) {
+                this.selectedTags.emit(this.selected);
+            } else {
+                this.api.removeTagFromItem(this.item, tag);
+            }
         }
     }
 
