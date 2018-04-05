@@ -11,7 +11,7 @@ from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_
 from ... import db
 
 from ...db_models.item import Item, ItemToTag, ItemAttribute, ItemToItem
-from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType
+from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemTypeToItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
 
 PATH: str = '/catalog/item'
@@ -222,25 +222,18 @@ class ItemItemTags(Resource):
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
-    @ANS.response(400, 'Cannot unassociate that tag without loosing attributes.')
     @ANS.response(204, 'Success.')
-    @api.param('force', 'Force removing the association. Delete attributes of this item if necessary.', type=bool, required=False, default=False)
     # pylint: disable=R0201
     def delete(self, item_id):
         """
         Remove association of a tag with the item.
         """
         tag_id = request.get_json()["id"]
-        item = Item.query.filter(Item.id == item_id).first()
-        tag = Tag.query.filter(Tag.id == tag_id).first()
-        force = request.args.get('force', 'false') == 'true'
-        if item is None:
-            abort(404, 'Requested item not found!')
-        if tag is None:
-            abort(400, 'Requested item tag not found!')
 
-        if not (force or item.can_tag_be_unassociated_safely(tag)):
-            abort(400, 'Cannot unassociate that tag without loosing attributes.')
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(400, 'Requested item tag not found!')
 
         association = (ItemToTag
                        .query
@@ -253,9 +246,6 @@ class ItemItemTags(Resource):
         
         try:
             db.session.delete(association)
-            if force:
-                for element in item.get_attributes_that_need_deletion_when_unassociating_tag(tag):
-                    db.session.delete(element)
             db.session.commit()
             return '', 204
         except IntegrityError:
@@ -365,6 +355,7 @@ class ItemContainedItems(Resource):
     @ANS.doc(model=ITEM_GET, body=ID)
     @ANS.response(404, 'Requested item (current) not found!')
     @ANS.response(400, 'Requested item (to be contained) not found!')
+    @ANS.response(400, 'This item can not contain that item.')
     @ANS.response(409, 'Subitem is already a subitem of this item!')
     # pylint: disable=R0201
     def post(self, item_id):
@@ -372,11 +363,22 @@ class ItemContainedItems(Resource):
         Add a new contained item to this item
         """
         contained_item_id = request.get_json()["id"]
-
-        if Item.query.filter(Item.id == item_id).first() is None:
+        parent = Item.query.filter(Item.id == item_id).first()
+        child = Item.query.filter(Item.id == contained_item_id).first()
+        
+        if parent is None:
             abort(404, 'Requested item (current) not found!')
-        if Item.query.filter(Item.id == contained_item_id).first() is None:
+        if child is None:
             abort(400, 'Requested item (to be contained) not found!')
+
+        association = (ItemTypeToItemType
+                       .query
+                       .filter(ItemTypeToItemType.parent_id == parent.type_id)
+                       .filter(ItemTypeToItemType.item_type_id == child.type_id)
+                       .first())
+
+        if association is None:
+            abort(400, 'This item can not contain that item.')
 
         new = ItemToItem(item_id, contained_item_id)
         try:
