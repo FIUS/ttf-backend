@@ -18,13 +18,14 @@ class Search(Resource):
     def get(self):
         search_string = request.args.get('search', default='', type=str)
         limit = request.args.get('limit', default=1000, type=int)
-        tag = request.args.getlist('tag', type=int)
+        tags = request.args.getlist('tag', type=int)
         type = request.args.get('type', default=-1, type=int)
 
         search_result = Item.query.filter(Item.name.like('%' + search_string + '%'))
 
-        #if len(tag) > 0:
-        #    search_result = search_result.join(ItemToTag.item)
+        if len(tags) > 0:
+            search_result = search_result.join(ItemToTag.item)
+            search_result = search_result.filter(ItemToTag.tag_id.in_(tags))
 
         if type != -1:
             search_result = search_result.filter(Item.type_id == type)
