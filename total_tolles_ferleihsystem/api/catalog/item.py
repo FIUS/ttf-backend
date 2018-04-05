@@ -53,6 +53,7 @@ class ItemList(Resource):
 
         try:
             db.session.add(new)
+            db.session.commit()
             item_id = new.id
             type_id = new.type_id
             item_type_attribute_definitions = (ItemTypeToAttributeDefinition
