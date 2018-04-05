@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { QuestionService } from '../shared/forms/question.service';
@@ -18,7 +18,6 @@ export class SearchComponent  {
 
     typeQuestion: NumberQuestion = new NumberQuestion();
 
-
     open: boolean = false;
 
     searchstring: string = '';
@@ -36,8 +35,7 @@ export class SearchComponent  {
     filter: string;
 
     @Input() asSelector: boolean = false;
-    @Input() selectedCallback: (any) => void = (test) => {};
-
+    @Output() selectedChanged: EventEmitter<ApiObject> = new EventEmitter<ApiObject>();
 
     constructor(private api: ApiService, private staging: StagingService) { }
 
@@ -78,5 +76,9 @@ export class SearchComponent  {
         if (this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
             this.filter = value;
         }
+    }
+
+    select(item: ApiObject) {
+        this.selectedChanged.emit(item);
     }
 }

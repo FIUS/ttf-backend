@@ -205,7 +205,11 @@ export class ApiService implements OnInit {
     search(search: string, type?: number, tags?: Set<number>): Observable<Array<ApiObject>> {
         const stream = new AsyncSubject<Array<ApiObject>>();
 
-        const params = {search: search};
+        const params: any = {search: search};
+
+        if (type != null && type >= 0) {
+            params.type = type;
+        }
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getRoot().subscribe((root) => {
