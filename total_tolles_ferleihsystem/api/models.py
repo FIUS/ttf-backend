@@ -22,6 +22,7 @@ ROOT_LINKS = api.inherit('RootLinks', WITH_CURIES, {
     'catalog': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
     'doc': HaLUrl(UrlData('api.doc', absolute=True)),
     'spec': HaLUrl(UrlData('api.specs', absolute=True)),
+    'lending': HaLUrl(UrlData('api.lending_lending_list', absolute=True)),
 })
 ROOT_MODEL = api.model('RootModel', {
     '_links': NestedFields(ROOT_LINKS),
@@ -177,11 +178,35 @@ ATTRIBUTE_PUT = api.model('AttributePUT', {
 
 ATTRIBUTE_GET = api.inherit('AttributeGET', ATTRIBUTE_PUT, {
     'attribute_definition_id': fields.Integer(),
+    'attribute_definition': fields.Nested(ATTRIBUTE_DEFINITION_GET),
     '_links': NestedFields(ATTRIBUTE_LINKS)
 })
 
-ATTRIBUTE_GET_FULL = api.inherit('AttributeGET', ATTRIBUTE_PUT, {
-    'attribute_definition_id': fields.Integer(),
-    'attribute_definition': fields.Nested(ATTRIBUTE_DEFINITION_GET),
-    '_links': NestedFields(ATTRIBUTE_LINKS)
+LENDING_LINKS = api.inherit('LendingLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.lending_lending_detail', absolute=True,
+                           url_data={'lending_id' : 'id'}), required=False),
+})
+
+ITEM_LENDING = api.model('ItemLending', {
+    'due': fields.DateTime(),
+    'item': fields.Nested(ITEM_GET),
+})
+
+LENDING_BASIC = api.model('LendingBASIC', {
+    'moderator': fields.String(),
+    'user': fields.String(),
+    'deposit': fields.String(),
+})
+
+LENDING_POST = api.inherit('LendingPOST', LENDING_BASIC, {
+    'item_ids': fields.List(fields.Integer(min=1))
+})
+
+LENDING_PUT = api.inherit('LendingPUT', LENDING_POST, {
+})
+
+LENDING_GET = api.inherit('LendingGET', LENDING_BASIC, ID, {
+    '_links': NestedFields(LENDING_LINKS),
+    'date': fields.DateTime(),
+    'itemLendings': fields.Nested(ITEM_LENDING)
 })
