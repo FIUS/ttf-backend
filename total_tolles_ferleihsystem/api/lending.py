@@ -113,11 +113,33 @@ class LendingDetail(Resource):
         """
         Replace a lending object
         """
+        json = request.get_json()
+        item_ids = json.pop('item_ids')
+        items = []
+        item_to_lendings = []
+
         lending = Lending.query.filter(Lending.id == lending_id).first()
         if lending is None:
             abort(404, 'Requested lending not found!')
+
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).first()
+            if item is None:
+                abort(400, "Item not found:" + str(element))
+            if not item.type.lendable:
+                abort(400, "Item not lendable:" + str(element))
+            if item.is_currently_lended:
+                abort(400, "Item already lended:" + str(element))
+            items.append(item)
+        
         lending.update(**request.get_json())
         try:
+            db.session.commit()
+            for element in ItemToLending.query.filter(ItemToLending.lending_id == lending_id).all():
+                db.session.delete(element)
+            for element in items:
+                item_to_lendings.append(ItemToLending(element, lending))
+            db.session.add_all(item_to_lendings)
             db.session.commit()
             return marshal(lending, LENDING_GET), 200
         except IntegrityError as err:
