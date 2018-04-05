@@ -20,6 +20,7 @@ ROOT_LINKS = api.inherit('RootLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.default_root_resource', absolute=True)),
     'auth': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
     'catalog': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
+    'search': HaLUrl(UrlData('api.search_search', absolute=True)),
     'doc': HaLUrl(UrlData('api.doc', absolute=True)),
     'spec': HaLUrl(UrlData('api.specs', absolute=True)),
 })
