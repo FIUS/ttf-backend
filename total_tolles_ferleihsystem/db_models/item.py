@@ -1,5 +1,3 @@
-import datetime
-
 from .. import db
 from . import STD_STRING_SIZE
 from .itemType import ItemType, ItemTypeToAttributeDefinition
