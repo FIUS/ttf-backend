@@ -29,8 +29,27 @@
                 </div>
             </div>
         </div>
-        <div class="mt3" [hidden]="!result">
-            {{result | json}}
+        <div class="mt3" [hidden]="!searchDone">
+            <div class="mb3 flex flex-wrap justify-center">
+                <div class="mr1 pointer" [ngClass]="{underline: filter == null}" (click)="setFilter(null)">ALL</div>
+                <div class="mr1" (click)="setFilter(letter)" [ngClass]="{underline: filter === letter, pointer: data?.get(letter).length > 0, 'black-60': data?.get(letter).length <= 0}"  *ngFor="let letter of alphabet">{{letter}}</div>
+            </div>
+            <ng-container *ngFor="let letter of alphabet">
+                <div class="flex" [ngClass]="{flex: (filter == null || filter === letter), dn: true}">
+                    <ng-container *ngIf="data?.get(letter).length > 0">
+                        <div class="f3 gray" style="width: 1em">{{letter}}</div>
+                        <ul class="mt0 list">
+                            <li class="min-w2 mb1 hide-child" *ngFor="let item of data?.get(letter)">
+                                <span class="link underline-hover pointer" routerLink="/items/{{item.id}}">{{item.name}}</span>
+                                <ng-container *ngIf="item?.type?.lendable">
+                                    <i class="child grow-large fa fa-cart-plus" [hidden]="staging.isStaged(item.id)" (click)="staging.stage(item.id)"></i>
+                                    <i class="fa fa-shopping-cart" [hidden]="!staging.isStaged(item.id)"></i>
+                                </ng-container>
+                            </li>
+                        </ul>
+                    </ng-container>
+                </div>
+            </ng-container>
         </div>
     </div>
 </ttf-box>

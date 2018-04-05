@@ -211,6 +211,7 @@ export class ApiService implements OnInit {
             this.getRoot().subscribe((root) => {
                 this.rest.get(root._links.search, token, params).subscribe(data => {
                     stream.next(data as ApiObject[]);
+                    stream.complete();
                 }, error => this.errorHandler(error, 'search', 'GET'));
             }, error => this.errorHandler(error, 'search', 'GET'));
         });
