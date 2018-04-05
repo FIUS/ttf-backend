@@ -878,4 +878,28 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
+    returnLending(lending: ApiObject, id?: number): Observable<ApiObject> {
+        const baseResource = 'lendings';
+        const resource = baseResource + '/' + lending.id;
+        const stream = this.getStreamSource(resource);
+
+        const data = { ids: [] };
+
+        if (id != null) {
+            data.ids.push(id);
+        } else {
+            lending.itemLendings.forEach(itemLending => {
+                data.ids.push(itemLending.item.id);
+            });
+        }
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.post(lending, data, token).subscribe(data => {
+                this.updateResource(baseResource, data as ApiObject);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
 }

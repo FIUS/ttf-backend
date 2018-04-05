@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { Subscription } from 'rxjs/Rx';
 
 import { ApiService } from '../shared/rest/api.service';
@@ -12,6 +12,7 @@ export class ItemLendingComponent implements OnInit, OnDestroy {
 
 
     @Input() itemLending: any;
+    @Output() return: EventEmitter<number> = new EventEmitter<number>();
 
     open: boolean = false;
 
