@@ -714,7 +714,7 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getTagsForItem(item: ApiObject): Observable<ApiObject> {
+    getTagsForItem(item: ApiObject): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -724,10 +724,10 @@ export class ApiService implements OnInit {
             }, error => this.errorHandler(error, resource, 'GET'));
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    addTagToItem(item: ApiObject, tag: ApiObject): Observable<ApiObject> {
+    addTagToItem(item: ApiObject, tag: ApiObject): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -738,10 +738,10 @@ export class ApiService implements OnInit {
             }, error => this.errorHandler(error, resource, 'POST'));
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    removeTagFromItem(item: ApiObject, tag: ApiObject): Observable<ApiObject> {
+    removeTagFromItem(item: ApiObject, tag: ApiObject): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -753,7 +753,7 @@ export class ApiService implements OnInit {
             }, error => this.errorHandler(error, resource, 'DELETE'));
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
 
