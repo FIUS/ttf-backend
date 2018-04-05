@@ -51,9 +51,9 @@ class LendingList(Resource):
             item = Item.query.filter(Item.id == element).first()
             if item is None:
                 abort(400, "Item not found:" + str(element))
-            if not item.lendable
+            if not item.lendable:
                 abort(400, "Item not lendable:" + str(element))
-            if item.is_currently_lended
+            if item.is_currently_lended:
                 abort(400, "Item already lended:" + str(element))
             items.append(item)
 
