@@ -1,3 +1,5 @@
+import datetime
+
 from .. import db
 from . import STD_STRING_SIZE
 from .itemType import ItemType, ItemTypeToAttributeDefinition
@@ -47,6 +49,9 @@ class Item (db.Model):
         Returns all attributes associated with this item by preforming a query on ItemAttribute
         """
         return ItemAttribute.query.filter(ItemAttribute.item_id == self.id).all()
+
+    def get_lending_duration(self):
+        return self.lending_duration
 
     def get_attributes_that_need_deletion_when_unassociating_tag(self, tag: Tag):
         """
@@ -107,11 +112,15 @@ class Lending (db.Model):
     date = db.Column(db.DateTime)
     deposit = db.Column(db.String(STD_STRING_SIZE))
 
-    def __init__(self, moderator: str, user: str, date: any, deposit: str):
-        # TODO Fabi fix date !
+    def __init__(self, moderator: str, user: str, deposit: str):
         self.moderator = moderator
         self.user = user
-        self.date = date
+        self.date = datetime.datetime.now()
+        self.deposit = deposit
+
+    def update(self, moderator: str, user: str, deposit: str):
+        self.moderator = moderator
+        self.user = user
         self.deposit = deposit
 
 
@@ -142,15 +151,14 @@ class ItemToLending (db.Model):
 
     item = db.relationship('Item', backref=db.backref('_lending', lazy='joined',
                                                       single_parent=True, cascade="all, delete-orphan"))
-    lending = db.relationship('Lending', backref=db.backref('_items', lazy='joined',
+    lending = db.relationship('Lending', backref=db.backref('itemLendings', lazy='joined',
                                                             single_parent=True,
                                                             cascade="all, delete-orphan"), lazy='joined')
 
-    def __init__(self, item: Item, lending: Lending, due: any):
-        # TODO Fabi fix date
+    def __init__(self, item: Item, lending: Lending):
         self.item = item
         self.lending = lending
-        self.due = due
+        self.due = lending.date + datetime.timedelta(0,item.get_lending_duration())
 
 
 class ItemToTag (db.Model):

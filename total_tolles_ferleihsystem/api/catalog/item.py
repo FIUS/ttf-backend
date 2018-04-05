@@ -7,7 +7,7 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, ATTRIBUTE_GET_FULL
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET
 from ... import db
 
 from ...db_models.item import Item, ItemToTag, ItemAttribute
@@ -287,7 +287,7 @@ class ItemAttributeDetail(Resource):
     """
 
     @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_GET_FULL)
+    @api.marshal_with(ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
     # pylint: disable=R0201
@@ -310,8 +310,8 @@ class ItemAttributeDetail(Resource):
 
         return attribute
 
-    @api.marshal_with(ATTRIBUTE_GET_FULL)
-    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET_FULL)
+    @api.marshal_with(ATTRIBUTE_GET)
+    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
     # pylint: disable=R0201
