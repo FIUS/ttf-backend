@@ -1,5 +1,5 @@
 <div class="w5 bb b--gray flex items-center">
     <input class="input-reset flex-grow bn pa1 tr" style="min-width: 3rem" [ngModel]="days" (ngModelChange)="updateDays($event)" [id]="question.key + 'days'" [type]="question.type" min="0">
     <span class="mr2">days</span>
-    <input class="input-reset bn pa1" style="width: 5rem" type="time" [ngModel]="time" (ngModelChange)="updateTime($event)" [id]="question.key + 'time'">
+    <input class="input-reset bn pa1" style="width: 6rem" type="time" [ngModel]="time" (ngModelChange)="updateTime($event)" [id]="question.key + 'time'">
 </div>
