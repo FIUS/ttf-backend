@@ -2,11 +2,12 @@
     <ttf-box>
         <h1 class="mv0" title>Item "{{item?.name}}":</h1>
         <div class="flex" title-right>
-            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer"  [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
+            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
                 <i class="fa fa-pencil" [ngClass]="{'fa-inverse': edit}"></i>
             </div>
-            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer"  [ngClass]="{'bg-silver': false}" title-right>
-                <i class="fa fa-cart-plus" [ngClass]="{'fa-inverse': false}"></i>
+            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': staging.isStaged(itemID)}" (click)="staging.stage(itemID)" title-right>
+                <i class="fa fa-cart-plus" [hidden]="staging.isStaged(itemID)"></i>
+                <i class="fa fa-shopping-cart fa-inverse" [hidden]="!staging.isStaged(itemID)"></i>
             </div>
         </div>
         <div class="w-100 ph3 pv2" body>

@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 @Injectable()
 export class StagingService {
 
-    private STAGED_KEY = 'STAGED'
+    readonly STAGED_KEY = 'staged-items';
 
     private staged: Set<number>;
 
@@ -35,7 +35,7 @@ export class StagingService {
         }
     }
 
-    private saveStaged(staged: Set<number>) {
+    private saveStaged = (staged: Set<number>) => {
         const asList = [];
         staged.forEach(value => asList.push(value));
         localStorage.setItem(this.STAGED_KEY, JSON.stringify(asList));

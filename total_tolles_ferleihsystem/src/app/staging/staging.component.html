@@ -1,0 +1,8 @@
+<div class="flex flex-wrap">
+    <ttf-box>
+        <h1 class="mv0" title>Staged Items:</h1>
+        <div class="w-100 ph3 pv2" body>
+            <ttf-staged-item *ngFor="let itemID of (staging.currentStaged|async)" [itemID]="itemID"></ttf-staged-item>
+        </div>
+    </ttf-box>
+</div>
