@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
-import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
+
 import { ApiObject } from '../shared/rest/api-base.service';
+import { ApiService } from '../shared/rest/api.service';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-item-list',
@@ -21,7 +22,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
     private subscription: Subscription;
     private deletedSubscription: Subscription;
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.subscription = this.api.getItems().subscribe(data => {

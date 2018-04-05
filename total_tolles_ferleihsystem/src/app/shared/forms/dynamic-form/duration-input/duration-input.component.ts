@@ -19,8 +19,8 @@ export class DurationInputComponent implements ControlValueAccessor {
 
     @Input() question: QuestionBase<any>;
 
-    days: string = '0';
-    time: string = '00:00';
+    days: string = '';
+    time: string = '';
     seconds: number = 0;
 
     onChange: any = () => {};
@@ -29,7 +29,7 @@ export class DurationInputComponent implements ControlValueAccessor {
 
     get value(): number {
         if ((this.days == null || this.days === '') &&
-            (this.time == null || this.time === '')) {
+            (this.time == null || this.time === '' || !this.time.match(/\d\d:\d\d/))) {
             return this.question.nullValue;
         } else {
             let val = this.seconds;
@@ -52,8 +52,8 @@ export class DurationInputComponent implements ControlValueAccessor {
     @Input()
     set value(val: number) {
         if (val === this.question.nullValue) {
-            this.days = '0';
-            this.time = '00:00';
+            this.days = '';
+            this.time = '';
             this.seconds = 0;
         } else {
             this.seconds = val % 60;

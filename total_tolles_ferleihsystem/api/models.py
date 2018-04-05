@@ -58,6 +58,10 @@ ITEM_TYPE_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
                                   url_data={'type_id' : 'id'}, absolute=True)),
 })
 
+ITEM_TYPE_LIST_LINKS = api.inherit('ItemTypeLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
+})
+
 ITEM_TYPE_POST = api.model('ItemTypePOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'name_schema': fields.String(max_length=STD_STRING_SIZE),
@@ -72,6 +76,7 @@ ITEM_TYPE_PUT = api.inherit('ItemTypePUT', ITEM_TYPE_POST, {
 
 ITEM_TYPE_GET = api.inherit('ItemType', ITEM_TYPE_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
+    'id': fields.Integer(),
     '_links': NestedFields(ITEM_TYPE_LINKS),
 })
 
@@ -81,6 +86,9 @@ ITEM_TAG_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
     'attributes': HaLUrl(UrlData('api.item_tag_item_tag_attributes', url_data={'tag_id' : 'id'}, absolute=True)),
 })
 
+ITEM_TAG_LIST_LINKS = api.inherit('ItemTagLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
+})
 
 ITEM_TAG_POST = api.model('ItemTagPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
@@ -93,6 +101,7 @@ ITEM_TAG_PUT = api.inherit('ItemTagPUT', ITEM_TAG_POST, {
 
 ITEM_TAG_GET = api.inherit('ItemTagGET', ITEM_TAG_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
+    'id': fields.Integer(),
     '_links': NestedFields(ITEM_TAG_LINKS),
 })
 
@@ -101,6 +110,9 @@ ATTRIBUTE_DEFINITION_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES
                            url_data={'definition_id' : 'id'}), required=False),
 })
 
+ATTRIBUTE_DEFINITION_LIST_LINKS = api.inherit('AttributeDefinitionLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
+})
 
 ATTRIBUTE_DEFINITION_POST = api.model('AttributeDefinitionPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
@@ -114,13 +126,22 @@ ATTRIBUTE_DEFINITION_PUT = api.inherit('AttributeDefinitionPUT', ATTRIBUTE_DEFIN
 
 ATTRIBUTE_DEFINITION_GET = api.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
+    'id': fields.Integer(),
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
+})
+
+ID = api.model('Id', {
+    'id': fields.Integer(min=1),
 })
 
 ITEM_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
     'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'}, absolute=True)),
+})
+
+ITEM_LIST_LINKS = api.inherit('ItemLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_item_list', absolute=True)),
 })
 
 ITEM_POST = api.model('ItemPOST', {
@@ -135,6 +156,8 @@ ITEM_PUT = api.inherit('ItemPUT', ITEM_POST, {
 
 ITEM_GET = api.inherit('ItemGET', ITEM_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
+    'id': fields.Integer(),
+    'type': fields.Nested(ITEM_TYPE_GET),
     '_links': NestedFields(ITEM_LINKS)
 })
 
@@ -142,6 +165,10 @@ ATTRIBUTE_LINKS = api.inherit('AttributeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_attribute_detail', absolute=True,
                            url_data={'item_id' : 'id', 'attribute_definition_id' : 'attribute_definition_id'}),
                    required=False),
+})
+
+ATTRIBUTE_LIST_LINKS = api.inherit('AttributeLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.item_item_attribute_list', absolute=True)),
 })
 
 ATTRIBUTE_PUT = api.model('AttributePUT', {
