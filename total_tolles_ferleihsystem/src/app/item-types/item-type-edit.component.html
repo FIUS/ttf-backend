@@ -6,6 +6,14 @@
     <div class="w-100 ph3 pv2" body>
         <dynamic-form [objectModel]="'ItemTypePUT'" [startValues]="itemType" (valid)="onValidChange($event)" (data)="onDataChange($event)"></dynamic-form>
         <div class="button h2 pv1 ph2 br2 bg-light-silver link bg-animate" [ngClass]="{'hover-bg-light-blue': valid, 'pointer': valid, 'bg-light-red': !valid}" (click)="save($event)" >Save<i class="fa fa-check mr2"></i></div>
+        <div class="pv2 flex">
+            <span class="f4 flex-grow-1">Can contain:</span>
+            <div>
+                <p class="f4 mb2 mt0" *ngFor="let itemType of canContain">{{itemType.name}} <i class="ml1 fa fa-times grow pointer" (click)="removeCanContain(itemType.id)"></i></p>
+                <ttf-type-chooser [question]="typeQuestion" [allowDeselect]="true" [(ngModel)]="canContainTypeID"></ttf-type-chooser>
+                <div class="button h2 pv1 ph2 mt1 br2 bg-light-silver link bg-animate flex items-center justify-around" [ngClass]="{'hover-bg-silver': canContainTypeID >= 0, 'pointer': canContainTypeID >= 0, 'gray': canContainTypeID < 0}" (click)="addCanContain()" ><i class="fa fa-plus mr2"></i></div>
+            </div>
+        </div>
     </div>
 </ttf-box>
 

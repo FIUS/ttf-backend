@@ -1,10 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
+import { Subscription } from 'rxjs/Rx';
+
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { StagingService } from '../navigation/staging-service';
 import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
-import { Subscription } from 'rxjs/Rx';
+import { ApiObject } from '../shared/rest/api-base.service';
 
 @Component({
   selector: 'ttf-item-detail',
@@ -16,14 +19,18 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private itemSubscription: Subscription;
     private attributesSubscription: Subscription;
     private tagsSubscription: Subscription;
+    private containedTypeSubscription: Subscription;
+    private containedItemsSubscription: Subscription;
 
     edit: boolean = false;
 
     itemID: number;
-    item;
-    attributes;
-    tags;
+    item: ApiObject;
+    attributes: ApiObject[];
+    tags: ApiObject[];
     attributeIDs: number[] = [];
+
+    canConatainType: ApiObject;
 
     constructor(private data: NavigationService, private api: ApiService,
                 private jwt: JWTService, private staging: StagingService,
@@ -75,7 +82,19 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             }
             this.tagsSubscription = this.api.getTagsForItem(item).subscribe(tags => {
                 this.tags = tags;
-            })
+            });
+            if (this.containedTypeSubscription != null) {
+                this.containedTypeSubscription.unsubscribe();
+            }
+            this.containedTypeSubscription = this.api.getCanContain(item.type).subscribe(containedType => {
+                console.log(containedType);
+            });
+            if (this.containedItemsSubscription != null) {
+                this.containedItemsSubscription.unsubscribe();
+            }
+            this.containedItemsSubscription = this.api.getContainedItems(item).subscribe(containedItems => {
+                console.log(containedItems);
+            });
         });
     }
 
@@ -115,6 +134,12 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         }
         if (this.tagsSubscription != null) {
             this.tagsSubscription.unsubscribe();
+        }
+        if (this.containedTypeSubscription != null) {
+            this.containedTypeSubscription.unsubscribe();
+        }
+        if (this.containedItemsSubscription != null) {
+            this.containedItemsSubscription.unsubscribe();
         }
     }
 

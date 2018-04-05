@@ -27,4 +27,11 @@
             <ttf-attribute-edit *ngFor="let attr of attributeIDs" [itemID]="itemID" [attributeID]="attr"></ttf-attribute-edit>
         </div>
     </ttf-box>
+
+    <ttf-box [hidden]="!edit || !canEdit">
+        <h1 class="mv0" title>Contained Items:</h1>
+        <div class="w-100 ph3 pv2" body>
+        </div>
+    </ttf-box>
+
 </div>
