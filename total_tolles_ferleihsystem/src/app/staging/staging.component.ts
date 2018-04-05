@@ -1,8 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { FormGroup } from '@angular/forms';
+
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { StagingService } from '../navigation/staging-service';
 import { ApiService } from '../shared/rest/api.service';
+import { QuestionService } from '../shared/forms/question.service';
+import { QuestionControlService } from '../shared/forms/question-control.service';
+import { QuestionBase } from '../shared/forms/question-base';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-staging',
@@ -10,12 +16,67 @@ import { ApiService } from '../shared/rest/api.service';
 })
 export class StagingComponent implements OnInit {
 
+    questions: QuestionBase<any>[] = [];
+    form: FormGroup;
 
-    constructor(private data: NavigationService, private api: ApiService, private staging: StagingService) { }
+    constructor(private data: NavigationService, private api: ApiService,
+                private staging: StagingService, private jwt: JWTService,
+                private qs: QuestionService, private qcs: QuestionControlService) { }
+
+    get valid(): boolean {
+        return this.form != null && this.form.valid;
+    }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Staging');
         this.data.changeBreadcrumbs([new Breadcrumb('Staging', '/staging')]);
+        this.staging.currentStaged.subscribe(this.updateStagedItems);
+        this.qs.getQuestionsFromScheme({
+            allOf: [
+                {
+                    $ref: '#/definitions/LendingPOST',
+                },
+                {
+                    type: 'object',
+                    properties: {
+                        item_ids: {
+                            readOnly: true,
+                            type: 'array',
+                            items: {
+                                type: 'integer',
+                                minimum: 1
+                            }
+                        },
+                    }
+                }
+            ]
+        }).take(1).subscribe(questions => {
+            this.questions = questions;
+            this.form = this.qcs.toFormGroup(this.questions);
+            this.staging.currentStaged.take(1).subscribe(this.updateStagedItems);
+            this.form.patchValue({
+                moderator: this.jwt.username(),
+            });
+            this.form.statusChanges.subscribe(status => {
+            });
+        });
     }
 
+    updateStagedItems = staged => {
+        const asList = [];
+        staged.forEach(value => asList.push(value));
+        if (this.form != null) {
+            this.form.patchValue({
+                item_ids: asList,
+            });
+        }
+    }
+
+    lend() {
+        if (this.valid) {
+            this.api.postLending(this.form.value).subscribe(() => {
+                console.log('HI')
+            });
+        }
+    }
 }
