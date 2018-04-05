@@ -155,9 +155,9 @@ class ItemToItem (db.Model):
                                                 single_parent=True, cascade="all, delete-orphan"))
     item = db.relationship('Item', foreign_keys=[item_id], lazy='joined')
 
-    def __init__(self, parent: Item, item: Item):
-        self.parent = parent
-        self.item = item
+    def __init__(self, parent_id: int, item_id: int):
+        self.parent_id = parent_id
+        self.item_id = item_id
 
 
 class ItemToLending (db.Model):

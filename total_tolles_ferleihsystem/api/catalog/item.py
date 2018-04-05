@@ -10,7 +10,7 @@ from .. import api as api
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET
 from ... import db
 
-from ...db_models.item import Item, ItemToTag, ItemAttribute
+from ...db_models.item import Item, ItemToTag, ItemAttribute, ItemToItem
 from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
 
@@ -337,5 +337,86 @@ class ItemAttributeDetail(Resource):
         try:
             db.session.commit()
             return attribute
+        except IntegrityError:
+            abort(500)
+
+@ANS.route('/<int:item_id>/contained/')
+class ItemContainedItems(Resource):
+    """
+    The items contained in this item object
+    """
+
+    @api.doc(security=None)
+    @api.marshal_with(ITEM_GET)
+    @ANS.response(404, 'Requested item not found!')
+    # pylint: disable=R0201
+    def get(self, item_id):
+        """
+        Get all contained items of this item.
+        """
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+     
+        associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+        return [e.item for e in associations]
+
+    @api.doc(security=None)
+    @api.marshal_with(ITEM_GET)
+    @ANS.doc(model=ITEM_GET, body=ID)
+    @ANS.response(404, 'Requested item (current) not found!')
+    @ANS.response(400, 'Requested item (to be contained) not found!')
+    @ANS.response(409, 'Subitem is already a subitem of this item!')
+    # pylint: disable=R0201
+    def post(self, item_id):
+        """
+        Add a new contained item to this item
+        """
+        contained_item_id = request.get_json()["id"]
+
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item (current) not found!')
+        if Item.query.filter(Item.id == contained_item_id).first() is None:
+            abort(400, 'Requested item (to be contained) not found!')
+
+        new = ItemToItem(item_id, contained_item_id)
+        try:
+            db.session.add(new)
+            db.session.commit()
+            associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+            return [e.item for e in associations]
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Attribute definition is already asociated with this tag!')
+            abort(500)
+
+    @api.doc(security=None)
+    @ANS.doc(body=ID)
+    @ANS.response(404, 'Requested item (current) not found!')
+    @ANS.response(400, 'Requested item (to be contained) not found!')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def delete(self, item_id):
+        """
+        Remove a contained item from this item.
+        """
+        contained_item_id = request.get_json()["id"]
+
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item (current) not found!')
+        if Item.query.filter(Item.id == contained_item_id).first() is None:
+            abort(400, 'Requested item (to be contained) not found!')
+
+        association = (ItemToItem
+                       .query
+                       .filter(ItemToItem.parent_id == item_id)
+                       .filter(ItemToItem.item_id == contained_item_id)
+                       .first())
+        if association is None:
+            return '', 204
+        try:
+            db.session.delete(association)
+            db.session.commit()
+            return '', 204
         except IntegrityError:
             abort(500)
