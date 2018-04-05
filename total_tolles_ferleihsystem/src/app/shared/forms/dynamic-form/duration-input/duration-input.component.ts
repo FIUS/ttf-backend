@@ -77,7 +77,11 @@ export class DurationInputComponent implements ControlValueAccessor {
             this.time = '00:00';
             return;
         }
+        if (this.days == null || this.days === '') {
+            this.days = '0';
+        }
         this.time = event;
+        this.update();
     }
 
     updateDays(event) {
