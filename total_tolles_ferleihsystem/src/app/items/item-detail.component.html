@@ -2,17 +2,18 @@
     <ttf-box>
         <h1 class="mv0" title>Item "{{item?.name}}":</h1>
         <div class="flex" title-right>
-            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer"  [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
+            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
                 <i class="fa fa-pencil" [ngClass]="{'fa-inverse': edit}"></i>
             </div>
-            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer"  [ngClass]="{'bg-silver': false}" title-right>
-                <i class="fa fa-cart-plus" [ngClass]="{'fa-inverse': false}"></i>
+            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': staging.isStaged(itemID)}" (click)="staging.stage(itemID)" title-right>
+                <i class="fa fa-cart-plus" [hidden]="staging.isStaged(itemID)"></i>
+                <i class="fa fa-shopping-cart fa-inverse" [hidden]="!staging.isStaged(itemID)"></i>
             </div>
         </div>
         <div class="w-100 ph3 pv2" body>
             <p class="f4"><span class="b">Type:</span> <span class="link underline-hover pointer" routerLink="/item-types/{{item?.type?.id}}">{{item?.type?.name}}</span></p>
             <p class="f4"><span class="b">Tags:</span> <span *ngFor="let tag of tags; let isLast=last" routerLink="/tags/{{tag.id}}"><span class="link underline-hover pointer">{{tag.name}}</span>{{isLast ? '' : ', '}}</span></p>
-            <p class="f4"><span class="b">Lending Duration:</span> {{lendingDuration / (24 * 60 * 60)}} Days</p>
+            <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration></p>
             <p class="f4 b">Attributes:</p>
             <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
         </div>

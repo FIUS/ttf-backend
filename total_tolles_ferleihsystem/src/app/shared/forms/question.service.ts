@@ -34,7 +34,7 @@ export class QuestionService implements OnInit {
 
     // Todo: get from a remote source of question metadata
     // Todo: make asynchronous
-    getQuestions(model: string): Observable<QuestionBase<any>[]> {
+    getQuestions = (model: string): Observable<QuestionBase<any>[]> => {
         if (this.swagger == undefined) {
             this.swagger = this.api.getSpec();
         }
@@ -55,7 +55,10 @@ export class QuestionService implements OnInit {
 
     }
 
-    getQuestionsFromScheme(scheme: object): Observable<QuestionBase<any>[]> {
+    getQuestionsFromScheme = (scheme: object): Observable<QuestionBase<any>[]> => {
+        if (this.swagger == undefined) {
+            this.swagger = this.api.getSpec();
+        }
 
         return this.swagger.flatMap(spec => {
             if (spec == undefined) {

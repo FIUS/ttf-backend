@@ -34,14 +34,6 @@ class ItemType (db.Model):
         self.visible_for = visible_for
         self.how_to = how_to
 
-    def get_attribute_definitions(self):
-        """
-        Returns all attribute definitions associated with this item type by preforming a query on ItemTypeToAttributeDefinition
-        """
-        return [element.attribute_definition
-                for element
-                in ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.item_type_id == self.id).all()]
-
 
 class ItemTypeToItemType (db.Model):
 

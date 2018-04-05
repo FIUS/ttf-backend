@@ -15,9 +15,13 @@ import { StagingService } from './navigation/staging-service';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
+import { StagingComponent } from './staging/staging.component';
+import { StagedItemComponent } from './staging/staged-item.component';
+
 import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemListComponent } from './items/item-list.component';
 import { ItemDetailComponent } from './items/item-detail.component';
+import { LendingDurationComponent } from './items/lending-duration.component';
 import { ItemEditComponent } from './items/item-edit.component';
 import { TagsChooserComponent } from './items/tags-chooser.component';
 import { AttributeEditComponent } from './items/attribute-edit.component';
@@ -52,9 +56,13 @@ import { AppComponent } from './app.component';
 
         HomeComponent,
 
+        StagingComponent,
+        StagedItemComponent,
+
         ItemsOverviewComponent,
         ItemListComponent,
         ItemDetailComponent,
+        LendingDurationComponent,
         ItemEditComponent,
         TagsChooserComponent,
         AttributeEditComponent,

@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Rx';
 
+import { StagingService } from '../navigation/staging-service';
+
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
@@ -22,7 +24,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
     private subscription: Subscription;
     private deletedSubscription: Subscription;
 
-    constructor(private api: ApiService, private jwt: JWTService) { }
+    constructor(private api: ApiService, private jwt: JWTService, private staging: StagingService) { }
 
     ngOnInit(): void {
         this.subscription = this.api.getItems().subscribe(data => {

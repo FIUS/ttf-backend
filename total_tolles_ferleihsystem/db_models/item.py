@@ -34,48 +34,25 @@ class Item (db.Model):
         self.lending_duration = lending_duration
         self.visible_for = visible_for
 
-    def get_tags(self):
+    @property
+    def lending_id(self):
         """
-        Returns all tags associated with this item by preforming a query on ItemToTag
+        The lending_id this item is currently associated with. -1 if not lended. 
         """
-        return [element.tag
-                for element
-                in ItemToTag.query.filter(ItemToTag.item_id == self.id).all()]
+        lending_to_item = ItemToLending.query.filter(ItemToLending.item_id == self.id).first()
+        if lending_to_item is None:
+            return -1
+        return lending_to_item.lending_id
 
-    def get_attributes(self):
+    @property
+    def is_currently_lended(self):
         """
-        Returns all attributes associated with this item by preforming a query on ItemAttribute
+        If the item is currently lended.
         """
-        return ItemAttribute.query.filter(ItemAttribute.item_id == self.id).all()
+        return self.lending_id != -1
 
-    def get_attributes_that_need_deletion_when_unassociating_tag(self, tag: Tag):
-        """
-        Returns all attributes that would need to be deleted, when the given tag was unassociated with this item.
-        """
-        #TODO: Can we do this directly with SQL? Would propably be more efficient. But persumably doing it as we do right now is easier to read.
-
-        to_delete = []
-        potentially_to_delete = tag.get_attribute_definitions()
-
-        for element in self.type.get_attribute_definitions():
-            if element in potentially_to_delete:
-                potentially_to_delete.remove(element)
-
-        for tag_e in self.get_tags():
-            if tag_e == tag:
-                continue
-            for attr_def_e in tag_e.get_attribute_definitions():
-                if attr_def_e in potentially_to_delete:
-                    potentially_to_delete.remove(attr_def_e)
-
-        for element in self.get_attributes():
-            if element.attribute_definition in potentially_to_delete:
-                to_delete.append(element)
-
-        return to_delete
-
-    def can_tag_be_unassociated_safely(self, tag: Tag):
-        return len(self.get_attributes_that_need_deletion_when_unassociating_tag(tag)) == 0
+    def get_lending_duration(self):
+        return self.lending_duration
 
 class File (db.Model):
 
@@ -107,11 +84,15 @@ class Lending (db.Model):
     date = db.Column(db.DateTime)
     deposit = db.Column(db.String(STD_STRING_SIZE))
 
-    def __init__(self, moderator: str, user: str, date: any, deposit: str):
-        # TODO Fabi fix date !
+    def __init__(self, moderator: str, user: str, deposit: str):
         self.moderator = moderator
         self.user = user
-        self.date = date
+        self.date = datetime.datetime.now()
+        self.deposit = deposit
+
+    def update(self, moderator: str, user: str, deposit: str):
+        self.moderator = moderator
+        self.user = user
         self.deposit = deposit
 
 
@@ -127,9 +108,9 @@ class ItemToItem (db.Model):
                                                 single_parent=True, cascade="all, delete-orphan"))
     item = db.relationship('Item', foreign_keys=[item_id], lazy='joined')
 
-    def __init__(self, parent: Item, item: Item):
-        self.parent = parent
-        self.item = item
+    def __init__(self, parent_id: int, item_id: int):
+        self.parent_id = parent_id
+        self.item_id = item_id
 
 
 class ItemToLending (db.Model):
@@ -142,15 +123,14 @@ class ItemToLending (db.Model):
 
     item = db.relationship('Item', backref=db.backref('_lending', lazy='joined',
                                                       single_parent=True, cascade="all, delete-orphan"))
-    lending = db.relationship('Lending', backref=db.backref('_items', lazy='joined',
+    lending = db.relationship('Lending', backref=db.backref('itemLendings', lazy='joined',
                                                             single_parent=True,
                                                             cascade="all, delete-orphan"), lazy='joined')
 
-    def __init__(self, item: Item, lending: Lending, due: any):
-        # TODO Fabi fix date
+    def __init__(self, item: Item, lending: Lending):
         self.item = item
         self.lending = lending
-        self.due = due
+        self.due = lending.date + datetime.timedelta(0,item.get_lending_duration())
 
 
 class ItemToTag (db.Model):

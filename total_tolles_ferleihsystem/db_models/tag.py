@@ -29,14 +29,6 @@ class Tag(db.Model):
         self.lending_duration = lending_duration
         self.visible_for = visible_for
 
-    def get_attribute_definitions(self):
-        """
-        Returns all attribute definitions associated with this tag by preforming a query on TagToAttributeDefinition
-        """
-        return [element.attribute_definition
-                for element
-                in TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == self.id).all()]
-
 class TagToAttributeDefinition (db.Model):
 
     __tablename__ = 'TagToAttributeDefinition'

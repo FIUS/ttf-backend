@@ -1,0 +1,16 @@
+<div class="flex flex-wrap">
+    <ttf-box>
+        <h1 class="mv0" title>Staged Items:</h1>
+        <div class="button h2 pv1 ph2 br2 link bg-animate" [ngClass]="{pointer: valid, 'hover-bg-light-silver': valid, 'gray': !valid}"  (click)="lend()" title-right>
+            Lend
+        </div>
+        <div class="w-100 ph3 pv2" body>
+            <form *ngIf="form" [formGroup]="form">
+                <div *ngFor="let question of questions" class="form-row">
+                    <df-question [question]="question" [form]="form" *ngIf="question.controlType !== 'hidden'" ></df-question>
+                </div>
+            </form>
+            <ttf-staged-item *ngFor="let itemID of (staging.currentStaged|async)" [itemID]="itemID"></ttf-staged-item>
+        </div>
+    </ttf-box>
+</div>

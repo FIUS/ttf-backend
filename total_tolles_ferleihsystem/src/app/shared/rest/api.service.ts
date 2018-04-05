@@ -714,7 +714,7 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getTagsForItem(item: ApiObject): Observable<ApiObject> {
+    getTagsForItem(item: ApiObject): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -724,10 +724,10 @@ export class ApiService implements OnInit {
             }, error => this.errorHandler(error, resource, 'GET'));
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    addTagToItem(item: ApiObject, tag: ApiObject): Observable<ApiObject> {
+    addTagToItem(item: ApiObject, tag: ApiObject): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -738,10 +738,10 @@ export class ApiService implements OnInit {
             }, error => this.errorHandler(error, resource, 'POST'));
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    removeTagFromItem(item: ApiObject, tag: ApiObject): Observable<ApiObject> {
+    removeTagFromItem(item: ApiObject, tag: ApiObject): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -753,7 +753,7 @@ export class ApiService implements OnInit {
             }, error => this.errorHandler(error, resource, 'DELETE'));
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
 
@@ -798,6 +798,42 @@ export class ApiService implements OnInit {
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+
+
+    // Lendings ////////////////////////////////////////////////////////////////
+    getLendings(): Observable<Array<ApiObject>> {
+        const resource = 'lendings';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getRoot().subscribe((root) => {
+                this.rest.get(root._links.lending, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    postLending(newData): Observable<ApiObject> {
+        const resource = 'lendings';
+
+        return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
+            return this.getRoot().flatMap(root => {
+                return this.rest.post(root._links.lending, newData, token).flatMap(data => {
+                    const stream = this.getStreamSource(resource + '/' + data.id);
+                    this.updateResource(resource, data);
+                    return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+                })
+                .catch(error => {
+                    this.errorHandler(error, resource, 'POST');
+                    return Observable.throw(error);
+                });
+            });
+        });
     }
 
 }

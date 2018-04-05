@@ -8,7 +8,7 @@
         <ng-container *ngIf="data?.get(letter).length > 0">
             <div class="f3 gray" style="width: 1em">{{letter}}</div>
             <ul class="mt0 list">
-                <li class="min-w2 mb1 link grow pointer" *ngFor="let itemType of data?.get(letter)" routerLink="/item-types/{{itemType.id}}">{{itemType.name}}</li>
+                <li class="min-w2 mb1 link underline-hover pointer" *ngFor="let itemType of data?.get(letter)" routerLink="/item-types/{{itemType.id}}">{{itemType.name}}</li>
             </ul>
         </ng-container>
     </div>

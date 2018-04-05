@@ -4,6 +4,8 @@ import { NgModule } from '@angular/core';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
+import { StagingComponent } from './staging/staging.component';
+
 import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemDetailComponent } from './items/item-detail.component';
 
@@ -21,6 +23,7 @@ import { ModGuard } from './shared/rest/guards/mod.guard';
 import { AdminGuard } from './shared/rest/guards/admin.guard';
 
 const routes: Routes = [
+  { path: 'staging', component: StagingComponent, canActivate: [ModGuard] },
   { path: 'items', component: ItemsOverviewComponent, canActivate: [LoginGuard] },
   { path: 'items/:id', component: ItemDetailComponent, canActivate: [LoginGuard] },
   { path: 'item-types', component: ItemTypesOverviewComponent, canActivate: [ModGuard] },

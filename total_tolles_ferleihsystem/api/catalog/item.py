@@ -7,11 +7,11 @@ from flask_restplus import Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, ATTRIBUTE_GET_FULL
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET
 from ... import db
 
-from ...db_models.item import Item, ItemToTag, ItemAttribute
-from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType
+from ...db_models.item import Item, ItemToTag, ItemAttribute, ItemToItem
+from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemTypeToItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
 
 PATH: str = '/catalog/item'
@@ -222,25 +222,18 @@ class ItemItemTags(Resource):
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
-    @ANS.response(400, 'Cannot unassociate that tag without loosing attributes.')
     @ANS.response(204, 'Success.')
-    @api.param('force', 'Force removing the association. Delete attributes of this item if necessary.', type=bool, required=False, default=False)
     # pylint: disable=R0201
     def delete(self, item_id):
         """
         Remove association of a tag with the item.
         """
         tag_id = request.get_json()["id"]
-        item = Item.query.filter(Item.id == item_id).first()
-        tag = Tag.query.filter(Tag.id == tag_id).first()
-        force = request.args.get('force', 'false') == 'true'
-        if item is None:
-            abort(404, 'Requested item not found!')
-        if tag is None:
-            abort(400, 'Requested item tag not found!')
 
-        if not (force or item.can_tag_be_unassociated_safely(tag)):
-            abort(400, 'Cannot unassociate that tag without loosing attributes.')
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+        if Tag.query.filter(Tag.id == tag_id).first() is None:
+            abort(400, 'Requested item tag not found!')
 
         association = (ItemToTag
                        .query
@@ -253,9 +246,6 @@ class ItemItemTags(Resource):
         
         try:
             db.session.delete(association)
-            if force:
-                for element in item.get_attributes_that_need_deletion_when_unassociating_tag(tag):
-                    db.session.delete(element)
             db.session.commit()
             return '', 204
         except IntegrityError:
@@ -287,7 +277,7 @@ class ItemAttributeDetail(Resource):
     """
 
     @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_GET_FULL)
+    @api.marshal_with(ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
     # pylint: disable=R0201
@@ -310,8 +300,8 @@ class ItemAttributeDetail(Resource):
 
         return attribute
 
-    @api.marshal_with(ATTRIBUTE_GET_FULL)
-    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET_FULL)
+    @api.marshal_with(ATTRIBUTE_GET)
+    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
     # pylint: disable=R0201
@@ -337,5 +327,98 @@ class ItemAttributeDetail(Resource):
         try:
             db.session.commit()
             return attribute
+        except IntegrityError:
+            abort(500)
+
+@ANS.route('/<int:item_id>/contained/')
+class ItemContainedItems(Resource):
+    """
+    The items contained in this item object
+    """
+
+    @api.doc(security=None)
+    @api.marshal_with(ITEM_GET)
+    @ANS.response(404, 'Requested item not found!')
+    # pylint: disable=R0201
+    def get(self, item_id):
+        """
+        Get all contained items of this item.
+        """
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+     
+        associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+        return [e.item for e in associations]
+
+    @api.doc(security=None)
+    @api.marshal_with(ITEM_GET)
+    @ANS.doc(model=ITEM_GET, body=ID)
+    @ANS.response(404, 'Requested item (current) not found!')
+    @ANS.response(400, 'Requested item (to be contained) not found!')
+    @ANS.response(400, 'This item can not contain that item.')
+    @ANS.response(409, 'Subitem is already a subitem of this item!')
+    # pylint: disable=R0201
+    def post(self, item_id):
+        """
+        Add a new contained item to this item
+        """
+        contained_item_id = request.get_json()["id"]
+        parent = Item.query.filter(Item.id == item_id).first()
+        child = Item.query.filter(Item.id == contained_item_id).first()
+        
+        if parent is None:
+            abort(404, 'Requested item (current) not found!')
+        if child is None:
+            abort(400, 'Requested item (to be contained) not found!')
+
+        association = (ItemTypeToItemType
+                       .query
+                       .filter(ItemTypeToItemType.parent_id == parent.type_id)
+                       .filter(ItemTypeToItemType.item_type_id == child.type_id)
+                       .first())
+
+        if association is None:
+            abort(400, 'This item can not contain that item.')
+
+        new = ItemToItem(item_id, contained_item_id)
+        try:
+            db.session.add(new)
+            db.session.commit()
+            associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+            return [e.item for e in associations]
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Attribute definition is already asociated with this tag!')
+            abort(500)
+
+    @api.doc(security=None)
+    @ANS.doc(body=ID)
+    @ANS.response(404, 'Requested item (current) not found!')
+    @ANS.response(400, 'Requested item (to be contained) not found!')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def delete(self, item_id):
+        """
+        Remove a contained item from this item.
+        """
+        contained_item_id = request.get_json()["id"]
+
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item (current) not found!')
+        if Item.query.filter(Item.id == contained_item_id).first() is None:
+            abort(400, 'Requested item (to be contained) not found!')
+
+        association = (ItemToItem
+                       .query
+                       .filter(ItemToItem.parent_id == item_id)
+                       .filter(ItemToItem.item_id == contained_item_id)
+                       .first())
+        if association is None:
+            return '', 204
+        try:
+            db.session.delete(association)
+            db.session.commit()
+            return '', 204
         except IntegrityError:
             abort(500)
