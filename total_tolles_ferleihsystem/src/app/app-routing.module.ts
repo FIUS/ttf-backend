@@ -8,6 +8,7 @@ import { SearchOverviewComponent } from './search/search-overview.component';
 
 import { StagingComponent } from './staging/staging.component';
 
+import { LendingOverviewComponent } from './lending/lending-overview.component';
 import { LendingComponent } from './lending/lending.component';
 
 import { ItemsOverviewComponent } from './items/items-overview.component';
@@ -29,6 +30,7 @@ import { AdminGuard } from './shared/rest/guards/admin.guard';
 const routes: Routes = [
   { path: 'search', component: SearchOverviewComponent, canActivate: [LoginGuard] },
   { path: 'staging', component: StagingComponent, canActivate: [ModGuard] },
+  { path: 'lendings', component: LendingOverviewComponent, canActivate: [ModGuard] },
   { path: 'lendings/:id', component: LendingComponent, canActivate: [ModGuard] },
   { path: 'items', component: ItemsOverviewComponent, canActivate: [LoginGuard] },
   { path: 'items/:id', component: ItemDetailComponent, canActivate: [LoginGuard] },
