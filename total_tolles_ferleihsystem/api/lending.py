@@ -35,6 +35,8 @@ class LendingList(Resource):
     @ANS.doc(model=LENDING_GET, body=LENDING_POST)
     @ANS.response(201, 'Created.')
     @ANS.response(400, "Item not found")
+    @ANS.response(400, "Item not lendable")
+    @ANS.response(400, "Item already lended")
     # pylint: disable=R0201
     def post(self):
         """
@@ -49,6 +51,10 @@ class LendingList(Resource):
             item = Item.query.filter(Item.id == element).first()
             if item is None:
                 abort(400, "Item not found:" + str(element))
+            if not item.lendable
+                abort(400, "Item not lendable:" + str(element))
+            if item.is_currently_lended
+                abort(400, "Item already lended:" + str(element))
             items.append(item)
 
         new = Lending(**json)

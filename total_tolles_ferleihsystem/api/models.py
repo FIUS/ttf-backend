@@ -197,7 +197,7 @@ ITEM_LENDING = api.model('ItemLending', {
 LENDING_BASIC = api.model('LendingBASIC', {
     'moderator': fields.String(),
     'user': fields.String(),
-    'deposit': fields.String(),
+    'deposit': fields.String(example="Studentenausweiß"),
 })
 
 LENDING_POST = api.inherit('LendingPOST', LENDING_BASIC, {
