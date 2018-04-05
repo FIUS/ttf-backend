@@ -12,21 +12,57 @@ import { ApiObject } from '../shared/rest/api-base.service';
 export class StagedItemComponent implements OnInit, OnDestroy {
 
     private itemSubscription: Subscription;
+    private tagsSubscription: Subscription;
+    private attributesSubscription: Subscription;
 
     @Input() itemID: number;
 
     item: ApiObject;
+    tags: ApiObject[];
+    attributes: ApiObject[];
+
+    open: boolean = false;
 
 
     constructor(private staging: StagingService, private api: ApiService) { }
 
     ngOnInit(): void {
-        this.itemSubscription = this.api.getItem(this.itemID).subscribe(item => this.item = item);
+        this.itemSubscription = this.api.getItem(this.itemID).subscribe(item => {
+            this.item = item;
+            this.tagsSubscription = this.api.getTagsForItem(item).subscribe(tags => this.tags = tags);
+            this.attributesSubscription = this.api.getAttributes(item).subscribe(attributes => this.attributes = attributes);
+        });
     }
 
     ngOnDestroy(): void {
         if (this.itemSubscription != null) {
             this.itemSubscription.unsubscribe();
+        }
+        if (this.tagsSubscription != null) {
+            this.tagsSubscription.unsubscribe();
+        }
+        if (this.attributesSubscription != null) {
+            this.attributesSubscription.unsubscribe();
+        }
+    }
+
+    get lendingDuration() {
+        if (this.item != null && this.item.lending_duration >= 0) {
+            return this.item.lending_duration;
+        }
+        if (this.tags != null) {
+            let duration;
+            this.tags.forEach(tag => {
+                if (tag.lending_duration >= 0 && (duration == null || duration > tag.lending_duration)) {
+                    duration = tag.lending_duration;
+                }
+            });
+            if (duration != null) {
+                return duration;
+            }
+        }
+        if (this.item != null && this.item.type != null) {
+            return this.item.type.lending_duration;
         }
     }
 
