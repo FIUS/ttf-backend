@@ -1,0 +1,36 @@
+<ttf-box>
+    <h1 class="mv0" title>Search:</h1>
+    <div class="w-100 ph3 pv2" body>
+        <div>
+            <div class="flex items-center">
+                <div class="w2 tc grow pointer" (click)="open = !open">
+                    <i class="fa fa-chevron-right" [hidden]="open"></i>
+                    <i class="fa fa-chevron-down" [hidden]="!open"></i>
+                </div>
+                <span class="mr2">Search: </span>
+                <div class="flex bb b--gray flex-grow-1 items-center">
+                    <input class="input-reset bn pa1 flex-grow-1" type="search" placeholder="search" [(ngModel)]="searchstring"
+                        (keyup.enter)="search()"/>
+
+                    <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem" (click)="search()">
+                        <i class="fa fa-search grow pointer"></i>
+                    </div>
+
+                </div>
+            </div>
+            <div [hidden]="!open">
+                <div class="mt2 flex items-center">
+                    <span class="mr2 w5">Filter Type:</span>
+                    <ttf-type-chooser [(ngModel)]="type" [allowDeselect]="true"></ttf-type-chooser>
+                </div>
+                <div class="mt2 flex items-center">
+                    <span class="mr2 w5">Filter Tags:</span>
+                    <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event"></ttf-tags-chooser>
+                </div>
+            </div>
+        </div>
+        <div class="mt3" [hidden]="!result">
+            {{result | json}}
+        </div>
+    </div>
+</ttf-box>

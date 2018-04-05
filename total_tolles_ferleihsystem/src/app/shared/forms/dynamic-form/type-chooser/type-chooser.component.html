@@ -1,14 +1,13 @@
 <ttf-dropdown #dropdown>
     <div class="w-100 bb b--gray flex flex-wrap gray hover-black" content>
-            <input class="input-reset w5 bn pa1 black" type="search" [(ngModel)]="searchTerm" (ngModelChange)="updateFilter()" placeholder="search types"
-                    (focus)="dropdown.openDropdown()" (keyup)="dropdown.openDropdown()"
-                    (keyup.enter)="select()" (keyup.arrowdown)="highlightNext()" (keyup.arrowup)="highlightPrevious()">
-
-            <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem" (click)="dropdown.toggleDropdown()"><i class="f4 fa fa-angle-down"></i></div>
+        <input class="input-reset w5 bn pa1 black" type="search" [(ngModel)]="searchTerm" (ngModelChange)="updateFilter()" placeholder="search types"
+                (focus)="dropdown.openDropdown()" (keyup)="dropdown.openDropdown()"
+                (keyup.enter)="select()" (keyup.arrowdown)="highlightNext()" (keyup.arrowup)="highlightPrevious()">
+        <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem" (click)="dropdown.toggleDropdown()"><i class="f4 fa fa-angle-down"></i></div>
+    </div>
+    <div dropdown-content dropdown-content>
+        <div class="pa1" *ngFor="let type of types" (click)="select(type)" [ngClass]="{'bg-light-blue': type.id === highlighted, 'b': selected === type.id}" (mouseenter)="highlighted = type.id" [hidden]="filter.has(type.id)">
+            {{type.name}}
         </div>
-        <div dropdown-content dropdown-content>
-            <div class="pa1" *ngFor="let type of types" (click)="select(type)" [ngClass]="{'bg-light-blue': type.id === highlighted, 'b': selected === type.id}" (mouseenter)="highlighted = type.id" [hidden]="filter.has(type.id)">
-                {{type.name}}
-            </div>
-        </div>
+    </div>
 </ttf-dropdown>

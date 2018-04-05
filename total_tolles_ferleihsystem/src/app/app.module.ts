@@ -15,6 +15,9 @@ import { StagingService } from './navigation/staging-service';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 
+import { SearchOverviewComponent } from './search/search-overview.component';
+import { SearchComponent } from './search/search.component';
+
 import { StagingComponent } from './staging/staging.component';
 import { StagedItemComponent } from './staging/staged-item.component';
 
@@ -58,6 +61,9 @@ import { AppComponent } from './app.component';
         LoginComponent,
 
         HomeComponent,
+
+        SearchOverviewComponent,
+        SearchComponent,
 
         StagingComponent,
         StagedItemComponent,
