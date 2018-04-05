@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormGroup } from '@angular/forms';
 
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
@@ -21,7 +21,8 @@ export class StagingComponent implements OnInit {
 
     constructor(private data: NavigationService, private api: ApiService,
                 private staging: StagingService, private jwt: JWTService,
-                private qs: QuestionService, private qcs: QuestionControlService) { }
+                private qs: QuestionService, private qcs: QuestionControlService,
+                private router: Router) { }
 
     get valid(): boolean {
         return this.form != null && this.form.valid;
@@ -74,8 +75,9 @@ export class StagingComponent implements OnInit {
 
     lend() {
         if (this.valid) {
-            this.api.postLending(this.form.value).subscribe(() => {
-                console.log('HI')
+            this.api.postLending(this.form.value).subscribe(data => {
+                this.staging.reset();
+                this.router.navigate(['lendings', data.id]);
             });
         }
     }

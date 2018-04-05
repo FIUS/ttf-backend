@@ -18,6 +18,9 @@ import { LoginComponent } from './login/login.component';
 import { StagingComponent } from './staging/staging.component';
 import { StagedItemComponent } from './staging/staged-item.component';
 
+import { LendingComponent } from './lending/lending.component';
+import { ItemLendingComponent } from './lending/item-lending.component';
+
 import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemListComponent } from './items/item-list.component';
 import { ItemDetailComponent } from './items/item-detail.component';
@@ -58,6 +61,9 @@ import { AppComponent } from './app.component';
 
         StagingComponent,
         StagedItemComponent,
+
+        LendingComponent,
+        ItemLendingComponent,
 
         ItemsOverviewComponent,
         ItemListComponent,

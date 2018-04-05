@@ -1,0 +1,15 @@
+<div class="flex flex-wrap">
+    <ttf-box>
+        <h1 class="mv0" title>Lending:</h1>
+        <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return all" title-right>
+            <i class="fa fa-reply-all"></i>
+        </div>
+        <div class="w-100 ph3 pv2" body>
+            <p class="f4"><span class="b">Moderator:</span> {{lending?.moderator}}</p>
+            <p class="f4"><span class="b">User:</span> {{lending?.user}}</p>
+            <p class="f4"><span class="b">Deposit:</span> {{lending?.deposit}}</p>
+            <p class="f4"><span class="b">Date:</span> {{lending?.date | date:'short'}}</p>
+            <ttf-item-lending *ngFor="let itemLending of lending?.itemLendings" [itemLending]="itemLending"></ttf-item-lending>
+        </div>
+    </ttf-box>
+</div>

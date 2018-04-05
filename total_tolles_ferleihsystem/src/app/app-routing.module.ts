@@ -6,6 +6,8 @@ import { LoginComponent } from './login/login.component';
 
 import { StagingComponent } from './staging/staging.component';
 
+import { LendingComponent } from './lending/lending.component';
+
 import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemDetailComponent } from './items/item-detail.component';
 
@@ -24,6 +26,7 @@ import { AdminGuard } from './shared/rest/guards/admin.guard';
 
 const routes: Routes = [
   { path: 'staging', component: StagingComponent, canActivate: [ModGuard] },
+  { path: 'lendings/:id', component: LendingComponent, canActivate: [ModGuard] },
   { path: 'items', component: ItemsOverviewComponent, canActivate: [LoginGuard] },
   { path: 'items/:id', component: ItemDetailComponent, canActivate: [LoginGuard] },
   { path: 'item-types', component: ItemTypesOverviewComponent, canActivate: [ModGuard] },
