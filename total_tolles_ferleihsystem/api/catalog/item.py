@@ -134,7 +134,7 @@ class ItemDetail(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        
+
         item_type = ItemType.query.filter(ItemType.id == request.get_json()["type_id"]).first()
         if item_type is None:
             abort(400, 'Requested item type not found!')
@@ -243,7 +243,7 @@ class ItemItemTags(Resource):
 
         if association is None:
             return '', 204
-        
+
         try:
             db.session.delete(association)
             db.session.commit()
@@ -346,7 +346,7 @@ class ItemContainedItems(Resource):
         """
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(404, 'Requested item not found!')
-     
+
         associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
         return [e.item for e in associations]
 
@@ -365,7 +365,7 @@ class ItemContainedItems(Resource):
         contained_item_id = request.get_json()["id"]
         parent = Item.query.filter(Item.id == item_id).first()
         child = Item.query.filter(Item.id == contained_item_id).first()
-        
+
         if parent is None:
             abort(404, 'Requested item (current) not found!')
         if child is None:
