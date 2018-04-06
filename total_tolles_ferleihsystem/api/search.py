@@ -1,8 +1,11 @@
+"""
+This is the module containing the search endpoint.
+"""
+
 from flask import request
 from flask_restplus import Resource
 from . import api
 from ..db_models.item import Item, ItemToTag
-from ..db_models.tag import Tag
 from .models import ITEM_GET
 
 PATH: str = '/search'
@@ -20,7 +23,11 @@ class Search(Resource):
     @api.param('type', 'Only show items with the given type id', type=int, required=False, default='')
     @api.param('deleted', 'If true also search deleted items', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_GET)
+    # pylint: disable=R0201
     def get(self):
+        """
+        The actual search endpoint definition
+        """
         search_string = request.args.get('search', default='', type=str)
         limit = request.args.get('limit', default=1000, type=int)
         tags = request.args.getlist('tag', type=int)
