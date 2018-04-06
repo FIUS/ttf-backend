@@ -1,13 +1,16 @@
+"""
+The database models of the item and all connected tables
+"""
+
 import datetime
 
 from .. import db
 from . import STD_STRING_SIZE
-from .itemType import ItemType, ItemTypeToAttributeDefinition
-from .tag import Tag, TagToAttributeDefinition
-from .attributeDefinition import AttributeDefinition
 
-class Item (db.Model):
-
+class Item(db.Model):
+    """
+    This data model represents a single lendable item
+    """
     __tablename__ = 'Item'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -19,18 +22,21 @@ class Item (db.Model):
 
     type = db.relationship('ItemType', lazy='joined')
 
-    def __init__(self, name: str, type_id: int, lending_duration: int=0, visible_for: str=''):
+    def __init__(self, name: str, type_id: int, lending_duration: int = 0, visible_for: str = ''):
         self.name = name
         self.type_id = type_id
 
         if lending_duration != 0:
-           self.lending_duration = lending_duration
-           #TODO fix time handling/conversion what ever
+            self.lending_duration = lending_duration
+            #TODO fix time handling/conversion what ever
 
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
-    def update(self, name: str, type_id: int, lending_duration: int=0, visible_for: str=''):
+    def update(self, name: str, type_id: int, lending_duration: int = 0, visible_for: str = ''):
+        """
+        Function to update the objects data
+        """
         self.name = name
         self.type_id = type_id
         self.lending_duration = lending_duration
@@ -56,8 +62,10 @@ class Item (db.Model):
     def get_lending_duration(self):
         return self.lending_duration
 
-class File (db.Model):
-
+class File(db.Model):
+    """
+    This data model represents a file attached to a item
+    """
     __tablename__ = 'File'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -75,12 +83,14 @@ class File (db.Model):
         self.path = path
 
 
-class Lending (db.Model):
-
+class Lending(db.Model):
+    """
+    This data model represents a Lending
+    """
     __tablename__ = 'Lending'
 
     id = db.Column(db.Integer, primary_key=True)
-    # FIXME used to have Integer as type possibly missing table ?
+    #FIXME used to have Integer as type possibly missing table ?
     moderator = db.Column(db.String(STD_STRING_SIZE))
     user = db.Column(db.String(STD_STRING_SIZE))
     date = db.Column(db.DateTime)
@@ -93,6 +103,9 @@ class Lending (db.Model):
         self.deposit = deposit
 
     def update(self, moderator: str, user: str, deposit: str):
+        """
+        Function to update the objects data
+        """
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
@@ -132,7 +145,7 @@ class ItemToLending (db.Model):
     def __init__(self, item: Item, lending: Lending):
         self.item = item
         self.lending = lending
-        self.due = lending.date + datetime.timedelta(0,item.get_lending_duration())
+        self.due = lending.date + datetime.timedelta(0, item.get_lending_duration())
 
 
 class ItemToTag (db.Model):
