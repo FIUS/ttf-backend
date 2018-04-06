@@ -6,7 +6,7 @@
             {{itemLending?.item?.name}} (due: {{itemLending?.due | date:'short'}})
         </div>
         <div>
-            <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return" (click)="staging.remove(itemID)">
+            <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return" (click)="return.emit(itemLending?.item?.id)">
                 <i class="fa fa-reply"></i>
             </div>
         </div>

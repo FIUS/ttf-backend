@@ -21,6 +21,7 @@ import { SearchComponent } from './search/search.component';
 import { StagingComponent } from './staging/staging.component';
 import { StagedItemComponent } from './staging/staged-item.component';
 
+import { LendingOverviewComponent } from './lending/lending-overview.component';
 import { LendingComponent } from './lending/lending.component';
 import { ItemLendingComponent } from './lending/item-lending.component';
 
@@ -68,6 +69,7 @@ import { AppComponent } from './app.component';
         StagingComponent,
         StagedItemComponent,
 
+        LendingOverviewComponent,
         LendingComponent,
         ItemLendingComponent,
 

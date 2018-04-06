@@ -19,4 +19,8 @@
         <i class="f2 fa fa-search"></i>
         <a class="f3 black">Search</a>
     </div>
+    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/lendings">
+        <i class="f2 fa fa-address-card"></i>
+        <a class="f3 black">Lendings</a>
+    </div>
 </div>

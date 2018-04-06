@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from . import api as api
 from .. import db
 
-from .models import LENDING_GET, LENDING_POST, LENDING_PUT
+from .models import LENDING_GET, LENDING_POST, LENDING_PUT, ID_LIST
 from ..db_models.item import Lending, ItemToLending, Item
 
 PATH: str = '/lending'
@@ -113,14 +113,14 @@ class LendingDetail(Resource):
         """
         Replace a lending object
         """
+        lending = Lending.query.filter(Lending.id == lending_id).first()
+        if lending is None:
+            abort(404, 'Requested lending not found!')
+
         json = request.get_json()
         item_ids = json.pop('item_ids')
         items = []
         item_to_lendings = []
-
-        lending = Lending.query.filter(Lending.id == lending_id).first()
-        if lending is None:
-            abort(404, 'Requested lending not found!')
 
         for element in item_ids:
             item = Item.query.filter(Item.id == element).first()
@@ -146,4 +146,29 @@ class LendingDetail(Resource):
             message = str(err)
             if 'UNIQUE constraint failed' in message:
                 abort(409, 'Name is not unique!')
+            abort(500)
+    
+    @ANS.doc(model=LENDING_GET, body=ID_LIST)
+    @ANS.response(404, 'Requested lending not found!')
+    @ANS.response(400, 'Requested item is not part of this lending.')
+    @api.marshal_with(LENDING_GET)
+    # pylint: disable=R0201
+    def post(self, lending_id):
+        """
+        Give back a list of items.
+        """
+        lending = Lending.query.filter(Lending.id == lending_id).first()
+        if lending is None:
+            abort(404, 'Requested lending not found!')
+        
+        ids = request.get_json()["ids"]
+        try:
+            for element in ids:
+                to_delete = ItemToLending.query.filter(ItemToLending.item_id == element).first()
+                if to_delete is None:
+                    abort(400, "Requested item is not part of this lending:" + str(element))
+                db.session.delete(to_delete)
+            db.session.commit()
+            return lending
+        except IntegrityError:
             abort(500)

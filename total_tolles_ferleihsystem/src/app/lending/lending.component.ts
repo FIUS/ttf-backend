@@ -52,4 +52,10 @@ export class LendingComponent implements OnInit, OnDestroy {
         }
     }
 
+    return(id?: number) {
+        if (this.lending != null) {
+            this.api.returnLending(this.lending, id);
+        }
+    }
+
 }

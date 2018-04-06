@@ -1,36 +1,50 @@
-<ttf-box>
-    <h1 class="mv0" title>Search:</h1>
-    <div class="w-100 ph3 pv2" body>
-        <div>
-            <div class="flex items-center">
-                <div class="w2 tc grow pointer" (click)="open = !open">
-                    <i class="fa fa-chevron-right" [hidden]="open"></i>
-                    <i class="fa fa-chevron-down" [hidden]="!open"></i>
-                </div>
-                <span class="mr2">Search: </span>
-                <div class="flex bb b--gray flex-grow-1 items-center">
-                    <input class="input-reset bn pa1 flex-grow-1" type="search" placeholder="search" [(ngModel)]="searchstring"
-                        (keyup.enter)="search()"/>
-
-                    <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem" (click)="search()">
-                        <i class="fa fa-search grow pointer"></i>
-                    </div>
-
-                </div>
-            </div>
-            <div [hidden]="!open">
-                <div class="mt2 flex items-center">
-                    <span class="mr2 w5">Filter Type:</span>
-                    <ttf-type-chooser [(ngModel)]="type" [allowDeselect]="true"></ttf-type-chooser>
-                </div>
-                <div class="mt2 flex items-center">
-                    <span class="mr2 w5">Filter Tags:</span>
-                    <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event"></ttf-tags-chooser>
-                </div>
-            </div>
+<div>
+    <div class="flex items-center">
+        <div class="w2 tc grow pointer" (click)="open = !open">
+            <i class="fa fa-chevron-right" [hidden]="open"></i>
+            <i class="fa fa-chevron-down" [hidden]="!open"></i>
         </div>
-        <div class="mt3" [hidden]="!result">
-            {{result | json}}
+        <span class="mr2">Search: </span>
+        <div class="flex bb b--gray flex-grow-1 items-center">
+            <input class="input-reset bn pa1 flex-grow-1" type="search" placeholder="search" [(ngModel)]="searchstring"
+                (keyup.enter)="search()"/>
+            <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem" (click)="search()">
+                <i class="fa fa-search grow pointer"></i>
+            </div>
         </div>
     </div>
-</ttf-box>
+    <div [hidden]="!open">
+        <div class="mt2 flex items-center" [ngClass]="{flex: !(restrictToType >= 0)}" [hidden]="restrictToType >= 0">
+            <span class="mr2 w5">Filter Type:</span>
+            <ttf-type-chooser [(ngModel)]="type" [allowDeselect]="true"></ttf-type-chooser>
+        </div>
+        <div class="mt2 flex items-center">
+            <span class="mr2 w5">Filter Tags:</span>
+            <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event"></ttf-tags-chooser>
+        </div>
+    </div>
+</div>
+<div class="mt3" [hidden]="!searchDone">
+    <div class="mb3 flex flex-wrap justify-center">
+        <div class="mr1 pointer" [ngClass]="{underline: filter == null}" (click)="setFilter(null)">ALL</div>
+        <div class="mr1" (click)="setFilter(letter)" [ngClass]="{underline: filter === letter, pointer: data?.get(letter)?.length > 0, 'black-60': data?.get(letter)?.length <= 0}"  *ngFor="let letter of alphabet">{{letter}}</div>
+    </div>
+    <ng-container *ngFor="let letter of alphabet">
+        <div class="flex" [ngClass]="{flex: (filter == null || filter === letter), dn: true}">
+            <ng-container *ngIf="data?.get(letter)?.length > 0">
+                <div class="f3 gray" style="width: 1em">{{letter}}</div>
+                <ul class="mt0 list">
+                    <li class="min-w2 mb1 hide-child" *ngFor="let item of data?.get(letter)">
+                        <span class="link underline-hover pointer" routerLink="/items/{{item.id}}" [hidden]="asSelector">{{item.name}}</span>
+                        <span (click)="select(item)" class="underline-hover pointer" [hidden]="!asSelector">{{item.name}}</span>
+                        <span class="i gray" [hidden]="!item?.is_currently_lended">lent</span>
+                        <ng-container *ngIf="item?.type?.lendable && !item?.is_currently_lended && !asSelector">
+                            <i class="child grow-large fa fa-cart-plus" [hidden]="staging.isStaged(item.id)" (click)="staging.stage(item.id)"></i>
+                            <i class="fa fa-shopping-cart" [hidden]="!staging.isStaged(item.id)"></i>
+                        </ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+        </div>
+    </ng-container>
+</div>

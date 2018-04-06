@@ -205,12 +205,22 @@ export class ApiService implements OnInit {
     search(search: string, type?: number, tags?: Set<number>): Observable<Array<ApiObject>> {
         const stream = new AsyncSubject<Array<ApiObject>>();
 
-        const params = {search: search};
+        const params: any = {search: search};
+
+        if (type != null && type >= 0) {
+            params.type = type;
+        }
+
+        if (tags != null && tags.size > 0) {
+            params.tag = [];
+            tags.forEach(tag => params.tag.push(tag));
+        }
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getRoot().subscribe((root) => {
                 this.rest.get(root._links.search, token, params).subscribe(data => {
                     stream.next(data as ApiObject[]);
+                    stream.complete();
                 }, error => this.errorHandler(error, 'search', 'GET'));
             }, error => this.errorHandler(error, 'search', 'GET'));
         });
@@ -367,6 +377,45 @@ export class ApiService implements OnInit {
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    getCanContain(item_type: ApiObject): Observable<ApiObject[]> {
+        const resource = 'item-types/' + item_type.id + '/can-contain';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(item_type._links.can_contain, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>);
+    }
+
+    postCanContain(item_type: ApiObject, itemTypeID): Observable<ApiObject[]> {
+        const resource = 'item-types/' + item_type.id + '/can-contain';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.post(item_type._links.can_contain, {id: itemTypeID}, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'POST'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>);
+    }
+
+    deleteCanContain(item_type: ApiObject, itemTypeID): Observable<ApiObject[]> {
+        const resource = 'item-types/' + item_type.id + '/can-contain';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.delete(item_type._links.can_contain, token, {id: itemTypeID}).subscribe(data => {
+                this.getCanContain(item_type);
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>);
     }
 
 
@@ -772,6 +821,45 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
+    getContainedItems(item: ApiObject): Observable<ApiObject[]> {
+        const resource = 'items/' + item.id + '/contained-items';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(item._links.contained_items, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    postContainedItem(item: ApiObject, itemID): Observable<ApiObject[]> {
+        const resource = 'items/' + item.id + '/contained-items';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.post(item._links.contained_items.href, {id: itemID}, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'POST'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    deleteContainedItem(item: ApiObject, itemID): Observable<ApiObject[]> {
+        const resource = 'items/' + item.id + '/contained-items';
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.delete(item._links.contained_items.href, token, {id: itemID}).subscribe(data => {
+                this.getContainedItems(item);
+            }, error => this.errorHandler(error, resource, 'DELETE'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
 
 
     // Attributes //////////////////////////////////////////////////////////////
@@ -862,6 +950,30 @@ export class ApiService implements OnInit {
                 this.rest.get(root._links.lending.href + id, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
                 }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    returnLending(lending: ApiObject, id?: number): Observable<ApiObject> {
+        const baseResource = 'lendings';
+        const resource = baseResource + '/' + lending.id;
+        const stream = this.getStreamSource(resource);
+
+        const data = { ids: [] };
+
+        if (id != null) {
+            data.ids.push(id);
+        } else {
+            lending.itemLendings.forEach(itemLending => {
+                data.ids.push(itemLending.item.id);
+            });
+        }
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.post(lending, data, token).subscribe(data => {
+                this.updateResource(baseResource, data as ApiObject);
             }, error => this.errorHandler(error, resource, 'GET'));
         });
 

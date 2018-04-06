@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
+import { NumberQuestion } from '../shared/forms/question-number';
 
 @Component({
   selector: 'ttf-item-type-edit',
@@ -11,6 +12,9 @@ import { Subscription } from 'rxjs/Rx';
 export class ItemTypeEditComponent implements OnChanges {
 
     private subscription: Subscription;
+    private canContainSubscription: Subscription;
+
+    typeQuestion: NumberQuestion = new NumberQuestion();
 
     @Input() itemTypeID: number;
 
@@ -22,6 +26,9 @@ export class ItemTypeEditComponent implements OnChanges {
     valid: boolean = false;
     data: any = {};
 
+    canContainTypeID: number;
+    canContain: ApiObject[];
+
     constructor(private api: ApiService, private router: Router) { }
 
     ngOnChanges(): void {
@@ -30,6 +37,12 @@ export class ItemTypeEditComponent implements OnChanges {
         }
         this.subscription = this.api.getItemType(this.itemTypeID).subscribe(data => {
             this.itemType = data;
+            if (this.canContainSubscription != null) {
+                this.canContainSubscription.unsubscribe();
+            }
+            this.canContainSubscription = this.api.getCanContain(this.itemType).subscribe(canContain => {
+                this.canContain = canContain;
+            });
         });
     }
 
@@ -41,14 +54,20 @@ export class ItemTypeEditComponent implements OnChanges {
         this.data = data;
     }
 
-    save(event) {
-        if (this.valid) {
-            this.api.putItemType(this.itemType.id, this.data);
+    addCanContain() {
+        if (this.canContainTypeID != null && this.canContainTypeID >= 0) {
+            this.api.postCanContain(this.itemType, this.canContainTypeID);
         }
     }
 
-    delete = (() => {
+    removeCanContain(id) {
+        if (this.canContainTypeID != null && this.canContainTypeID >= 0) {
+            this.api.deleteCanContain(this.itemType, id);
+        }
+    }
+
+    delete = () => {
         this.api.deleteItemType(this.itemType.id).take(1).subscribe(() => this.router.navigate(['item-types']));
-    }).bind(this);
+    }
 
 }
