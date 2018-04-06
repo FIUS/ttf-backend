@@ -30,7 +30,10 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     tags: ApiObject[];
     attributeIDs: number[] = [];
 
-    canConatainType: ApiObject;
+    canContain: ApiObject[];
+    containedItems: ApiObject[];
+    containedItemsAsMap: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
+    chooseItemType: number = -1;
 
     constructor(private data: NavigationService, private api: ApiService,
                 private jwt: JWTService, private staging: StagingService,
@@ -86,14 +89,24 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             if (this.containedTypeSubscription != null) {
                 this.containedTypeSubscription.unsubscribe();
             }
-            this.containedTypeSubscription = this.api.getCanContain(item.type).subscribe(containedType => {
-                console.log(containedType);
+            this.containedTypeSubscription = this.api.getCanContain(item.type).subscribe(canContain => {
+                this.canContain = canContain;
             });
             if (this.containedItemsSubscription != null) {
                 this.containedItemsSubscription.unsubscribe();
             }
             this.containedItemsSubscription = this.api.getContainedItems(item).subscribe(containedItems => {
-                console.log(containedItems);
+                const itemMap = new Map<number, ApiObject[]>();
+                containedItems.forEach(item => {
+                    let list = itemMap.get(item.type.id);
+                    if (list == null) {
+                        list = [];
+                        itemMap.set(item.type.id, list);
+                    }
+                    list.push(item);
+                });
+                this.containedItemsAsMap = itemMap;
+                this.containedItems = containedItems;
             });
         });
     }
@@ -141,6 +154,14 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         if (this.containedItemsSubscription != null) {
             this.containedItemsSubscription.unsubscribe();
         }
+    }
+
+    addItemToContained = (item: ApiObject) => {
+        this.api.postContainedItem(this.item, item.id);
+    }
+
+    removeItemFromContained(item: ApiObject) {
+        this.api.deleteContainedItem(this.item, item.id);
     }
 
 }

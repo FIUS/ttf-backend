@@ -35,12 +35,22 @@ export class SearchComponent  {
     filter: string;
 
     @Input() asSelector: boolean = false;
+    @Input() restrictToType: number = -1;
     @Output() selectedChanged: EventEmitter<ApiObject> = new EventEmitter<ApiObject>();
 
     constructor(private api: ApiService, private staging: StagingService) { }
 
+    resetSearchData() {
+        console.log('RESET');
+        this.searchDone = false;
+        this.data = new Map<string, ApiObject[]>();
+    }
+
     search() {
         this.searchDone = false;
+        if (this.restrictToType != null && this.restrictToType >= 0) {
+            this.type = this.restrictToType;
+        }
         this.api.search(this.searchstring, this.type, this.tags).subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));

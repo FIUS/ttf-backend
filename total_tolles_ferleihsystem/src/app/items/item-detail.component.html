@@ -1,6 +1,6 @@
 <div class="flex flex-wrap">
     <ttf-box>
-        <h1 class="mv0" title>Item "{{item?.name}}" <span class="i gray underline-hover pointer" routerLink="/lendings/{{item.lending_id}}" [hidden]="!item?.is_currently_lended">lent</span>:</h1>
+        <h1 class="mv0" title>Item "{{item?.name}}" <span class="i gray underline-hover pointer" routerLink="/lendings/{{item?.lending_id}}" [hidden]="!item?.is_currently_lended">lent</span>:</h1>
         <div class="flex" title-right>
             <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
                 <i class="fa fa-pencil" [ngClass]="{'fa-inverse': edit}"></i>
@@ -14,8 +14,14 @@
             <p class="f4"><span class="b">Type:</span> <span class="link underline-hover pointer" routerLink="/item-types/{{item?.type?.id}}">{{item?.type?.name}}</span></p>
             <p class="f4"><span class="b">Tags:</span> <span *ngFor="let tag of tags; let isLast=last" routerLink="/tags/{{tag.id}}"><span class="link underline-hover pointer">{{tag.name}}</span>{{isLast ? '' : ', '}}</span></p>
             <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration></p>
-            <p class="f4 b">Attributes:</p>
-            <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
+            <div [hidden]="attributes?.length === 0">
+                <p class="f4 b">Attributes:</p>
+                <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
+            </div>
+            <div [hidden]="containedItems?.length === 0">
+                <p class="f4 b">Contained Items:</p>
+                <p class="f5" *ngFor="let item of containedItems"><span class="hover-underline pointer" routerLink="/items/{{item.id}}">{{item.name}}</span></p>
+            </div>
         </div>
     </ttf-box>
 
@@ -31,7 +37,30 @@
     <ttf-box [hidden]="!edit || !canEdit">
         <h1 class="mv0" title>Contained Items:</h1>
         <div class="w-100 ph3 pv2" body>
+            <div class="br2 ba b--black-10 mb2" *ngFor="let itemType of canContain" >
+                <div class="min-h2 mv0 pv2 ph3 flex items-center justify-between f4 bg-near-white br2 br--top">
+                    <div>
+                        {{itemType.name}}
+                    </div>
+                    <div>
+                        <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="add" (click)="chooseItemType = itemType.id; search.resetSearchData(); chooseItem.open()">
+                            <i class="fa fa-plus"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="ph2 bt b--black-10" [hidden]="containedItemsAsMap.get(itemType.id)?.length < 1">
+                    <p *ngFor="let item of containedItemsAsMap.get(itemType.id)">{{item.name}} <i class="ml1 fa fa-times grow pointer" (click)="removeItemFromContained(item)"></i></p>
+                </div>
+            </div>
         </div>
     </ttf-box>
+
+    <ttf-dialog [dialogType]="'info'" #chooseItem>
+        <h1 class="mv0" title>Choose Item:</h1>
+        <div class="w-100 ph3 pv2" body>
+            <ttf-search [asSelector]="true" [restrictToType]="chooseItemType" (selectedChanged)="addItemToContained($event); chooseItem.close()" #search></ttf-search>
+        </div>
+    </ttf-dialog>
+
 
 </div>
