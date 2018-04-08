@@ -1,6 +1,6 @@
 <div class="flex flex-wrap">
     <ttf-box>
-        <h1 class="mv0" title>Item "{{item?.name}}" <span class="i gray underline-hover pointer" routerLink="/lendings/{{item?.lending_id}}" [hidden]="!item?.is_currently_lended">lent</span>:</h1>
+        <h1 class="mv0" title>Item "{{item?.name}}" <span class="i gray" [ngClass]="{'underline-hover': jwt.isModerator(), 'pointer': jwt.isModerator()}" routerLink="{{jwt.isModerator() ? ('/lendings/' + item?.lending_id) : '/items/' + item?.id}}" [hidden]="!item?.is_currently_lended">lent</span>:</h1>
         <div class="flex" title-right>
             <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
                 <i class="fa fa-pencil" [ngClass]="{'fa-inverse': edit}"></i>
@@ -11,9 +11,25 @@
             </div>
         </div>
         <div class="w-100 ph3 pv2" body>
-            <p class="f4"><span class="b">Type:</span> <span class="link underline-hover pointer" routerLink="/item-types/{{item?.type?.id}}">{{item?.type?.name}}</span></p>
-            <p class="f4"><span class="b">Tags:</span> <span *ngFor="let tag of tags; let isLast=last" routerLink="/tags/{{tag.id}}"><span class="link underline-hover pointer">{{tag.name}}</span>{{isLast ? '' : ', '}}</span></p>
-            <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration></p>
+            <p class="f4">
+                <span class="b">Type:</span>
+                <span class="link" [ngClass]="{'underline-hover': jwt.isModerator(), 'pointer': jwt.isModerator()}" routerLink="{{jwt.isModerator() ? ('/item-types/' + item?.type?.id) : '/items/' + item?.id}}">
+                    {{item?.type?.name}}
+                </span>
+            </p>
+            <p class="f4">
+                <span class="b">Tags:</span>
+                <span *ngFor="let tag of tags; let isLast=last" routerLink="{{jwt.isModerator() ? ('/tags/' + tag.id) : '/items/' + item?.id}}">
+                    <span class="link" [ngClass]="{'underline-hover': jwt.isModerator(), 'pointer': jwt.isModerator()}" >
+                        {{tag.name}}
+                    </span>
+                    {{isLast ? '' : ', '}}
+                </span>
+            </p>
+            <p class="f4">
+                <span class="b">Lending Duration:</span>
+                <ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration>
+            </p>
             <div [hidden]="attributes?.length === 0">
                 <p class="f4 b">Attributes:</p>
                 <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
