@@ -37,7 +37,7 @@ class Search(Resource):
         search_result = Item.query.filter(Item.name.like('%' + search_string + '%'))
 
         if not deleted:
-            search_result = search_result.filter(not Item.deleted)
+            search_result = search_result.filter(~Item.deleted)
 
         if tags:
             search_result = search_result.join(ItemToTag.item)
