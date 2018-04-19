@@ -1,6 +1,13 @@
 # TTF
 
 
+## Prerequesits
+- nodejs >8.0.0
+- npm
+- python 3.6
+- pip [python 3.6]
+- venv [python 3.6]
+
 ## First start:
 
 After you've cloned this repo you have to do the install routine for both backend AND frontend before starting the backend!
@@ -75,4 +82,3 @@ The following sites are available after starting the flask development server:
 
 Only in debug mode:
 [debug](http://127.0.0.1:5000/debug)
-
