@@ -1,16 +1,19 @@
-import { Component, OnChanges, Input } from '@angular/core';
+import { Component, OnChanges, Input, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
+import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
 
 @Component({
   selector: 'ttf-item-edit',
   templateUrl: './item-edit.component.html'
 })
-export class ItemEditComponent implements OnChanges {
+export class ItemEditComponent implements OnChanges, OnDestroy {
 
     private subscription: Subscription;
+
+    @ViewChild(DynamicFormComponent) form;
 
     @Input() itemID: number;
 
@@ -18,9 +21,6 @@ export class ItemEditComponent implements OnChanges {
         _links: {'self': {'href': ''}},
         name: 'UNBEKANNT'
     };
-
-    valid: boolean = false;
-    data: any = {};
 
     constructor(private api: ApiService, private router: Router) { }
 
@@ -33,22 +33,22 @@ export class ItemEditComponent implements OnChanges {
         });
     }
 
-    onValidChange(valid: boolean) {
-        this.valid = valid;
-    }
-
-    onDataChange(data: any) {
-        this.data = data;
-    }
-
-    save(event) {
-        if (this.valid) {
-            this.api.putItem(this.item.id, this.data);
+    ngOnDestroy(): void {
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
         }
     }
 
-    delete = (() => {
+    save = (event) => {
+        this.api.putItem(this.item.id, event).take(1).subscribe(() => {
+            this.form.saveFinished(true);
+        }, () => {
+            this.form.saveFinished(false);
+        });
+    }
+
+    delete = () => {
         this.api.deleteItem(this.item.id).take(1).subscribe(() => this.router.navigate(['items']));
-    }).bind(this);
+    };
 
 }

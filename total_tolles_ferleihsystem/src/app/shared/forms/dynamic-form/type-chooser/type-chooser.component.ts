@@ -30,7 +30,7 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
 
     searchTerm: string = '';
 
-    types: ApiObject[];
+    types: ApiObject[] = [];
 
     selected: number;
     filter: Set<number> = new Set<number>();

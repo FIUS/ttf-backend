@@ -1,16 +1,19 @@
-import { Component, OnChanges, Input } from '@angular/core';
+import { Component, OnChanges, Input, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
+import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
 
 @Component({
   selector: 'ttf-tag-edit',
   templateUrl: './tag-edit.component.html'
 })
-export class TagEditComponent implements OnChanges {
+export class TagEditComponent implements OnChanges, OnDestroy {
 
     private subscription: Subscription;
+
+    @ViewChild(DynamicFormComponent) form;
 
     @Input() tagID: number;
 
@@ -18,9 +21,6 @@ export class TagEditComponent implements OnChanges {
         _links: {'self': {'href': ''}},
         name: 'UNBEKANNT'
     };
-
-    valid: boolean = false;
-    data: any = {};
 
     constructor(private api: ApiService, private router: Router) { }
 
@@ -33,22 +33,22 @@ export class TagEditComponent implements OnChanges {
         });
     }
 
-    onValidChange(valid: boolean) {
-        this.valid = valid;
-    }
-
-    onDataChange(data: any) {
-        this.data = data;
-    }
-
-    save(event) {
-        if (this.valid) {
-            this.api.putTag(this.tag.id, this.data);
+    ngOnDestroy(): void {
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
         }
     }
 
-    delete = (() => {
+    save = (event) => {
+        this.api.putTag(this.tag.id, event).take(1).subscribe(() => {
+            this.form.saveFinished(true);
+        }, () => {
+            this.form.saveFinished(false);
+        });
+    }
+
+    delete = () => {
         this.api.deleteTag(this.tag.id).take(1).subscribe(() => this.router.navigate(['tags']));
-    }).bind(this);
+    };
 
 }

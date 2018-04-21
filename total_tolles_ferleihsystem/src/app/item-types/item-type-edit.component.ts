@@ -1,18 +1,21 @@
-import { Component, OnChanges, Input } from '@angular/core';
+import { Component, OnChanges, Input, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
 import { NumberQuestion } from '../shared/forms/question-number';
+import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
 
 @Component({
   selector: 'ttf-item-type-edit',
   templateUrl: './item-type-edit.component.html'
 })
-export class ItemTypeEditComponent implements OnChanges {
+export class ItemTypeEditComponent implements OnChanges, OnDestroy {
 
     private subscription: Subscription;
     private canContainSubscription: Subscription;
+
+    @ViewChild(DynamicFormComponent) form;
 
     typeQuestion: NumberQuestion = new NumberQuestion();
 
@@ -22,9 +25,6 @@ export class ItemTypeEditComponent implements OnChanges {
         _links: {'self': {'href': ''}},
         name: 'UNBEKANNT'
     };
-
-    valid: boolean = false;
-    data: any = {};
 
     canContainTypeID: number;
     canContain: ApiObject[];
@@ -46,12 +46,13 @@ export class ItemTypeEditComponent implements OnChanges {
         });
     }
 
-    onValidChange(valid: boolean) {
-        this.valid = valid;
-    }
-
-    onDataChange(data: any) {
-        this.data = data;
+    ngOnDestroy(): void {
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
+        }
+        if (this.canContainSubscription != null) {
+            this.canContainSubscription.unsubscribe();
+        }
     }
 
     addCanContain() {
@@ -64,6 +65,14 @@ export class ItemTypeEditComponent implements OnChanges {
         if (this.canContainTypeID != null && this.canContainTypeID >= 0) {
             this.api.deleteCanContain(this.itemType, id);
         }
+    }
+
+    save = (event) => {
+        this.api.putItemType(this.itemTypeID, event).take(1).subscribe(() => {
+            this.form.saveFinished(true);
+        }, () => {
+            this.form.saveFinished(false);
+        });
     }
 
     delete = () => {
