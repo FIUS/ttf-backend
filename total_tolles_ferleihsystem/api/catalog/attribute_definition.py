@@ -7,9 +7,10 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from .. import api as api
+from .. import api, satisfies_role
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT
 from ... import db
+from ...login import UserRole
 
 from ...db_models.attributeDefinition import AttributeDefinition
 
@@ -35,6 +36,7 @@ class AttributeDefinitionList(Resource):
         return AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for).all()
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
@@ -74,6 +76,7 @@ class AttributeDefinitionDetail(Resource):
         return attribute
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested attribute not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -89,6 +92,7 @@ class AttributeDefinitionDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested attribute not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -104,6 +108,7 @@ class AttributeDefinitionDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested attribute not found!')

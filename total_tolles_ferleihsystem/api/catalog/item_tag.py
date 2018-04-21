@@ -7,9 +7,10 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from .. import api as api
+from .. import api, satisfies_role
 from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TAG_PUT
 from ... import db
+from ...login import UserRole
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
 from ...db_models.attributeDefinition import AttributeDefinition
@@ -36,6 +37,7 @@ class ItemTagList(Resource):
         return Tag.query.filter(Tag.deleted == test_for).all()
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
@@ -75,6 +77,7 @@ class ItemTagDetail(Resource):
         return item_tag
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -90,6 +93,7 @@ class ItemTagDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -105,6 +109,7 @@ class ItemTagDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item tag not found!')
@@ -153,6 +158,7 @@ class ItemTagAttributes(Resource):
         return [e.attribute_definition for e in associations]
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
@@ -183,6 +189,7 @@ class ItemTagAttributes(Resource):
             abort(500)
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
