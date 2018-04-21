@@ -4,6 +4,7 @@ This module contains all API endpoints for the namespace 'item_tag'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
@@ -23,7 +24,7 @@ class ItemTagList(Resource):
     Item tags root item tag
     """
 
-    @api.doc(security=None)
+    @jwt_required
     @api.param('deleted', 'get all deleted item tags (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_TAG_GET)
     # pylint: disable=R0201
@@ -34,7 +35,7 @@ class ItemTagList(Resource):
         test_for = request.args.get('deleted', 'false') == 'true'
         return Tag.query.filter(Tag.deleted == test_for).all()
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
@@ -60,9 +61,9 @@ class ItemTagDetail(Resource):
     Single item tag object
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_TAG_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item tag not found!')
+    @api.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self, tag_id):
         """
@@ -72,6 +73,8 @@ class ItemTagDetail(Resource):
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
         return item_tag
+
+    @jwt_required
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -85,6 +88,8 @@ class ItemTagDetail(Resource):
         item_tag.deleted = True
         db.session.commit()
         return "", 204
+
+    @jwt_required
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -98,6 +103,8 @@ class ItemTagDetail(Resource):
         item_tag.deleted = False
         db.session.commit()
         return "", 204
+
+    @jwt_required
     @ANS.doc(model=ITEM_TAG_GET, body=ITEM_TAG_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item tag not found!')
@@ -127,9 +134,9 @@ class ItemTagAttributes(Resource):
     The attributes of a single item tag object
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item tag not found!')
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def get(self, tag_id):
         """
@@ -145,12 +152,12 @@ class ItemTagAttributes(Resource):
         associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
         return [e.attribute_definition for e in associations]
 
-    @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @jwt_required
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(409, 'Attribute definition is already associated with this tag!')
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def post(self, tag_id):
         """
@@ -175,7 +182,7 @@ class ItemTagAttributes(Resource):
                 abort(409, 'Attribute definition is already asociated with this tag!')
             abort(500)
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(400, 'Requested attribute definition not found!')

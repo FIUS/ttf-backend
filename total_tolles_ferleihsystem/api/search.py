@@ -4,6 +4,7 @@ This is the module containing the search endpoint.
 
 from flask import request
 from flask_restplus import Resource
+from flask_jwt_extended import jwt_optional
 from . import api
 from ..db_models.item import Item, ItemToTag, ItemAttribute
 from .models import ITEM_GET
@@ -16,7 +17,7 @@ class Search(Resource):
     """
     Search Resource
     """
-    @api.doc(security=None)
+    @jwt_optional
     @api.param('search', 'the string to search for', type=str, required=False, default='')
     @api.param('limit', 'limit the amount of return values', type=int, required=False, default=1000)
     @api.param('tag', 'Only show items with a tag of the given tag id', type=int, required=False, default='')

@@ -4,6 +4,7 @@ This module contains all API endpoints for the namespace 'item_type'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
@@ -23,7 +24,7 @@ class ItemTypeList(Resource):
     Item types root element
     """
 
-    @api.doc(security=None)
+    @jwt_required
     @api.param('deleted', 'get all deleted objects (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
@@ -34,7 +35,7 @@ class ItemTypeList(Resource):
         test_for = request.args.get('deleted', 'false') == 'true'
         return ItemType.query.filter(ItemType.deleted == test_for).all()
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
@@ -60,9 +61,9 @@ class ItemTypeDetail(Resource):
     Single item type object
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_TYPE_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item type not found!')
+    @api.marshal_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def get(self, type_id):
         """
@@ -73,6 +74,7 @@ class ItemTypeDetail(Resource):
             abort(404, 'Requested item type not found!')
         return item_type
 
+    @jwt_required
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -87,6 +89,7 @@ class ItemTypeDetail(Resource):
         db.session.commit()
         return "", 204
 
+    @jwt_required
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -101,6 +104,7 @@ class ItemTypeDetail(Resource):
         db.session.commit()
         return "", 204
 
+    @jwt_required
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item type not found!')
@@ -129,9 +133,9 @@ class ItemTypeAttributes(Resource):
     The attributes of a single item type object
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item type not found!')
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def get(self, type_id):
         """
@@ -146,12 +150,12 @@ class ItemTypeAttributes(Resource):
                         .all())
         return [element.attribute_definition for element in associations]
 
-    @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @jwt_required
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(409, 'Attribute definition is already associated with this item type!')
+    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def post(self, type_id):
         """
@@ -179,7 +183,7 @@ class ItemTypeAttributes(Resource):
                 abort(409, 'Attribute definition is already asociated with item type!')
             abort(500)
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
@@ -217,9 +221,9 @@ class ItemTypeCanContainTypes(Resource):
     The item types that a item of this type can contain.
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_TYPE_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item type not found!')
+    @api.marshal_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def get(self, type_id):
         """
@@ -231,12 +235,12 @@ class ItemTypeCanContainTypes(Resource):
         associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
         return [e.item_type for e in associations]
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_TYPE_GET)
+    @jwt_required
     @ANS.doc(model=ITEM_TYPE_GET, body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested child item type not found!')
     @ANS.response(409, 'Item type can already be contained in this item type.')
+    @api.marshal_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def post(self, type_id):
         """
@@ -262,7 +266,7 @@ class ItemTypeCanContainTypes(Resource):
                 abort(409, 'Item type can already be contained in this item type.')
             abort(500)
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested child item type not found!')
