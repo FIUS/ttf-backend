@@ -7,9 +7,10 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from .. import api as api
+from .. import api, satisfies_role
 from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TYPE_PUT
 from ... import db
+from ...login import UserRole
 
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
 from ...db_models.attributeDefinition import AttributeDefinition
@@ -36,6 +37,7 @@ class ItemTypeList(Resource):
         return ItemType.query.filter(ItemType.deleted == test_for).all()
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
@@ -75,6 +77,7 @@ class ItemTypeDetail(Resource):
         return item_type
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -90,6 +93,7 @@ class ItemTypeDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -105,6 +109,7 @@ class ItemTypeDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item type not found!')
@@ -151,6 +156,7 @@ class ItemTypeAttributes(Resource):
         return [element.attribute_definition for element in associations]
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
@@ -184,6 +190,7 @@ class ItemTypeAttributes(Resource):
             abort(500)
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
@@ -236,6 +243,7 @@ class ItemTypeCanContainTypes(Resource):
         return [e.item_type for e in associations]
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TYPE_GET, body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested child item type not found!')
@@ -267,6 +275,7 @@ class ItemTypeCanContainTypes(Resource):
             abort(500)
 
     @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested child item type not found!')
