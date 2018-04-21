@@ -1,11 +1,14 @@
 <div class="z-2 w-100 h3 bg-near-white shadow-1 ph3 dt flex items-center justify-between">
     <h1 class="dtc f1 ma0 truncate">{{title}}</h1>
     <div class="flex">
-        <div class="br1 pa1 ml2 bg-animate hover-bg-black-20 pointer tooltip tooltip-left" data-tooltip="staged items" routerLink="/staging" [hidden]="stagingEmpty">
+        <div class="br1 pa1 ml2 bg-animate hover-bg-black-20 pointer tooltip tooltip-left" style="outline: none" data-tooltip="staged items" routerLink="/staging" [hidden]="stagingEmpty">
             <i class="f1 fa fa-shopping-cart"></i>
         </div>
-        <div class="br1 pa1 ml2 bg-animate hover-bg-black-20 pointer tooltip tooltip-left" data-tooltip="logout" *ngIf="jwt.loggedIn()" (click)="jwt.logout()">
+        <div class="br1 pa1 ml2 bg-animate hover-bg-black-20 pointer tooltip tooltip-left" data-tooltip="logout" *ngIf="jwt.loggedIn() && jwt.isModerator()" (click)="jwt.logout()">
             <i class="f1 fa fa-sign-out"></i>
+        </div>
+        <div class="br1 pa1 ml2 bg-animate hover-bg-black-20 pointer tooltip tooltip-left" style="outline: none" data-tooltip="login" *ngIf="jwt.loggedIn() && jwt.isUser()" routerLink="/login">
+            <i class="f1 fa fa-sign-in"></i>
         </div>
     </div>
 </div>

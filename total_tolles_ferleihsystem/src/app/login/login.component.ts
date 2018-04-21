@@ -19,7 +19,7 @@ export class LoginComponent implements OnInit {
         private jwt: JWTService, private router: Router) { }
 
     ngOnInit(): void {
-        if (this.jwt.loggedIn()) {
+        if (this.jwt.loggedIn() && !this.jwt.isUser()) {
             this.router.navigate(['/']);
         }
         this.data.changeTitle('Total Tolles Ferleihsystem – Login');
