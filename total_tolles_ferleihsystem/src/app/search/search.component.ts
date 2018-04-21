@@ -51,12 +51,22 @@ export class SearchComponent  {
         this.data = new Map<string, ApiObject[]>();
     }
 
-    search() {
+    search = () => {
         this.searchDone = false;
         if (this.restrictToType != null && this.restrictToType >= 0) {
             this.type = this.restrictToType;
         }
-        this.api.search(this.searchstring, this.type, this.tags).subscribe(data => {
+        const attributes = new Map<number, string>();
+        if (this.attributes != null) {
+            this.attributes.forEach(attr => {
+                if (this.attributeForms.get(attr.id).valid &&
+                    this.attributeForms.get(attr.id).value[attr.name] != null &&
+                    !(attr.type === 'string' && this.attributeForms.get(attr.id).value[attr.name].length === 0)) {
+                    attributes.set(attr.id, JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]))
+                }
+            });
+        }
+        this.api.search(this.searchstring, this.type, this.tags, attributes).subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(item => {
