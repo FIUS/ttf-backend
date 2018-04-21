@@ -3,7 +3,7 @@ Module containing the root resource of the API.
 """
 
 from flask_restplus import Resource
-from flask_jwt_extended import jwt_required, jwt_optional
+from flask_jwt_extended import jwt_optional
 from . import api
 from .models import ROOT_MODEL, CATALOG_MODEL
 
