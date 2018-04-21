@@ -8,10 +8,11 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from . import api as api
+from . import api, satisfies_role
 from .. import db
 
 from .models import LENDING_GET, LENDING_POST, LENDING_PUT, ID_LIST
+from ..login import UserRole
 from ..db_models.item import Lending, ItemToLending, Item
 
 PATH: str = '/lending'
@@ -33,6 +34,7 @@ class LendingList(Resource):
         return Lending.query.all()
 
     @jwt_required
+    @satisfies_role(UserRole.MODERATOR)
     @ANS.doc(model=LENDING_GET, body=LENDING_POST)
     @ANS.response(201, 'Created.')
     @ANS.response(400, "Item not found")
@@ -80,8 +82,9 @@ class LendingDetail(Resource):
     """
 
     @jwt_required
-    @api.marshal_with(LENDING_GET)
+    @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested lending not found!')
+    @api.marshal_with(LENDING_GET)
     # pylint: disable=R0201
     def get(self, lending_id):
         """
@@ -93,6 +96,7 @@ class LendingDetail(Resource):
         return lending
 
     @jwt_required
+    @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -108,6 +112,7 @@ class LendingDetail(Resource):
         return "", 204
 
     @jwt_required
+    @satisfies_role(UserRole.MODERATOR)
     @ANS.doc(model=LENDING_GET, body=LENDING_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested lending not found!')
@@ -152,6 +157,7 @@ class LendingDetail(Resource):
             abort(500)
 
     @jwt_required
+    @satisfies_role(UserRole.MODERATOR)
     @ANS.doc(model=LENDING_GET, body=ID_LIST)
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(400, 'Requested item is not part of this lending.')
