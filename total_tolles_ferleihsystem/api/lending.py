@@ -90,7 +90,7 @@ class LendingDetail(Resource):
         if lending is None:
             abort(404, 'Requested lending not found!')
         return lending
-   
+
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -104,7 +104,7 @@ class LendingDetail(Resource):
         db.session.delete(lending)
         db.session.commit()
         return "", 204
-    
+
     @ANS.doc(model=LENDING_GET, body=LENDING_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested lending not found!')
@@ -131,7 +131,7 @@ class LendingDetail(Resource):
             if item.is_currently_lended:
                 abort(400, "Item already lended:" + str(element))
             items.append(item)
-        
+
         lending.update(**request.get_json())
         try:
             db.session.commit()
@@ -147,7 +147,7 @@ class LendingDetail(Resource):
             if 'UNIQUE constraint failed' in message:
                 abort(409, 'Name is not unique!')
             abort(500)
-    
+
     @ANS.doc(model=LENDING_GET, body=ID_LIST)
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(400, 'Requested item is not part of this lending.')
@@ -160,7 +160,7 @@ class LendingDetail(Resource):
         lending = Lending.query.filter(Lending.id == lending_id).first()
         if lending is None:
             abort(404, 'Requested lending not found!')
-        
+
         ids = request.get_json()["ids"]
         try:
             for element in ids:
