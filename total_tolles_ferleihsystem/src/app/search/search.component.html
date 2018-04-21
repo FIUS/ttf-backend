@@ -23,8 +23,11 @@
             <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event; updateAttributes()"></ttf-tags-chooser>
         </div>
         <div class="mt2 flex items-center" *ngFor="let attr of attributes">
-            <span class="mr2 w5">Attribute "{{attr?.name}}":</span>
-
+            <form *ngIf="attributeForms.get(attr.id) != null" [formGroup]="attributeForms.get(attr.id)">
+                <div *ngFor="let question of attributeQuestions.get(attr.id)" class="form-row">
+                    <df-question [question]="question" [form]="attributeForms.get(attr.id)"></df-question>
+                </div>
+            </form>
         </div>
     </div>
 </div>

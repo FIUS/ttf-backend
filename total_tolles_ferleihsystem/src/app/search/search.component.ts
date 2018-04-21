@@ -25,6 +25,8 @@ export class SearchComponent  {
     type: number;
     tags: Set<number>;
     attributes: ApiObject[];
+    attributeQuestions: Map<number, QuestionBase<any>[]> = new Map<number, QuestionBase<any>[]>();
+    attributeForms: Map<number, FormGroup> = new Map<number, FormGroup>();
 
     searchDone: boolean = false;
 
@@ -40,7 +42,8 @@ export class SearchComponent  {
     @Input() restrictToType: number = -1;
     @Output() selectedChanged: EventEmitter<ApiObject> = new EventEmitter<ApiObject>();
 
-    constructor(private api: ApiService, private staging: StagingService) { }
+    constructor(private api: ApiService, private staging: StagingService,
+                private qs: QuestionService, private qcs: QuestionControlService) { }
 
     resetSearchData() {
         console.log('RESET');
@@ -119,6 +122,31 @@ export class SearchComponent  {
             });
         }
         Observable.forkJoin(finished).subscribe(() => typeAndTagsSubject.complete());
+    }
+
+    getQuestion(attribute_definition) {
+        let schema: any = {};
+        if (attribute_definition.jsonschema != null && attribute_definition.jsonschema !== '') {
+            schema = JSON.parse(attribute_definition.jsonschema);
+        }
+        schema.type = attribute_definition.type;
+        this.qs.getQuestionsFromScheme({
+            type: 'object',
+            properties: {
+                [attribute_definition.name]: schema,
+            }
+        }).take(1).subscribe(questions => {
+            this.attributeQuestions.set(attribute_definition.id, questions);
+            const form = this.qcs.toFormGroup(questions)
+            this.attributeForms.set(attribute_definition.id, form);
+            let value = undefined; // TODO
+            try {
+                value = JSON.parse(value);
+            } catch (SyntaxError) {}
+            form.patchValue({
+                [attribute_definition.name]: value,
+            });
+        });
     }
 
     select(item: ApiObject) {
