@@ -70,7 +70,6 @@ export class DynamicFormComponent implements OnInit, OnChanges {
                 });
             }
             patchValues(this.startValues, this.questions, patched);
-            console.log(patched);
             if (this.valueChangeSubscription != null) {
                 this.valueChangeSubscription.unsubscribe();
             }

@@ -11,6 +11,7 @@
                 </div>
             </form>
             <ttf-staged-item *ngFor="let itemID of (staging.currentStaged|async)" [itemID]="itemID"></ttf-staged-item>
+            <p class="tr mv0 link gray hover-black pointer" (click)="staging.reset()" [hidden]="(staging.currentStaged | async).size < 5">clear all items</p>
         </div>
     </ttf-box>
 </div>
