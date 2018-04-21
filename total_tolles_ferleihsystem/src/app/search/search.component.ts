@@ -9,6 +9,7 @@ import { ApiService } from '../shared/rest/api.service';
 import { TypeQuestion } from '../shared/forms/question-type';
 import { NumberQuestion } from '../shared/forms/question-number';
 import { StagingService } from '../navigation/staging-service';
+import { Subject, Observable, AsyncSubject } from 'rxjs/Rx';
 
 @Component({
   selector: 'ttf-search',
@@ -23,6 +24,7 @@ export class SearchComponent  {
     searchstring: string = '';
     type: number;
     tags: Set<number>;
+    attributes: ApiObject[];
 
     searchDone: boolean = false;
 
@@ -85,6 +87,38 @@ export class SearchComponent  {
         if (this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
             this.filter = value;
         }
+    }
+
+    updateAttributes() {
+        const typeAndTagsSubject = new Subject<ApiObject>();
+
+        typeAndTagsSubject.flatMap(typeOrTag => {
+            return this.api.getLinkedAttributeDefinitions(typeOrTag).take(1)
+        }).map(attributes => Observable.from(attributes))
+        .concatAll()
+        .distinct(attr => attr.id)
+        .toArray()
+        .map(attrs => attrs.sort((a, b) => a.type.localeCompare(b.type)).sort((a, b) => a.name.localeCompare(b.name)))
+        .subscribe(data => this.attributes = data);
+
+        const finished = [];
+        if (this.type >= 0) {
+            const obs = this.api.getItemType(this.type).take(1);
+            obs.subscribe(itemType => {
+                typeAndTagsSubject.next(itemType);
+            });
+            finished.push(obs);
+        }
+        if (this.tags != null ) {
+            this.tags.forEach(tagID => {
+                const obs = this.api.getTag(tagID).take(1);
+                obs.subscribe(itemTag => {
+                    typeAndTagsSubject.next(itemTag);
+                });
+                finished.push(obs);
+            });
+        }
+        Observable.forkJoin(finished).subscribe(() => typeAndTagsSubject.complete());
     }
 
     select(item: ApiObject) {

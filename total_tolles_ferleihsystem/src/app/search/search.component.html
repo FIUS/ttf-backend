@@ -16,11 +16,15 @@
     <div [hidden]="!open">
         <div class="mt2 flex items-center" [ngClass]="{flex: !(restrictToType >= 0)}" [hidden]="restrictToType >= 0">
             <span class="mr2 w5">Filter Type:</span>
-            <ttf-type-chooser [(ngModel)]="type" [allowDeselect]="true"></ttf-type-chooser>
+            <ttf-type-chooser [(ngModel)]="type" (ngModelChange)="updateAttributes()" [allowDeselect]="true"></ttf-type-chooser>
         </div>
         <div class="mt2 flex items-center">
             <span class="mr2 w5">Filter Tags:</span>
-            <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event"></ttf-tags-chooser>
+            <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event; updateAttributes()"></ttf-tags-chooser>
+        </div>
+        <div class="mt2 flex items-center" *ngFor="let attr of attributes">
+            <span class="mr2 w5">Attribute "{{attr?.name}}":</span>
+
         </div>
     </div>
 </div>
