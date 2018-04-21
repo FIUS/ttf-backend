@@ -102,7 +102,10 @@ export class SearchComponent  {
         .distinct(attr => attr.id)
         .toArray()
         .map(attrs => attrs.sort((a, b) => a.type.localeCompare(b.type)).sort((a, b) => a.name.localeCompare(b.name)))
-        .subscribe(data => this.attributes = data);
+        .subscribe(attributes => {
+            this.attributes = attributes;
+            attributes.forEach(this.getQuestion);
+        });
 
         const finished = [];
         if (this.type >= 0) {
@@ -124,7 +127,7 @@ export class SearchComponent  {
         Observable.forkJoin(finished).subscribe(() => typeAndTagsSubject.complete());
     }
 
-    getQuestion(attribute_definition) {
+    getQuestion = (attribute_definition) => {
         let schema: any = {};
         if (attribute_definition.jsonschema != null && attribute_definition.jsonschema !== '') {
             schema = JSON.parse(attribute_definition.jsonschema);
