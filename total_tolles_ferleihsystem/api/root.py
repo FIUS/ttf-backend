@@ -15,6 +15,7 @@ class RootResource(Resource):
     The API root element
     """
 
+    @api.doc(security=None)
     @jwt_optional
     @api.marshal_with(ROOT_MODEL)
     # pylint: disable=R0201
@@ -31,6 +32,7 @@ class CatalogResource(Resource):
     The catalog root element
     """
 
+    @api.doc(security=None)
     @jwt_optional
     @api.marshal_with(CATALOG_MODEL)
     # pylint: disable=R0201
