@@ -4,6 +4,7 @@ This module contains all API endpoints for the namespace 'item'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
@@ -24,7 +25,7 @@ class ItemList(Resource):
     Items root element
     """
 
-    @api.doc(security=None)
+    @jwt_required
     @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
@@ -35,7 +36,7 @@ class ItemList(Resource):
         test_for = request.args.get('deleted', 'false') == 'true'
         return Item.query.filter(Item.deleted == test_for).all()
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(model=ITEM_GET, body=ITEM_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(400, 'Requested item type not found!')
@@ -80,9 +81,9 @@ class ItemDetail(Resource):
     Single item object
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
+    @api.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -94,6 +95,7 @@ class ItemDetail(Resource):
 
         return item
 
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -108,6 +110,7 @@ class ItemDetail(Resource):
         db.session.commit()
         return "", 204
 
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -122,6 +125,7 @@ class ItemDetail(Resource):
         db.session.commit()
         return "", 204
 
+    @jwt_required
     @ANS.doc(model=ITEM_GET, body=ITEM_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item not found!')
@@ -155,9 +159,9 @@ class ItemItemTags(Resource):
     The item tags of a single item
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_TAG_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
+    @api.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -169,12 +173,12 @@ class ItemItemTags(Resource):
         associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
         return [e.tag for e in associations]
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_TAG_GET)
+    @jwt_required
     @ANS.doc(model=ITEM_TAG_GET, body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
     @ANS.response(409, 'Tag is already associated with this item!')
+    @api.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def post(self, item_id):
         """
@@ -218,7 +222,7 @@ class ItemItemTags(Resource):
                 abort(409, 'Tag is already associated with this item!')
             abort(500)
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
@@ -257,9 +261,9 @@ class ItemAttributeList(Resource):
     The attributes of a single item
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
+    @api.marshal_with(ATTRIBUTE_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -276,10 +280,10 @@ class ItemAttributeDetail(Resource):
     A single attribute of this item
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ATTRIBUTE_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
+    @api.marshal_with(ATTRIBUTE_GET)
     # pylint: disable=R0201
     def get(self, item_id, attribute_definition_id):
         """
@@ -300,10 +304,11 @@ class ItemAttributeDetail(Resource):
 
         return attribute
 
-    @api.marshal_with(ATTRIBUTE_GET)
+    @jwt_required
     @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
+    @api.marshal_with(ATTRIBUTE_GET)
     # pylint: disable=R0201
     def put(self, item_id, attribute_definition_id):
         """
@@ -336,9 +341,9 @@ class ItemContainedItems(Resource):
     The items contained in this item object
     """
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_GET)
+    @jwt_required
     @ANS.response(404, 'Requested item not found!')
+    @api.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -350,13 +355,13 @@ class ItemContainedItems(Resource):
         associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
         return [e.item for e in associations]
 
-    @api.doc(security=None)
-    @api.marshal_with(ITEM_GET)
+    @jwt_required
     @ANS.doc(model=ITEM_GET, body=ID)
     @ANS.response(404, 'Requested item (current) not found!')
     @ANS.response(400, 'Requested item (to be contained) not found!')
     @ANS.response(400, 'This item can not contain that item.')
     @ANS.response(409, 'Subitem is already a subitem of this item!')
+    @api.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def post(self, item_id):
         """
@@ -392,7 +397,7 @@ class ItemContainedItems(Resource):
                 abort(409, 'Attribute definition is already asociated with this tag!')
             abort(500)
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item (current) not found!')
     @ANS.response(400, 'Requested item (to be contained) not found!')

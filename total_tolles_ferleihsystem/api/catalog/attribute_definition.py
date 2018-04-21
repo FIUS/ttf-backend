@@ -4,6 +4,7 @@ This module contains all API endpoints for the namespace 'attribute_definition'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from .. import api as api
@@ -22,7 +23,7 @@ class AttributeDefinitionList(Resource):
     Attribute definitions root attribute
     """
 
-    @api.doc(security=None)
+    @jwt_required
     @api.param('deleted', 'get all deleted attributes (and only these)', type=bool, required=False, default=False)
     @api.marshal_list_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
@@ -33,7 +34,7 @@ class AttributeDefinitionList(Resource):
         test_for = request.args.get('deleted', 'false') == 'true'
         return AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for).all()
 
-    @api.doc(security=None)
+    @jwt_required
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
@@ -59,7 +60,7 @@ class AttributeDefinitionDetail(Resource):
     Single attribute definition attribute
     """
 
-    @api.doc(security=None)
+    @jwt_required
     @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
     @ANS.response(404, 'Requested attribute not found!')
     # pylint: disable=R0201
@@ -72,6 +73,7 @@ class AttributeDefinitionDetail(Resource):
             abort(404, 'Requested attribute not found!')
         return attribute
 
+    @jwt_required
     @ANS.response(404, 'Requested attribute not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -86,6 +88,7 @@ class AttributeDefinitionDetail(Resource):
         db.session.commit()
         return "", 204
 
+    @jwt_required
     @ANS.response(404, 'Requested attribute not found!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
@@ -100,6 +103,7 @@ class AttributeDefinitionDetail(Resource):
         db.session.commit()
         return "", 204
 
+    @jwt_required
     @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ATTRIBUTE_DEFINITION_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested attribute not found!')
