@@ -39,7 +39,7 @@ class Search(Resource):
 
         search_result = Item.query
 
-        if not search_string:
+        if search_string:
             search_result = search_result.filter(Item.name.like('%' + search_string + '%'))
 
         if not deleted:
