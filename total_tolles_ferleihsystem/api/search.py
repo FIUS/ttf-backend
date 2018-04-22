@@ -17,6 +17,7 @@ class Search(Resource):
     """
     Search Resource
     """
+    @api.doc(security=None)
     @jwt_optional
     @api.param('search', 'the string to search for', type=str, required=False, default='')
     @api.param('limit', 'limit the amount of return values', type=int, required=False, default=1000)
@@ -39,7 +40,7 @@ class Search(Resource):
 
         search_result = Item.query
 
-        if not search_string:
+        if search_string:
             search_result = search_result.filter(Item.name.like('%' + search_string + '%'))
 
         if not deleted:
@@ -50,19 +51,24 @@ class Search(Resource):
             search_result = search_result.filter(ItemToTag.tag_id.in_(tags))
 
         if attributes:
-            attribute_ids = [attribute.split('-', 1)[0] for attribute in attributes]
-            attribute_values = [attribute.split('-', 1)[1] for attribute in attributes]
+            for attribute in attributes:
+                search_result = search_result.join(ItemAttribute, aliased=True)
+                search_result = search_result.filter(ItemAttribute.item_id == attribute.split('-', 1)[0])
+                search_result = search_result.filter(ItemAttribute.value == attribute.split('-', 1)[1])
 
-            search_result = search_result.join(ItemAttribute.item)
-            search_filter = None
-            for i in range(len(attributes)):
-                if search_filter is None:
-                    search_filter = ((ItemAttribute.attribute_definition_id == attribute_ids[i]) &
-                                     (ItemAttribute.value == attribute_values[i]))
-                else:
-                    search_filter = search_filter | ((ItemAttribute.attribute_definition_id == attribute_ids[i]) &
-                                                     (ItemAttribute.value == attribute_values[i]))
-            search_result = search_result.filter(search_filter)
+            # attribute_ids = [attribute.split('-', 1)[0] for attribute in attributes]
+            # attribute_values = [attribute.split('-', 1)[1] for attribute in attributes]
+
+            # search_result = search_result.join(ItemAttribute.item)
+            # search_filter = None
+            # for i in range(len(attributes)):
+            #     if search_filter is None:
+            #         search_filter = ((ItemAttribute.attribute_definition_id == attribute_ids[i]) &
+            #                          (ItemAttribute.value == attribute_values[i]))
+            #     else:
+            #         search_filter = search_filter | ((ItemAttribute.attribute_definition_id == attribute_ids[i]) &
+            #                                          (ItemAttribute.value == attribute_values[i]))
+            # search_result = search_result.filter(search_filter)
 
         if item_type != -1:
             search_result = search_result.filter(Item.type_id == item_type)
