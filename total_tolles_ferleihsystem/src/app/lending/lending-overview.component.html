@@ -11,8 +11,13 @@
                     <ng-container *ngIf="data?.get(letter).length > 0">
                         <div class="f3 gray" style="width: 1em">{{letter}}</div>
                         <ul class="mt0 list">
-                            <li class="min-w2 mb1 link underline-hover pointer" *ngFor="let lending of data?.get(letter)" routerLink="/lendings/{{lending.id}}">
-                                <span class="i black-80">User:</span> {{lending.user}} <span class="ml2 i black-80">Moderator:</span> {{lending.moderator}}
+                            <li class="min-w2 mb1" *ngFor="let lending of data?.get(letter)">
+                                <p class="mv0 link underline-hover pointer" routerLink="/lendings/{{lending.id}}">
+                                    <span class="i black-80">User:</span> {{lending.user}} <span class="ml2 i black-80">Moderator:</span> {{lending.moderator}}
+                                </p>
+                                <p class="mv0 pl3 black-80 link underline-hover pointer" *ngFor="let item_lending of lending.itemLendings" routerLink="/items/{{item_lending.item?.id}}">
+                                    {{item_lending.item?.name}} ({{item_lending.item?.type?.name}})
+                                </p>
                             </li>
                         </ul>
                     </ng-container>
