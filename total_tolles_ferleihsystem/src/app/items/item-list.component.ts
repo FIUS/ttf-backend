@@ -18,8 +18,9 @@ export class ItemListComponent implements OnInit, OnDestroy {
     alphabet: Array<string> = ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-    data: Map<string, any>;
-    deleted: any[];
+    data: Map<string, ApiObject[]>;
+    itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
+    deleted: ApiObject[];
 
     private subscription: Subscription;
     private deletedSubscription: Subscription;
@@ -30,8 +31,11 @@ export class ItemListComponent implements OnInit, OnDestroy {
         this.subscription = this.api.getItems().subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
-            data.forEach(itemType => {
-                let letter: string = itemType.name.toUpperCase().substr(0, 1);
+            data.forEach(item => {
+                this.api.getAttributes(item).take(1).subscribe(attributes => {
+                    this.itemAttributes.set(item.id, attributes);
+                });
+                let letter: string = item.name.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
                 }
@@ -49,7 +53,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
                 }
                 const list = map.get(letter);
                 if (list != null) {
-                    list.push(itemType);
+                    list.push(item);
                 }
             });
             this.data = map;
