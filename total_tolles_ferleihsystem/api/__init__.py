@@ -7,7 +7,7 @@ from flask import Blueprint, logging
 from flask_restplus import Api, abort
 from flask_jwt_extended import get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
-from .. import app, jwt
+from .. import app, JWT
 from ..login import User, UserRole
 
 
@@ -68,43 +68,43 @@ api = Api(api_blueprint, version='0.1', title='TTF API', doc='/doc/',
           description='API for TTF.')
 
 
-@jwt.user_identity_loader
+@JWT.user_identity_loader
 def load_user_identity(user: User):
     return user.name
 
 
-@jwt.user_claims_loader
+@JWT.user_claims_loader
 def load_user_claims(user: User):
     return user.role.value
 
 
-@jwt.expired_token_loader
+@JWT.expired_token_loader
 def expired_token():
     message = 'Token is expired.'
     log_unauthorized(message)
     abort(401, message)
 
 
-@jwt.invalid_token_loader
+@JWT.invalid_token_loader
 def invalid_token(message: str):
     log_unauthorized(message)
     abort(401, message)
 
 
-@jwt.unauthorized_loader
+@JWT.unauthorized_loader
 def unauthorized(message: str):
     log_unauthorized(message)
     abort(401, message)
 
 
-@jwt.needs_fresh_token_loader
+@JWT.needs_fresh_token_loader
 def stale_token():
     message = 'The JWT Token is not fresh. Please request a new Token directly with the /auth resource.'
     log_unauthorized(message)
     abort(403, message)
 
 
-@jwt.revoked_token_loader
+@JWT.revoked_token_loader
 def revoked_token():
     message = 'The Token has been revoked.'
     log_unauthorized(message)

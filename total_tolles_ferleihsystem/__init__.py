@@ -46,7 +46,7 @@ db = SQLAlchemy(app)  # type: SQLAlchemy
 bcrypt = Bcrypt(app)  # type: Bcrypt
 
 # Setup JWT
-jwt = JWTManager(app)  # type: JWTManager
+JWT = JWTManager(app)  # type: JWTManager
 
 # Setup Headers
 CORS(app)
