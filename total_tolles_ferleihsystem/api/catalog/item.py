@@ -7,9 +7,9 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from .. import api, satisfies_role
+from .. import API, satisfies_role
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET
-from ... import db
+from ... import DB
 from ...login import UserRole
 
 from ...db_models.item import Item, ItemToTag, ItemAttribute, ItemToItem
@@ -17,7 +17,7 @@ from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemT
 from ...db_models.tag import TagToAttributeDefinition, Tag
 
 PATH: str = '/catalog/item'
-ANS = api.namespace('item', description='Items', path=PATH)
+ANS = API.namespace('item', description='Items', path=PATH)
 
 
 @ANS.route('/')
@@ -27,8 +27,8 @@ class ItemList(Resource):
     """
 
     @jwt_required
-    @api.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
-    @api.marshal_list_with(ITEM_GET)
+    @API.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
+    @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self):
         """
@@ -55,8 +55,8 @@ class ItemList(Resource):
         new = Item(**request.get_json())
 
         try:
-            db.session.add(new)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.commit()
             item_id = new.id
             type_id = new.type_id
             item_type_attribute_definitions = (ItemTypeToAttributeDefinition
@@ -68,8 +68,8 @@ class ItemList(Resource):
                 attributes.append(ItemAttribute(item_id,
                                                 element.attribute_definition_id,
                                                 "")) #TODO: Get default if possible.
-            db.session.add_all(attributes)
-            db.session.commit()
+            DB.session.add_all(attributes)
+            DB.session.commit()
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
             message = str(err)
@@ -85,7 +85,7 @@ class ItemDetail(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @api.marshal_with(ITEM_GET)
+    @API.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -110,7 +110,7 @@ class ItemDetail(Resource):
         if item is None:
             abort(404, 'Requested item not found!')
         item.deleted = True
-        db.session.commit()
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -126,7 +126,7 @@ class ItemDetail(Resource):
         if item is None:
             abort(404, 'Requested item not found!')
         item.deleted = False
-        db.session.commit()
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -150,7 +150,7 @@ class ItemDetail(Resource):
 
         item.update(**request.get_json())
         try:
-            db.session.commit()
+            DB.session.commit()
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
             message = str(err)
@@ -166,7 +166,7 @@ class ItemItemTags(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @api.marshal_with(ITEM_TAG_GET)
+    @API.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -184,7 +184,7 @@ class ItemItemTags(Resource):
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
     @ANS.response(409, 'Tag is already associated with this item!')
-    @api.marshal_with(ITEM_TAG_GET)
+    @API.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def post(self, item_id):
         """
@@ -217,9 +217,9 @@ class ItemItemTags(Resource):
                                                     element.attribute_definition_id,
                                                     "")) #TODO: Get default values
         try:
-            db.session.add(new)
-            db.session.add_all(new_attributes)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.add_all(new_attributes)
+            DB.session.commit()
             associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
             return [e.tag for e in associations]
         except IntegrityError as err:
@@ -256,8 +256,8 @@ class ItemItemTags(Resource):
             return '', 204
 
         try:
-            db.session.delete(association)
-            db.session.commit()
+            DB.session.delete(association)
+            DB.session.commit()
             return '', 204
         except IntegrityError:
             abort(500)
@@ -270,7 +270,7 @@ class ItemAttributeList(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @api.marshal_with(ATTRIBUTE_GET)
+    @API.marshal_with(ATTRIBUTE_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -290,7 +290,7 @@ class ItemAttributeDetail(Resource):
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
-    @api.marshal_with(ATTRIBUTE_GET)
+    @API.marshal_with(ATTRIBUTE_GET)
     # pylint: disable=R0201
     def get(self, item_id, attribute_definition_id):
         """
@@ -316,7 +316,7 @@ class ItemAttributeDetail(Resource):
     @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
-    @api.marshal_with(ATTRIBUTE_GET)
+    @API.marshal_with(ATTRIBUTE_GET)
     # pylint: disable=R0201
     def put(self, item_id, attribute_definition_id):
         """
@@ -338,7 +338,7 @@ class ItemAttributeDetail(Resource):
 
         attribute.value = value
         try:
-            db.session.commit()
+            DB.session.commit()
             return attribute
         except IntegrityError:
             abort(500)
@@ -351,7 +351,7 @@ class ItemContainedItems(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @api.marshal_with(ITEM_GET)
+    @API.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -370,7 +370,7 @@ class ItemContainedItems(Resource):
     @ANS.response(400, 'Requested item (to be contained) not found!')
     @ANS.response(400, 'This item can not contain that item.')
     @ANS.response(409, 'Subitem is already a subitem of this item!')
-    @api.marshal_with(ITEM_GET)
+    @API.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def post(self, item_id):
         """
@@ -396,8 +396,8 @@ class ItemContainedItems(Resource):
 
         new = ItemToItem(item_id, contained_item_id)
         try:
-            db.session.add(new)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.commit()
             associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
             return [e.item for e in associations]
         except IntegrityError as err:
@@ -432,8 +432,8 @@ class ItemContainedItems(Resource):
         if association is None:
             return '', 204
         try:
-            db.session.delete(association)
-            db.session.commit()
+            DB.session.delete(association)
+            DB.session.commit()
             return '', 204
         except IntegrityError:
             abort(500)

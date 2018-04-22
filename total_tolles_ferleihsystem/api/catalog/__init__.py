@@ -2,7 +2,7 @@
 Catalog API Module
 """
 
-from .. import api
+from .. import API
 
 from . import item_type
 from . import item_tag

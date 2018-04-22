@@ -5,9 +5,9 @@ This Module should only be loaded in debug Mode.
 """
 
 from flask import Blueprint, render_template
-from .. import app
+from .. import APP
 
-if not app.config['DEBUG']:
+if not APP.config['DEBUG']:
     raise ImportWarning("This Module should only be loaded if DEBUG mode is active!")
 
 debug_blueprint = Blueprint('debug_routes', __name__, template_folder='templates',
@@ -23,4 +23,4 @@ def index():
                            title='Total Tolles Ferleihsystem – Debug')
 
 
-app.register_blueprint(debug_blueprint, url_prefix='/debug')
+APP.register_blueprint(debug_blueprint, url_prefix='/debug')

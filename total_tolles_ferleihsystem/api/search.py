@@ -5,28 +5,28 @@ This is the module containing the search endpoint.
 from flask import request
 from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional
-from . import api
+from . import API
 from ..db_models.item import Item, ItemToTag, ItemAttribute
 from .models import ITEM_GET
 
 PATH: str = '/search'
-ANS = api.namespace('search', description='The search resource', path=PATH)
+ANS = API.namespace('search', description='The search resource', path=PATH)
 
 @ANS.route('/')
 class Search(Resource):
     """
     Search Resource
     """
-    @api.doc(security=None)
+    @API.doc(security=None)
     @jwt_optional
-    @api.param('search', 'the string to search for', type=str, required=False, default='')
-    @api.param('limit', 'limit the amount of return values', type=int, required=False, default=1000)
-    @api.param('tag', 'Only show items with a tag of the given tag id', type=int, required=False, default='')
-    @api.param('attrib', 'Filter the results on specific attributes with a search string in the format: &lt;' +
+    @API.param('search', 'the string to search for', type=str, required=False, default='')
+    @API.param('limit', 'limit the amount of return values', type=int, required=False, default=1000)
+    @API.param('tag', 'Only show items with a tag of the given tag id', type=int, required=False, default='')
+    @API.param('attrib', 'Filter the results on specific attributes with a search string in the format: &lt;' +
                'attribute-id&gt;-&lt;search-string&gt;', type=str, required=False, default='')
-    @api.param('type', 'Only show items with the given type id', type=int, required=False, default='')
-    @api.param('deleted', 'If true also search deleted items', type=bool, required=False, default=False)
-    @api.marshal_list_with(ITEM_GET)
+    @API.param('type', 'Only show items with the given type id', type=int, required=False, default='')
+    @API.param('deleted', 'If true also search deleted items', type=bool, required=False, default=False)
+    @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self):
         """

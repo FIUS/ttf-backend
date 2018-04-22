@@ -4,10 +4,10 @@ Module containing the root resource of the API.
 
 from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional
-from . import api
+from . import API
 from .models import ROOT_MODEL, CATALOG_MODEL
 
-ANS = api.namespace('default', path='/')
+ANS = API.namespace('default', path='/')
 
 @ANS.route('/')
 class RootResource(Resource):
@@ -15,9 +15,9 @@ class RootResource(Resource):
     The API root element
     """
 
-    @api.doc(security=None)
+    @API.doc(security=None)
     @jwt_optional
-    @api.marshal_with(ROOT_MODEL)
+    @API.marshal_with(ROOT_MODEL)
     # pylint: disable=R0201
     def get(self):
         """
@@ -32,9 +32,9 @@ class CatalogResource(Resource):
     The catalog root element
     """
 
-    @api.doc(security=None)
+    @API.doc(security=None)
     @jwt_optional
-    @api.marshal_with(CATALOG_MODEL)
+    @API.marshal_with(CATALOG_MODEL)
     # pylint: disable=R0201
     def get(self):
         """

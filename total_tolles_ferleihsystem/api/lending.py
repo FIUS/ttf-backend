@@ -8,15 +8,15 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from . import api, satisfies_role
-from .. import db
+from . import API, satisfies_role
+from .. import DB
 
 from .models import LENDING_GET, LENDING_POST, LENDING_PUT, ID_LIST
 from ..login import UserRole
 from ..db_models.item import Lending, ItemToLending, Item
 
 PATH: str = '/lending'
-ANS = api.namespace('lending', description='Lendings', path=PATH)
+ANS = API.namespace('lending', description='Lendings', path=PATH)
 
 @ANS.route('/')
 class LendingList(Resource):
@@ -25,7 +25,7 @@ class LendingList(Resource):
     """
 
     @jwt_required
-    @api.marshal_list_with(LENDING_GET)
+    @API.marshal_list_with(LENDING_GET)
     # pylint: disable=R0201
     def get(self):
         """
@@ -62,12 +62,12 @@ class LendingList(Resource):
 
         new = Lending(**json)
         try:
-            db.session.add(new)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.commit()
             for element in items:
                 item_to_lendings.append(ItemToLending(element, new))
-            db.session.add_all(item_to_lendings)
-            db.session.commit()
+            DB.session.add_all(item_to_lendings)
+            DB.session.commit()
             return marshal(new, LENDING_GET), 201
         except IntegrityError as err:
             message = str(err)
@@ -84,7 +84,7 @@ class LendingDetail(Resource):
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested lending not found!')
-    @api.marshal_with(LENDING_GET)
+    @API.marshal_with(LENDING_GET)
     # pylint: disable=R0201
     def get(self, lending_id):
         """
@@ -107,8 +107,8 @@ class LendingDetail(Resource):
         lending = Lending.query.filter(Lending.id == lending_id).first()
         if lending is None:
             abort(404, 'Requested lending not found!')
-        db.session.delete(lending)
-        db.session.commit()
+        DB.session.delete(lending)
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -142,13 +142,13 @@ class LendingDetail(Resource):
 
         lending.update(**request.get_json())
         try:
-            db.session.commit()
+            DB.session.commit()
             for element in ItemToLending.query.filter(ItemToLending.lending_id == lending_id).all():
-                db.session.delete(element)
+                DB.session.delete(element)
             for element in items:
                 item_to_lendings.append(ItemToLending(element, lending))
-            db.session.add_all(item_to_lendings)
-            db.session.commit()
+            DB.session.add_all(item_to_lendings)
+            DB.session.commit()
             return marshal(lending, LENDING_GET), 200
         except IntegrityError as err:
             message = str(err)
@@ -161,7 +161,7 @@ class LendingDetail(Resource):
     @ANS.doc(model=LENDING_GET, body=ID_LIST)
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(400, 'Requested item is not part of this lending.')
-    @api.marshal_with(LENDING_GET)
+    @API.marshal_with(LENDING_GET)
     # pylint: disable=R0201
     def post(self, lending_id):
         """
@@ -177,8 +177,8 @@ class LendingDetail(Resource):
                 to_delete = ItemToLending.query.filter(ItemToLending.item_id == element).first()
                 if to_delete is None:
                     abort(400, "Requested item is not part of this lending:" + str(element))
-                db.session.delete(to_delete)
-            db.session.commit()
+                DB.session.delete(to_delete)
+            DB.session.commit()
             return lending
         except IntegrityError:
             abort(500)
