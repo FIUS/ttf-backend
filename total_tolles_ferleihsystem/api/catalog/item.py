@@ -15,6 +15,7 @@ from ...login import UserRole
 from ...db_models.item import Item, ItemToTag, ItemAttribute, ItemToItem
 from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemTypeToItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item'
 ANS = api.namespace('item', description='Items', path=PATH)
@@ -35,7 +36,7 @@ class ItemList(Resource):
         Get a list of all items currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        return Item.query.filter(Item.deleted == test_for).all()
+        return Item.query.filter(Item.deleted == test_for).order_by(Item.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
@@ -279,7 +280,7 @@ class ItemAttributeList(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(404, 'Requested item not found!')
 
-        return ItemAttribute.query.filter(ItemAttribute.item_id == item_id).all()
+        return ItemAttribute.query.filter(ItemAttribute.item_id == item_id).join(ItemAttribute.attribute_definition).order_by(AttributeDefinition.name).all()
 
 @ANS.route('/<int:item_id>/attributes/<int:attribute_definition_id>/')
 class ItemAttributeDetail(Resource):

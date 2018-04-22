@@ -34,7 +34,7 @@ class ItemTypeList(Resource):
         Get a list of all item types currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        return ItemType.query.filter(ItemType.deleted == test_for).all()
+        return ItemType.query.filter(ItemType.deleted == test_for).order_by(ItemType.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)

@@ -172,7 +172,7 @@ ITEM_GET = api.inherit('ItemGET', ITEM_PUT, ID, {
 
 ATTRIBUTE_LINKS = api.inherit('AttributeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_attribute_detail', absolute=True,
-                           url_data={'item_id' : 'id', 'attribute_definition_id' : 'attribute_definition_id'}),
+                           url_data={'item_id': 'item_id', 'attribute_definition_id': 'attribute_definition_id'}),
                    required=False),
 })
 
@@ -203,7 +203,7 @@ ITEM_LENDING = api.model('ItemLending', {
 LENDING_BASIC = api.model('LendingBASIC', {
     'moderator': fields.String(),
     'user': fields.String(),
-    'deposit': fields.String(example="Studentenausweiß"),
+    'deposit': fields.String(example="Studentenausweis"),
 })
 
 LENDING_POST = api.inherit('LendingPOST', LENDING_BASIC, {
