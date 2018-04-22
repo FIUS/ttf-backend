@@ -4,9 +4,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { DynamicFormComponent } from './forms/dynamic-form/dynamic-form.component';
 import { DynamicFormQuestionComponent } from './forms/dynamic-form/dynamic-form-question.component';
+import { SaveButtonComponent } from './forms/dynamic-form/save-button/save-button.component';
 import { TypeChooserComponent } from './forms/dynamic-form/type-chooser/type-chooser.component';
 import { BooleanInputComponent } from './forms/dynamic-form/boolean-input/boolean-input.component';
 import { NumberInputComponent } from './forms/dynamic-form/number-input/number-input.component';
+import { DateInputComponent } from './forms/dynamic-form/date-input/date-input.component';
 import { DurationInputComponent } from './forms/dynamic-form/duration-input/duration-input.component';
 
 import { QuestionControlService } from './forms/question-control.service';
@@ -39,9 +41,11 @@ import { ClickOutsideDirective } from './click-outside.directive';
         myTableComponent,
         DynamicFormComponent,
         DynamicFormQuestionComponent,
+        SaveButtonComponent,
         TypeChooserComponent,
         BooleanInputComponent,
         NumberInputComponent,
+        DateInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
     ],
@@ -64,9 +68,11 @@ import { ClickOutsideDirective } from './click-outside.directive';
         myTableComponent,
         DynamicFormComponent,
         DynamicFormQuestionComponent,
+        SaveButtonComponent,
         TypeChooserComponent,
         BooleanInputComponent,
         NumberInputComponent,
+        DateInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
 

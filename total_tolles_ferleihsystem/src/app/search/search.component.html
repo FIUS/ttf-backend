@@ -22,7 +22,7 @@
             <span class="mr2 w5">Filter Tags:</span>
             <ttf-tags-chooser [offline]="true" (selectedTags)="tags = $event; updateAttributes()"></ttf-tags-chooser>
         </div>
-        <div class="mt2 flex items-center" *ngFor="let attr of attributes">
+        <div class="mt2" *ngFor="let attr of attributes">
             <form *ngIf="attributeForms.get(attr.id) != null" [formGroup]="attributeForms.get(attr.id)">
                 <div *ngFor="let question of attributeQuestions.get(attr.id)" class="form-row">
                     <df-question [question]="question" [form]="attributeForms.get(attr.id)"></df-question>

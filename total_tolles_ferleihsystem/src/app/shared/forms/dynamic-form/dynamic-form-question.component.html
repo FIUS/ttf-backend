@@ -1,41 +1,44 @@
-<div class="pv2 flex" [formGroup]="form">
+<div class="pv2 flex items-center" [formGroup]="form">
     <div class="w2 tc f5">
         <i [hidden]="!isValid" class="fa fa-check"></i>
         <span class="tooltip tooltip-right" [attr.data-tooltip]="error" [hidden]="isValid" ><i class="red fa fa-exclamation"></i></span>
     </div>
+    <div class="flex-grow-1 flex flex-wrap">
+        <label class="f4 min-w4 mr2 ws-normal flex-grow-1" style="word-wrap: break-word" [attr.for]="question.key">
+            {{question.label}}
+        </label>
 
-    <label class="w5 f4 ws-normal" style="word-wrap: break-word" [attr.for]="question.key">
-        {{question.label}}
-    </label>
+        <div class="pl1 min-w5 flex-grow-1 flex items-center" >
+            <div [ngSwitch]="question.controlType" class="flex-grow-1">
 
-    <div class="pl1" >
-        <div [ngSwitch]="question.controlType">
+                <div *ngSwitchCase="'string'" class="flex bb b--gray">
+                    <input class="input-reset bn pa1 flex-grow-1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
+                </div>
 
-            <div *ngSwitchCase="'string'" class="w5 flex bb b--gray">
-                <input class="input-reset w5 bn pa1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
+                <div *ngSwitchCase="'text'" class="flex">
+                    <textarea class="min-w5 flex-grow-1" [formControlName]="question.key" [id]="question.key"></textarea>
+                </div>
+
+                <div *ngSwitchCase="'date'" class="min-w5 flex-grow-1 flex bb b--gray">
+                    <ttf-date-input class="flex flex-grow-1" [formControlName]="question.key" [question]="question"></ttf-date-input>
+                </div>
+
+                <ttf-type-chooser *ngSwitchCase="'type'" [formControlName]="question.key" [question]="question"></ttf-type-chooser>
+
+                <ttf-duration-input *ngSwitchCase="'duration'" [formControlName]="question.key" [question]="question"></ttf-duration-input>
+
+                <ttf-number-input *ngSwitchCase="'number'" [formControlName]="question.key" [question]="question"></ttf-number-input>
+
+                <ttf-boolean-input *ngSwitchCase="'boolean'" [formControlName]="question.key" [question]="question"></ttf-boolean-input>
+
+                <div *ngSwitchCase="'dropdown'" class="min-w5 flex-grow-1 flex bb b--gray gray hover-black">
+                    <select [id]="question.key" class="input-reset bn pa1 bg-white black flex-grow-1" [formControlName]="question.key" #inputSelect>
+                        <option *ngFor="let opt of question.options" [value]="opt">{{opt}}</option>
+                    </select>
+                    <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem; pointer-events: none" (click)="inputSelect.click($event)"><i class="f4 fa fa-angle-down"></i></div>
+                </div>
+
             </div>
-
-            <textarea *ngSwitchCase="'text'" class="w5" [formControlName]="question.key" [id]="question.key"></textarea>
-
-            <div *ngSwitchCase="'date'" class="w5 flex bb b--gray">
-                <input class="input-reset w5 bn pa1" [formControlName]="question.key" [id]="question.key" [type]="question.type">
-            </div>
-
-            <ttf-type-chooser *ngSwitchCase="'type'" [formControlName]="question.key" [question]="question"></ttf-type-chooser>
-
-            <ttf-duration-input *ngSwitchCase="'duration'" [formControlName]="question.key" [question]="question"></ttf-duration-input>
-
-            <ttf-number-input *ngSwitchCase="'number'" [formControlName]="question.key" [question]="question"></ttf-number-input>
-
-            <ttf-boolean-input *ngSwitchCase="'boolean'" [formControlName]="question.key" [question]="question"></ttf-boolean-input>
-
-            <div *ngSwitchCase="'dropdown'" class="w5 flex bb b--gray gray hover-black">
-                <select [id]="question.key" class="input-reset w5 bn pa1 bg-white black" [formControlName]="question.key" #inputSelect>
-                    <option *ngFor="let opt of question.options" [value]="opt">{{opt}}</option>
-                </select>
-                <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem; pointer-events: none" (click)="inputSelect.click($event)"><i class="f4 fa fa-angle-down"></i></div>
-            </div>
-
         </div>
 
         <!--div class="f6">{{question.label}} is required</div-->

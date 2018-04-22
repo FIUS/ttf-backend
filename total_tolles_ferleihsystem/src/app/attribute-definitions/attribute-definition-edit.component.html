@@ -4,8 +4,7 @@
         <i class="fa fa-trash"></i>
     </div>
     <div class="w-100 ph3 pv2" body>
-        <dynamic-form [objectModel]="'AttributeDefinitionPUT'" [startValues]="attrDef" (valid)="onValidChange($event)" (data)="onDataChange($event)"></dynamic-form>
-        <div class="button h2 pv1 ph2 br2 bg-light-silver link bg-animate" [ngClass]="{'hover-bg-light-blue': valid, 'pointer': valid, 'bg-light-red': !valid}" (click)="save($event)" >Save<i class="fa fa-check mr2"></i></div>
+        <dynamic-form [objectModel]="'AttributeDefinitionPUT'" [startValues]="attrDef" [showSaveButton]="true" (save)="save($event)"></dynamic-form>
     </div>
 </ttf-box>
 

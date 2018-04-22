@@ -202,7 +202,8 @@ export class ApiService implements OnInit {
         });
     }
 
-    search(search: string, type?: number, tags?: Set<number>): Observable<Array<ApiObject>> {
+    search(search: string, type?: number, tags?: Set<number>,
+           attributes?: Map<number, string>, deleted?: boolean): Observable<Array<ApiObject>> {
         const stream = new AsyncSubject<Array<ApiObject>>();
 
         const params: any = {search: search};
@@ -214,6 +215,17 @@ export class ApiService implements OnInit {
         if (tags != null && tags.size > 0) {
             params.tag = [];
             tags.forEach(tag => params.tag.push(tag));
+        }
+
+        if (attributes != null) {
+            params.attrib = [];
+            attributes.forEach((value, id) => {
+                params.attrib.push(id.toString() + '-' + value);
+            });
+        }
+
+        if (deleted != null) {
+            params.deleted = true;
         }
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {

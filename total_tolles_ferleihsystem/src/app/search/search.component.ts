@@ -51,12 +51,22 @@ export class SearchComponent  {
         this.data = new Map<string, ApiObject[]>();
     }
 
-    search() {
+    search = () => {
         this.searchDone = false;
         if (this.restrictToType != null && this.restrictToType >= 0) {
             this.type = this.restrictToType;
         }
-        this.api.search(this.searchstring, this.type, this.tags).subscribe(data => {
+        const attributes = new Map<number, string>();
+        if (this.attributes != null) {
+            this.attributes.forEach(attr => {
+                if (this.attributeForms.get(attr.id).valid &&
+                    this.attributeForms.get(attr.id).value[attr.name] != null &&
+                    !(attr.type === 'string' && this.attributeForms.get(attr.id).value[attr.name].length === 0)) {
+                    attributes.set(attr.id, JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]))
+                }
+            });
+        }
+        this.api.search(this.searchstring, this.type, this.tags, attributes).subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(item => {
@@ -102,7 +112,10 @@ export class SearchComponent  {
         .distinct(attr => attr.id)
         .toArray()
         .map(attrs => attrs.sort((a, b) => a.type.localeCompare(b.type)).sort((a, b) => a.name.localeCompare(b.name)))
-        .subscribe(data => this.attributes = data);
+        .subscribe(attributes => {
+            this.attributes = attributes;
+            attributes.forEach(this.getQuestion);
+        });
 
         const finished = [];
         if (this.type >= 0) {
@@ -124,7 +137,7 @@ export class SearchComponent  {
         Observable.forkJoin(finished).subscribe(() => typeAndTagsSubject.complete());
     }
 
-    getQuestion(attribute_definition) {
+    getQuestion = (attribute_definition) => {
         let schema: any = {};
         if (attribute_definition.jsonschema != null && attribute_definition.jsonschema !== '') {
             schema = JSON.parse(attribute_definition.jsonschema);

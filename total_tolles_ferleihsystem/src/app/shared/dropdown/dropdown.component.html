@@ -1,6 +1,6 @@
-<div class="dropdown relative" [ngClass]="{'fit-content': fitContent}" (clickOutside)="closeDropdown()">
+<div class="dropdown relative flex-grow-1" [ngClass]="{'fit-content': fitContent}" (clickOutside)="closeDropdown()">
     <ng-content select="[content]"></ng-content>
-    <div class="dropdown-content z-1 absolute br bb bl b--gray bg-near-white overflow-y-auto overflow-x-none" [ngClass]="{'dn': !open, 'w5': fitContent, 'w-100': !fitContent}">
+    <div class="dropdown-content z-1 absolute w-100 br bb bl b--gray bg-near-white overflow-y-auto overflow-x-none" [ngClass]="{'dn': !open}">
         <ng-content select="[dropdown-content]"></ng-content>
     </div>
 </div>
