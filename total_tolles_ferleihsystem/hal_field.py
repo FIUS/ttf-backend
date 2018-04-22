@@ -4,7 +4,7 @@ from flask_restplus.fields import Raw, Nested, StringMixin, MarshallingError, ge
 from flask import url_for, request
 from typing import Dict, List, Union
 
-from . import app
+from . import APP
 
 
 class NestedFields(Nested):
@@ -92,7 +92,7 @@ class UrlData():
         for key in self.url_data:
             value = get_value(self.url_data[key], obj)
             if value is None:
-                app.logger.debug('Could not build url because some provided values were none.\n' +
+                APP.logger.debug('Could not build url because some provided values were none.\n' +
                                  'UrlParam: "%s", ObjectKey: "%s"',
                                  key, self.url_data[key])
                 print(obj)

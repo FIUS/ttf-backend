@@ -7,15 +7,15 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from .. import api, satisfies_role
+from .. import API, satisfies_role
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT
-from ... import db
+from ... import DB
 from ...login import UserRole
 
 from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/attribute_definitions'
-ANS = api.namespace('attribute_definition', description='The attribute definitions', path=PATH)
+ANS = API.namespace('attribute_definition', description='The attribute definitions', path=PATH)
 
 
 @ANS.route('/')
@@ -25,8 +25,8 @@ class AttributeDefinitionList(Resource):
     """
 
     @jwt_required
-    @api.param('deleted', 'get all deleted attributes (and only these)', type=bool, required=False, default=False)
-    @api.marshal_list_with(ATTRIBUTE_DEFINITION_GET)
+    @API.param('deleted', 'get all deleted attributes (and only these)', type=bool, required=False, default=False)
+    @API.marshal_list_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def get(self):
         """
@@ -47,8 +47,8 @@ class AttributeDefinitionList(Resource):
         """
         new = AttributeDefinition(**request.get_json())
         try:
-            db.session.add(new)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.commit()
             return marshal(new, ATTRIBUTE_DEFINITION_GET), 201
         except IntegrityError as err:
             message = str(err)
@@ -63,7 +63,7 @@ class AttributeDefinitionDetail(Resource):
     """
 
     @jwt_required
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @API.marshal_with(ATTRIBUTE_DEFINITION_GET)
     @ANS.response(404, 'Requested attribute not found!')
     # pylint: disable=R0201
     def get(self, definition_id):
@@ -88,7 +88,7 @@ class AttributeDefinitionDetail(Resource):
         if attribute is None:
             abort(404, 'Requested attribute not found!')
         attribute.deleted = True
-        db.session.commit()
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -104,7 +104,7 @@ class AttributeDefinitionDetail(Resource):
         if attribute is None:
             abort(404, 'Requested attribute not found!')
         attribute.deleted = False
-        db.session.commit()
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -122,7 +122,7 @@ class AttributeDefinitionDetail(Resource):
             abort(404, 'Requested attribute not found!')
         attribute.update(**request.get_json())
         try:
-            db.session.commit()
+            DB.session.commit()
             return marshal(attribute, ATTRIBUTE_DEFINITION_GET), 200
         except IntegrityError as err:
             message = str(err)

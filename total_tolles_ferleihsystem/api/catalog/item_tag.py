@@ -7,16 +7,16 @@ from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
-from .. import api, satisfies_role
+from .. import API, satisfies_role
 from ..models import ITEM_TAG_GET, ITEM_TAG_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TAG_PUT
-from ... import db
+from ... import DB
 from ...login import UserRole
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
 from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item_tags'
-ANS = api.namespace('item_tag', description='ItemTags', path=PATH)
+ANS = API.namespace('item_tag', description='ItemTags', path=PATH)
 
 
 @ANS.route('/')
@@ -26,8 +26,8 @@ class ItemTagList(Resource):
     """
 
     @jwt_required
-    @api.param('deleted', 'get all deleted item tags (and only these)', type=bool, required=False, default=False)
-    @api.marshal_list_with(ITEM_TAG_GET)
+    @API.param('deleted', 'get all deleted item tags (and only these)', type=bool, required=False, default=False)
+    @API.marshal_list_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self):
         """
@@ -48,8 +48,8 @@ class ItemTagList(Resource):
         """
         new = Tag(**request.get_json())
         try:
-            db.session.add(new)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.commit()
             return marshal(new, ITEM_TAG_GET), 201
         except IntegrityError as err:
             message = str(err)
@@ -65,7 +65,7 @@ class ItemTagDetail(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item tag not found!')
-    @api.marshal_with(ITEM_TAG_GET)
+    @API.marshal_with(ITEM_TAG_GET)
     # pylint: disable=R0201
     def get(self, tag_id):
         """
@@ -89,7 +89,7 @@ class ItemTagDetail(Resource):
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
         item_tag.deleted = True
-        db.session.commit()
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -105,7 +105,7 @@ class ItemTagDetail(Resource):
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
         item_tag.deleted = False
-        db.session.commit()
+        DB.session.commit()
         return "", 204
 
     @jwt_required
@@ -123,7 +123,7 @@ class ItemTagDetail(Resource):
             abort(404, 'Requested item tag not found!')
         item_tag.update(**request.get_json())
         try:
-            db.session.commit()
+            DB.session.commit()
             return marshal(item_tag, ITEM_TAG_GET), 200
         except IntegrityError as err:
             message = str(err)
@@ -141,7 +141,7 @@ class ItemTagAttributes(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item tag not found!')
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @API.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def get(self, tag_id):
         """
@@ -163,7 +163,7 @@ class ItemTagAttributes(Resource):
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(409, 'Attribute definition is already associated with this tag!')
-    @api.marshal_with(ATTRIBUTE_DEFINITION_GET)
+    @API.marshal_with(ATTRIBUTE_DEFINITION_GET)
     # pylint: disable=R0201
     def post(self, tag_id):
         """
@@ -178,8 +178,8 @@ class ItemTagAttributes(Resource):
 
         new = TagToAttributeDefinition(tag_id, attribute_definition_id)
         try:
-            db.session.add(new)
-            db.session.commit()
+            DB.session.add(new)
+            DB.session.commit()
             associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
             return [e.attribute_definition for e in associations]
         except IntegrityError as err:
@@ -213,8 +213,8 @@ class ItemTagAttributes(Resource):
         if association is None:
             return '', 204
         try:
-            db.session.delete(association)
-            db.session.commit()
+            DB.session.delete(association)
+            DB.session.commit()
             return '', 204
         except IntegrityError:
             abort(500)

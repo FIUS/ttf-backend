@@ -1,41 +1,42 @@
-from flask import url_for, request
+"""
+Model for all the available authentication endpoints
+"""
 from flask_restplus import Resource, fields, abort
 from flask_jwt_extended import jwt_required, create_access_token, \
                                get_jwt_identity, create_refresh_token, \
                                get_jwt_claims, jwt_refresh_token_required
 
-from . import api as api
-from . import auth_logger, satisfies_role
+from . import API
+from . import AUTH_LOGGER
 from .models import AUTHENTICATION_ROUTES_MODEL
-from .. import jwt
-from .. import app
+from .. import APP
 
-from ..login import User, UserRole, LoginService, BasicAuthProvider
+from ..login import LoginService, BasicAuthProvider
 
 
-ns = api.namespace('auth', description='Authentication Resources:')
+ANS = API.namespace('auth', description='Authentication Resources:')
 
-login_service: LoginService
-if app.config['DEBUG']:
-    login_service = LoginService(BasicAuthProvider())
+LOGIN_SERVICE: LoginService
+if APP.config['DEBUG']:
+    LOGIN_SERVICE = LoginService(BasicAuthProvider())
 else:
     #FIXME add LDAP auth provider here
-    login_service = LoginService(None)
+    LOGIN_SERVICE = LoginService(None)
 
-user_auth_model = api.model('UserAuth', {
+USER_AUTH_MODEL = API.model('UserAuth', {
     'username': fields.String(required=True, example='admin'),
     'password': fields.String(required=True, example='admin')
 })
 
-jwt_response = api.model('JWT', {
+JWT_RESPONSE = API.model('JWT', {
     'access_token': fields.String(required=True)
 })
 
-jwt_response_full = api.inherit('JWT_FULL', jwt_response, {
+JWT_RESPONSE_FULL = API.inherit('JWT_FULL', JWT_RESPONSE, {
     'refresh_token': fields.String(reqired=True)
 })
 
-check_response = api.model('check', {
+CHECK_RESPONSE = API.model('check', {
     'username': fields.String(required=True, readonly=True),
     'role': fields.Integer(required=True, readonly=True)
 })
@@ -43,38 +44,41 @@ check_response = api.model('check', {
 
 def login_user():
     """Login a user."""
-    username = api.payload.get('username', None)
-    password = api.payload.get('password', None)
-    user = login_service.get_user_by_id(username)
+    username = API.payload.get('username', None)
+    password = API.payload.get('password', None)
+    user = LOGIN_SERVICE.get_user_by_id(username)
     if not user:
-        auth_logger.debug('Attempted login with unknown username "%s".', username)
+        AUTH_LOGGER.debug('Attempted login with unknown username "%s".', username)
         abort(401, 'Wrong username or pasword.')
-    if not login_service.check_password(user, password):
-        auth_logger.error('Attempted login with invalid password for user "%s"', username)
+    if not LOGIN_SERVICE.check_password(user, password):
+        AUTH_LOGGER.error('Attempted login with invalid password for user "%s"', username)
         abort(401, 'Wrong username or pasword.')
 
-    auth_logger.info('New login from user "%s"', username)
+    AUTH_LOGGER.info('New login from user "%s"', username)
     return user
 
 
-@ns.route('/')
+@ANS.route('/')
 class AuthenticationRoutes(Resource):
     """Authentication Routes Hal resource."""
 
-    @api.doc(security=None)
-    @api.marshal_with(AUTHENTICATION_ROUTES_MODEL)
+    @API.doc(security=None)
+    @API.marshal_with(AUTHENTICATION_ROUTES_MODEL)
+    # pylint: disable=R0201
     def get(self):
+        """Authentication root resource."""
         return
 
-@ns.route('/guest-login/')
+@ANS.route('/guest-login/')
 class GuestLogin(Resource):
     """Login resource."""
 
-    @api.doc(security=None)
-    @api.marshal_with(jwt_response_full)
+    @API.doc(security=None)
+    @API.marshal_with(JWT_RESPONSE_FULL)
+    # pylint: disable=R0201
     def post(self):
         """Login as guest to get a new token and refresh token."""
-        user = login_service.get_anonymous_user()
+        user = LOGIN_SERVICE.get_anonymous_user()
 
         ret = {
             'access_token': create_access_token(identity=user, fresh=True),
@@ -82,14 +86,15 @@ class GuestLogin(Resource):
         }
         return ret
 
-@ns.route('/login/')
+@ANS.route('/login/')
 class Login(Resource):
     """Login resource."""
 
-    @api.doc(security=None)
-    @api.marshal_with(jwt_response_full)
-    @api.response(401, 'Wrong username or pasword.')
-    @api.expect(user_auth_model)
+    @API.doc(security=None)
+    @API.expect(USER_AUTH_MODEL)
+    @API.response(401, 'Wrong username or pasword.')
+    @API.marshal_with(JWT_RESPONSE_FULL)
+    # pylint: disable=R0201
     def post(self):
         """Login with username and password to get a new token and refresh token."""
         user = login_user()
@@ -101,14 +106,15 @@ class Login(Resource):
         return ret
 
 
-@ns.route('/fresh-login/')
+@ANS.route('/fresh-login/')
 class FreshLogin(Resource):
     """Resource for a fresh login token without refresh token."""
 
-    @api.doc(security=None)
-    @api.marshal_with(jwt_response)
-    @api.response(401, 'Wrong username or pasword.')
-    @api.expect(user_auth_model)
+    @API.doc(security=None)
+    @API.expect(USER_AUTH_MODEL)
+    @API.response(401, 'Wrong username or pasword.')
+    @API.marshal_with(JWT_RESPONSE)
+    # pylint: disable=R0201
     def post(self):
         """Login with username and password to get a fresh token."""
         user = login_user()
@@ -119,13 +125,14 @@ class FreshLogin(Resource):
         return ret
 
 
-@ns.route('/check/')
+@ANS.route('/check/')
 class Check(Resource):
     """Resource to check access tokens."""
 
-    @api.marshal_with(check_response)
-    @api.response(401, 'Not Authenticated')
     @jwt_required
+    @API.response(401, 'Not Authenticated')
+    @API.marshal_with(CHECK_RESPONSE)
+    # pylint: disable=R0201
     def get(self):
         """Check your current access token."""
         ret = {
@@ -135,21 +142,22 @@ class Check(Resource):
         return ret
 
 
-@ns.route('/refresh/')
+@ANS.route('/refresh/')
 class Refresh(Resource):
     """Resource to refresh access tokens."""
 
-    @api.doc(security=['jwt-refresh'])
-    @api.marshal_with(jwt_response)
-    @api.response(401, 'Wrong username or pasword.')
+    @API.doc(security=['jwt-refresh'])
     @jwt_refresh_token_required
+    @API.response(401, 'Wrong username or pasword.')
+    @API.marshal_with(JWT_RESPONSE)
+    # pylint: disable=R0201
     def post(self):
         """Create a new access token with a refresh token."""
         username = get_jwt_identity()
-        user = login_service.get_user_by_id(username)
+        user = LOGIN_SERVICE.get_user_by_id(username)
         if not user:
             abort(401, "User doesn't exist.")
-        auth_logger.debug('User "%s" asked for a new access token.', username)
+        AUTH_LOGGER.debug('User "%s" asked for a new access token.', username)
         new_token = create_access_token(identity=user, fresh=False)
         ret = {'access_token': new_token}
         return ret, 200

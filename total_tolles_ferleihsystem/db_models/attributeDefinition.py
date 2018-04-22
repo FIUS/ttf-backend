@@ -1,17 +1,17 @@
-from .. import db
+from .. import DB
 from . import STD_STRING_SIZE
 
 
-class AttributeDefinition (db.Model):
+class AttributeDefinition (DB.Model):
 
     __tablename__ = 'AttributeDefinition'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(STD_STRING_SIZE), unique=True)
-    type = db.Column(db.String)
-    jsonschema = db.Column(db.Text)
-    visible_for = db.Column(db.String)
-    deleted = db.Column(db.Boolean, default=False)
+    id = DB.Column(DB.Integer, primary_key=True)
+    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
+    type = DB.Column(DB.String)
+    jsonschema = DB.Column(DB.Text)
+    visible_for = DB.Column(DB.String)
+    deleted = DB.Column(DB.Boolean, default=False)
 
     def __init__(self, name: str, type: str, jsonschema: str, visible_for: str):
         self.name = name
@@ -24,4 +24,3 @@ class AttributeDefinition (db.Model):
         self.type = type
         self.jsonschema = jsonschema
         self.visible_for = visible_for
-        
