@@ -54,22 +54,9 @@ class Search(Resource):
         if attributes:
             for attribute in attributes:
                 search_result = search_result.join(ItemAttribute, aliased=True)
-                search_result = search_result.filter(ItemAttribute.item_id == attribute.split('-', 1)[0])
+                search_result = search_result.filter(ItemAttribute.attribute_definition_id ==
+                                                     attribute.split('-', 1)[0])
                 search_result = search_result.filter(ItemAttribute.value == attribute.split('-', 1)[1])
-
-            # attribute_ids = [attribute.split('-', 1)[0] for attribute in attributes]
-            # attribute_values = [attribute.split('-', 1)[1] for attribute in attributes]
-
-            # search_result = search_result.join(ItemAttribute.item)
-            # search_filter = None
-            # for i in range(len(attributes)):
-            #     if search_filter is None:
-            #         search_filter = ((ItemAttribute.attribute_definition_id == attribute_ids[i]) &
-            #                          (ItemAttribute.value == attribute_values[i]))
-            #     else:
-            #         search_filter = search_filter | ((ItemAttribute.attribute_definition_id == attribute_ids[i]) &
-            #                                          (ItemAttribute.value == attribute_values[i]))
-            # search_result = search_result.filter(search_filter)
 
         if item_type != -1:
             search_result = search_result.filter(Item.type_id == item_type)
