@@ -6,7 +6,7 @@ from flask import request
 from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional
 from . import API
-from ..db_models.item import Item, ItemToTag, ItemAttribute
+from ..db_models.item import Item, ItemToTag, ItemAttribute, ItemToLending
 from ..db_models.tag import Tag
 from .models import ITEM_GET
 
@@ -61,8 +61,7 @@ class Search(Resource):
             search_result = search_result.filter(~Item.deleted)
 
         if not lent:
-            #search_result = search_result.filter(~Item.is_currently_lent)
-            pass
+            search_result = search_result.join(ItemToLending, isouter=True).filter(ItemToLending.lending_id is None)
 
         if tags:
             search_result = search_result.join(ItemToTag)
