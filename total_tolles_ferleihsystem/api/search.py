@@ -7,6 +7,7 @@ from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional
 from . import API
 from ..db_models.item import Item, ItemToTag, ItemAttribute
+from ..db_models.tag import Tag
 from .models import ITEM_GET
 
 PATH: str = '/search'
@@ -32,23 +33,33 @@ class Search(Resource):
         """
         The actual search endpoint definition
         """
-        search_string = request.args.get('search', default='', type=str)
+        search = request.args.get('search', default='', type=str)
         limit = request.args.get('limit', default=1000, type=int)
         tags = request.args.getlist('tag', type=int)
         attributes = request.args.getlist('attrib', type=str)
         item_type = request.args.get('type', default=-1, type=int)
         deleted = request.args.get('deleted', default=False, type=lambda x: x == 'true')
 
+        search_string = '%' + search + '%'
         search_result = Item.query
 
-        if search_string:
-            search_result = search_result.filter(Item.name.like('%' + search_string + '%'))
+        if search:
+            search_condition = Item.name.like(search_string)
+
+            if not tags:
+                search_result = search_result.join(ItemToTag, isouter=True).join(Tag, isouter=True)
+                search_condition = search_condition | Tag.name.like(search_string)
+            if not attributes:
+                search_result = search_result.join(ItemAttribute, isouter=True)
+                search_condition = search_condition | ItemAttribute.value.like(search_string)
+
+            search_result = search_result.filter(search_condition)
 
         if not deleted:
             search_result = search_result.filter(~Item.deleted)
 
         if tags:
-            search_result = search_result.join(ItemToTag.item)
+            search_result = search_result.join(ItemToTag)
             search_result = search_result.filter(ItemToTag.tag_id.in_(tags))
 
         if attributes:
