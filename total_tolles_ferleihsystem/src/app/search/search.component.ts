@@ -12,8 +12,8 @@ import { StagingService } from '../navigation/staging-service';
 import { Subject, Observable, AsyncSubject } from 'rxjs/Rx';
 
 @Component({
-  selector: 'ttf-search',
-  templateUrl: './search.component.html'
+    selector: 'ttf-search',
+    templateUrl: './search.component.html'
 })
 export class SearchComponent  {
 
@@ -22,6 +22,8 @@ export class SearchComponent  {
     open: boolean = false;
 
     searchstring: string = '';
+    includeDeleted: boolean = false;
+    includeLent: boolean = true;
     type: number;
     tags: Set<number>;
     attributes: ApiObject[];
@@ -69,7 +71,7 @@ export class SearchComponent  {
                 }
             });
         }
-        this.api.search(this.searchstring, this.type, this.tags, attributes).subscribe(data => {
+        this.api.search(this.searchstring, this.type, this.tags, attributes, this.includeDeleted, this.includeLent).subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             const availableLetters = new Set<string>();
             this.alphabet.forEach(letter => map.set(letter, []));

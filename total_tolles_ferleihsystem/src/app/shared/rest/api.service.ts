@@ -203,7 +203,7 @@ export class ApiService implements OnInit {
     }
 
     search(search: string, type?: number, tags?: Set<number>,
-           attributes?: Map<number, string>, deleted?: boolean): Observable<Array<ApiObject>> {
+           attributes?: Map<number, string>, deleted?: boolean, lent?: boolean): Observable<Array<ApiObject>> {
         const stream = new AsyncSubject<Array<ApiObject>>();
 
         const params: any = {search: search};
@@ -225,7 +225,11 @@ export class ApiService implements OnInit {
         }
 
         if (deleted != null) {
-            params.deleted = true;
+            params.deleted = deleted;
+        }
+
+        if (lent != null) {
+            params.lent = lent;
         }
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {

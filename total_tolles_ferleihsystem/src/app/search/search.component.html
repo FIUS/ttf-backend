@@ -14,6 +14,18 @@
         </div>
     </div>
     <div [hidden]="!open">
+        <div class="mt2 flex items-center">
+            <span class="mr2 flex-grow-1 pointer" (click)="includeDeleted = !includeDeleted">
+                Include Deleted Items:
+                <i class="fa fa-fw fa-square-o" [hidden]="includeDeleted"></i>
+                <i class="fa fa-fw fa-check-square-o" [hidden]="!includeDeleted"></i>
+            </span>
+            <span class="mr2 flex-grow-1 pointer" (click)="includeLent = !includeLent">
+                Include Lent Items:
+                <i class="fa fa-fw fa-square-o" [hidden]="includeLent"></i>
+                <i class="fa fa-fw fa-check-square-o" [hidden]="!includeLent"></i>
+            </span>
+        </div>
         <div class="mt2 flex items-center" [ngClass]="{flex: !(restrictToType >= 0)}" [hidden]="restrictToType >= 0">
             <span class="mr2 w5">Filter Type:</span>
             <ttf-type-chooser [(ngModel)]="type" (ngModelChange)="updateAttributes()" [allowDeselect]="true"></ttf-type-chooser>
@@ -82,7 +94,7 @@
                 </ul>
             </ng-container>
         </div>
-        <p class="tr mv0 link gray hover-black pointer" [ngClass]="{dn: !(filter == null || filter === letter)}" [hidden]="data?.get(letter)?.length < 5" (click)="stageAll(letter)">stage all {{data?.get(letter)?.length}} items</p>
+        <p class="tr mv0 link gray hover-black pointer" [ngClass]="{dn: filter !== letter}" [hidden]="data?.get(letter)?.length < 5" (click)="stageAll(letter)">stage all {{data?.get(letter)?.length}} items</p>
     </ng-container>
     <p class="tr mv0 link gray hover-black pointer" [hidden]="nrOfItemsFound < 5" (click)="stageAll()" *ngIf="availableLetters?.size > 1 && filter == null">stage all {{nrOfItemsFound}} items</p>
 </div>
