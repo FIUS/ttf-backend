@@ -8,10 +8,10 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
-from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT
+from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT, ATTRIBUTE_DEFINITION_VALUES
 from ... import DB
 from ...login import UserRole
-
+from ...db_models.item import ItemAttribute
 from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/attribute_definitions'
@@ -129,3 +129,25 @@ class AttributeDefinitionDetail(Resource):
             if 'UNIQUE constraint failed' in message:
                 abort(409, 'Name is not unique!')
             abort(500)
+
+
+@ANS.route('/<int:definition_id>/values')
+class AttributeDefinitionValues(Resource):
+    """
+    The current values of a attribute
+    """
+    @jwt_required
+    @ANS.response(404, 'Requested attribute not found!')
+    @API.marshal_with(ATTRIBUTE_DEFINITION_VALUES)
+    # pylint: disable=R0201
+    def get(self, definition_id):
+        """
+        Get all values of this attribute definition
+        """
+        if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
+            abort(404, 'Requested attribute not found!')
+
+        return {
+            'id': definition_id,
+            'values': [item.value for item in ItemAttribute.query.filter(ItemAttribute.attribute_definition_id == definition_id)]
+        }
