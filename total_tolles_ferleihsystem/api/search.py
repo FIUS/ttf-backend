@@ -61,7 +61,7 @@ class Search(Resource):
             search_result = search_result.filter(~Item.deleted)
 
         if not lent:
-            #search_result = search_result.filter(~Item.is_currently_lended)
+            #search_result = search_result.filter(~Item.is_currently_lent)
             pass
 
         if tags:
