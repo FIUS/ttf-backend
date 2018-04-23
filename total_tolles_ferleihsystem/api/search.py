@@ -27,6 +27,7 @@ class Search(Resource):
                'attribute-id&gt;-&lt;search-string&gt;', type=str, required=False, default='')
     @API.param('type', 'Only show items with the given type id', type=int, required=False, default='')
     @API.param('deleted', 'If true also search deleted items', type=bool, required=False, default=False)
+    @API.param('lent', 'If true also search lent items', type=bool, required=False, default=False)
     @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self):
@@ -39,6 +40,7 @@ class Search(Resource):
         attributes = request.args.getlist('attrib', type=str)
         item_type = request.args.get('type', default=-1, type=int)
         deleted = request.args.get('deleted', default=False, type=lambda x: x == 'true')
+        lent = request.args.get('lent', default=False, type=lambda x: x == 'true')
 
         search_string = '%' + search + '%'
         search_result = Item.query
@@ -57,6 +59,10 @@ class Search(Resource):
 
         if not deleted:
             search_result = search_result.filter(~Item.deleted)
+
+        if not lent:
+            #search_result = search_result.filter(~Item.is_currently_lended)
+            pass
 
         if tags:
             search_result = search_result.join(ItemToTag)
