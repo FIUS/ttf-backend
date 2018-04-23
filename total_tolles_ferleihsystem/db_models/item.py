@@ -45,7 +45,7 @@ class Item(DB.Model):
     @property
     def lending_id(self):
         """
-        The lending_id this item is currently associated with. -1 if not lended.
+        The lending_id this item is currently associated with. -1 if not lent.
         """
         lending_to_item = ItemToLending.query.filter(ItemToLending.item_id == self.id).first()
         if lending_to_item is None:
@@ -53,9 +53,9 @@ class Item(DB.Model):
         return lending_to_item.lending_id
 
     @property
-    def is_currently_lended(self):
+    def is_currently_lent(self):
         """
-        If the item is currently lended.
+        If the item is currently lent.
         """
         return self.lending_id != -1
 

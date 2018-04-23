@@ -39,7 +39,7 @@ class LendingList(Resource):
     @ANS.response(201, 'Created.')
     @ANS.response(400, "Item not found")
     @ANS.response(400, "Item not lendable")
-    @ANS.response(400, "Item already lended")
+    @ANS.response(400, "Item already lent")
     # pylint: disable=R0201
     def post(self):
         """
@@ -56,8 +56,8 @@ class LendingList(Resource):
                 abort(400, "Item not found:" + str(element))
             if not item.type.lendable:
                 abort(400, "Item not lendable:" + str(element))
-            if item.is_currently_lended:
-                abort(400, "Item already lended:" + str(element))
+            if item.is_currently_lent:
+                abort(400, "Item already lent:" + str(element))
             items.append(item)
 
         new = Lending(**json)
@@ -136,8 +136,8 @@ class LendingDetail(Resource):
                 abort(400, "Item not found:" + str(element))
             if not item.type.lendable:
                 abort(400, "Item not lendable:" + str(element))
-            if item.is_currently_lended:
-                abort(400, "Item already lended:" + str(element))
+            if item.is_currently_lent:
+                abort(400, "Item already lent:" + str(element))
             items.append(item)
 
         lending.update(**request.get_json())
