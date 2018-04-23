@@ -29,6 +29,9 @@
                 </div>
             </form>
         </div>
+        <div class="bg-animate bg-near-white br2 flex hover-bg-light-silver items-center justify-center mt2 pa2" (click)="search()">
+            <i class="fa fa-search"></i> Search
+        </div>
     </div>
 </div>
 <div class="mt3" [hidden]="!searchDone">
@@ -43,7 +46,7 @@
                 <ul class="mt0 list">
                     <li class="min-w2 mb1 hide-child" *ngFor="let item of data?.get(letter)">
                         <p class="mv0">
-                            <span class="link underline-hover pointer" routerLink="/items/{{item.id}}" [hidden]="asSelector">{{item.name}}</span>
+                            <span class="b link underline-hover pointer" routerLink="/items/{{item.id}}" [hidden]="asSelector">{{item.name}}</span>
                             <span (click)="select(item)" class="underline-hover pointer" [hidden]="!asSelector">{{item.name}}</span>
                             <span class="i gray" [hidden]="!item?.is_currently_lended">lent</span>
                             <ng-container *ngIf="item?.type?.lendable && !item?.is_currently_lended && !asSelector">
@@ -57,15 +60,23 @@
                                     Type:
                                 </span>
                                 {{item.type?.name}}
-                            </span>
-                            <ng-container *ngIf="itemAttributes.has(item.id)">
-                                <span class="black-70" *ngFor="let attr of itemAttributes.get(item.id); let last = last">
-                                    <span class="b">
-                                        {{attr.attribute_definition?.name}}:
+                                <ng-container *ngIf="itemTags.get(item.id)?.length > 0">
+                                    <span class="ml3 b">
+                                        Tags:
                                     </span>
-                                    {{attr.value}}{{last ? '' : ', '}}
+                                    <span class="black-70" *ngFor="let tag of itemTags.get(item.id); let last = last">
+                                        {{tag?.name}}{{last ? '' : ', '}}
+                                    </span>
+                                </ng-container>
+                            </span>
+                        </p>
+                        <p class="mv0 pl2" *ngIf="itemAttributes.get(item.id)?.length > 0">
+                            <span class="black-70" *ngFor="let attr of itemAttributes.get(item.id); let last = last">
+                                <span class="b">
+                                    {{attr.attribute_definition?.name}}:
                                 </span>
-                            </ng-container>
+                                {{attr.value}}{{last ? '' : ', '}}
+                            </span>
                         </p>
                     </li>
                 </ul>

@@ -19,6 +19,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, ApiObject[]>;
+    itemTags: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     deleted: ApiObject[];
 
@@ -32,6 +33,9 @@ export class ItemListComponent implements OnInit, OnDestroy {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(item => {
+                this.api.getTagsForItem(item).take(1).subscribe(tags => {
+                    this.itemTags.set(item.id, tags);
+                });
                 this.api.getAttributes(item).take(1).subscribe(attributes => {
                     this.itemAttributes.set(item.id, attributes);
                 });
