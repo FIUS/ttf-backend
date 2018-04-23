@@ -61,6 +61,11 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
             schema = JSON.parse(attribute.attribute_definition.jsonschema);
         }
         schema.type = attribute.attribute_definition.type;
+        if (attribute.attribute_definition.type === 'string') {
+            if (schema.maxLength == null || schema.maxLength > 253) {
+                schema.maxLength = 253;
+            }
+        }
         this.qs.getQuestionsFromScheme({
             type: 'object',
             properties: {
