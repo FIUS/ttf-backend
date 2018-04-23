@@ -35,6 +35,7 @@ export class SearchComponent  {
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, any>;
     availableLetters: Set<string>;
+    itemTags: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     nrOfItemsFound: number = 0;
 
@@ -74,6 +75,9 @@ export class SearchComponent  {
             this.alphabet.forEach(letter => map.set(letter, []));
             this.nrOfItemsFound = data.length;
             data.forEach(item => {
+                this.api.getTagsForItem(item).take(1).subscribe(tags => {
+                    this.itemTags.set(item.id, tags);
+                });
                 this.api.getAttributes(item).take(1).subscribe(attributes => {
                     this.itemAttributes.set(item.id, attributes);
                 });
