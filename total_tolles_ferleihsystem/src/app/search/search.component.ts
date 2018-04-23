@@ -152,6 +152,11 @@ export class SearchComponent  {
             schema = JSON.parse(attribute_definition.jsonschema);
         }
         schema.type = attribute_definition.type;
+        if (attribute_definition.type === 'string') {
+            if (schema.maxLength == null || schema.maxLength > 253) {
+                schema.maxLength = 253;
+            }
+        }
         this.qs.getQuestionsFromScheme({
             type: 'object',
             properties: {
