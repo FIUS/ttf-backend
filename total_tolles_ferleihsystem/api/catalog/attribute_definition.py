@@ -136,9 +136,8 @@ class AttributeDefinitionValues(Resource):
     """
     The current values of a attribute
     """
-    @jwt_required
+    @ANS.doc(model=ATTRIBUTE_DEFINITION_VALUES)
     @ANS.response(404, 'Requested attribute not found!')
-    @API.marshal_with(ATTRIBUTE_DEFINITION_VALUES)
     # pylint: disable=R0201
     def get(self, definition_id):
         """
@@ -147,7 +146,4 @@ class AttributeDefinitionValues(Resource):
         if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
             abort(404, 'Requested attribute not found!')
 
-        return {
-            'id': definition_id,
-            'values': [item.value for item in ItemAttribute.query.filter(ItemAttribute.attribute_definition_id == definition_id)]
-        }
+        return [item.value for item in ItemAttribute.query.filter(ItemAttribute.attribute_definition_id == definition_id)]

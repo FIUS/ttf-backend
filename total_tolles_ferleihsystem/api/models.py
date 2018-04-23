@@ -132,9 +132,11 @@ ATTRIBUTE_DEFINITION_GET = API.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFIN
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
 })
 
-ATTRIBUTE_DEFINITION_VALUES = API.model('AttributeDefinitionValues', {
-    'id': fields.Integer(),
-    'values': fields.List(fields.String(max_length=STD_STRING_SIZE))
+ATTRIBUTE_DEFINITION_VALUES = API.schema_model('AttributeDefinitionVALUE', {
+    "type": "array",
+    "items": {
+        "type": "string",
+    }
 })
 
 ID = API.model('Id', {
