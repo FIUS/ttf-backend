@@ -136,6 +136,7 @@ class AttributeDefinitionValues(Resource):
     """
     The current values of a attribute
     """
+    @jwt_required
     @ANS.doc(model=ATTRIBUTE_DEFINITION_VALUES)
     @ANS.response(404, 'Requested attribute not found!')
     # pylint: disable=R0201
