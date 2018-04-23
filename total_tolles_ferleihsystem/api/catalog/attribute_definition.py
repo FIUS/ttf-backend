@@ -33,7 +33,7 @@ class AttributeDefinitionList(Resource):
         Get a list of all attribute definitions currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        return AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for).all()
+        return AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for).order_by(AttributeDefinition.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)

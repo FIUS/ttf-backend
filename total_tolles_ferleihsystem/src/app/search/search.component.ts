@@ -34,7 +34,9 @@ export class SearchComponent  {
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, any>;
-    result: ApiObject[];
+    availableLetters: Set<string>;
+    itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
+    nrOfItemsFound: number = 0;
 
     filter: string;
 
@@ -68,8 +70,13 @@ export class SearchComponent  {
         }
         this.api.search(this.searchstring, this.type, this.tags, attributes).subscribe(data => {
             const map = new Map<string, ApiObject[]>();
+            const availableLetters = new Set<string>();
             this.alphabet.forEach(letter => map.set(letter, []));
+            this.nrOfItemsFound = data.length;
             data.forEach(item => {
+                this.api.getAttributes(item).take(1).subscribe(attributes => {
+                    this.itemAttributes.set(item.id, attributes);
+                });
                 let letter: string = item.name.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
@@ -86,18 +93,20 @@ export class SearchComponent  {
                 if (letter.match(/^[A-Z]/) == null) {
                     letter = '#';
                 }
+                availableLetters.add(letter);
                 const list = map.get(letter);
                 if (list != null) {
                     list.push(item);
                 }
             });
             this.data = map;
+            this.availableLetters = availableLetters;
             this.searchDone = true;
         });
     }
 
     setFilter(value) {
-        if (this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
+        if (value == null || (this.data != null && this.data.get(value) != null && this.data.get(value).length > 0)) {
             this.filter = value;
         }
     }
@@ -164,5 +173,26 @@ export class SearchComponent  {
 
     select(item: ApiObject) {
         this.selectedChanged.emit(item);
+    }
+
+    stageAll(letter?: string) {
+        if (letter == null) {
+            this.data.forEach(items => {
+                items.forEach(item => {
+                    if (item.type.lendable) {
+                        this.staging.stage(item.id);
+                    }
+                });
+            });
+        } else {
+            const items = this.data.get(letter);
+            if (items != null) {
+                items.forEach(item => {
+                    if (item.type.lendable) {
+                        this.staging.stage(item.id);
+                    }
+                });
+            }
+        }
     }
 }

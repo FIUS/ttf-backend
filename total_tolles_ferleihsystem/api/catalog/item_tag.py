@@ -34,7 +34,7 @@ class ItemTagList(Resource):
         Get a list of all item tags currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        return Tag.query.filter(Tag.deleted == test_for).all()
+        return Tag.query.filter(Tag.deleted == test_for).order_by(Tag.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)

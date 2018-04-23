@@ -37,6 +37,7 @@ export class LendingOverviewComponent implements OnInit, OnDestroy {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(lending => {
+                console.log(lending)
                 let letter: string = lending.user.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
