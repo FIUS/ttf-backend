@@ -190,7 +190,7 @@ export class SearchComponent  {
         if (letter == null) {
             this.data.forEach(items => {
                 items.forEach(item => {
-                    if (item.type.lendable) {
+                    if (item.type.lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
                     }
                 });
@@ -199,7 +199,7 @@ export class SearchComponent  {
             const items = this.data.get(letter);
             if (items != null) {
                 items.forEach(item => {
-                    if (item.type.lendable) {
+                    if (item.type.lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
                     }
                 });
