@@ -7,6 +7,7 @@ import datetime
 from .. import DB
 from . import STD_STRING_SIZE
 
+
 class Item(DB.Model):
     """
     This data model represents a single lendable item
@@ -62,6 +63,7 @@ class Item(DB.Model):
     def get_lending_duration(self):
         return self.lending_duration
 
+
 class File(DB.Model):
     """
     This data model represents a file attached to a item
@@ -109,6 +111,30 @@ class Lending(DB.Model):
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
+
+
+class AttributeDefinition (DB.Model):
+
+    __tablename__ = 'AttributeDefinition'
+
+    id = DB.Column(DB.Integer, primary_key=True)
+    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
+    type = DB.Column(DB.String(STD_STRING_SIZE))
+    jsonschema = DB.Column(DB.Text)
+    visible_for = DB.Column(DB.String(STD_STRING_SIZE))
+    deleted = DB.Column(DB.Boolean, default=False)
+
+    def __init__(self, name: str, type: str, jsonschema: str, visible_for: str):
+        self.name = name
+        self.type = type
+        self.jsonschema = jsonschema
+        self.visible_for = visible_for
+
+    def update(self, name: str, type: str, jsonschema: str, visible_for: str):
+        self.name = name
+        self.type = type
+        self.jsonschema = jsonschema
+        self.visible_for = visible_for
 
 
 class ItemToItem (DB.Model):
@@ -164,9 +190,9 @@ class ItemToTag (DB.Model):
         self.tag_id = tag_id
 
 
-class ItemAttribute (DB.Model):
+class ItemToAttributeDefinition (DB.Model):
 
-    __tablename__ = 'ItemAttributes'
+    __tablename__ = 'ItemToAttributeDefinition'
 
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)

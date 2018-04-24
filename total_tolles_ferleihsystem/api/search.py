@@ -6,7 +6,7 @@ from flask import request
 from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional
 from . import API
-from ..db_models.item import Item, ItemToTag, ItemAttribute, ItemToLending
+from ..db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToLending
 from ..db_models.tag import Tag
 from .models import ITEM_GET
 
@@ -52,8 +52,8 @@ class Search(Resource):
                 search_result = search_result.join(ItemToTag, isouter=True).join(Tag, isouter=True)
                 search_condition = search_condition | Tag.name.like(search_string)
             if not attributes:
-                search_result = search_result.join(ItemAttribute, isouter=True)
-                search_condition = search_condition | ItemAttribute.value.like(search_string)
+                search_result = search_result.join(ItemToAttributeDefinition, isouter=True)
+                search_condition = search_condition | ItemToAttributeDefinition.value.like(search_string)
 
             search_result = search_result.filter(search_condition)
 
@@ -72,9 +72,9 @@ class Search(Resource):
 
         if attributes:
             for attribute in attributes:
-                search_result = search_result.join(ItemAttribute, aliased=True)
-                search_result = search_result.filter(ItemAttribute.attribute_definition_id ==
+                search_result = search_result.join(ItemToAttributeDefinition, aliased=True)
+                search_result = search_result.filter(ItemToAttributeDefinition.attribute_definition_id ==
                                                      attribute.split('-', 1)[0])
-                search_result = search_result.filter(ItemAttribute.value == attribute.split('-', 1)[1])
+                search_result = search_result.filter(ItemToAttributeDefinition.value == attribute.split('-', 1)[1])
 
         return search_result.order_by(Item.name).limit(limit).all()

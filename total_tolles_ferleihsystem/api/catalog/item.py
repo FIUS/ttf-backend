@@ -12,10 +12,9 @@ from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_
 from ... import DB
 from ...login import UserRole
 
-from ...db_models.item import Item, ItemToTag, ItemAttribute, ItemToItem
+from ...db_models.item import Item, AttributeDefinition, ItemToTag, ItemToAttributeDefinition, ItemToItem
 from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemTypeToItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
-from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item'
 ANS = API.namespace('item', description='Items', path=PATH)
@@ -66,7 +65,7 @@ class ItemList(Resource):
                                                .all())
             attributes = []
             for element in item_type_attribute_definitions:
-                attributes.append(ItemAttribute(item_id,
+                attributes.append(ItemToAttributeDefinition(item_id,
                                                 element.attribute_definition_id,
                                                 "")) #TODO: Get default if possible.
             DB.session.add_all(attributes)
@@ -199,7 +198,7 @@ class ItemItemTags(Resource):
             abort(400, 'Requested item tag not found!')
 
         new = ItemToTag(item_id, tag_id)
-        attributes = ItemAttribute.query.filter(ItemAttribute.item_id == item_id).all()
+        attributes = ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).all()
 
         attributes_dict = {}
         new_attributes = []
@@ -214,7 +213,7 @@ class ItemItemTags(Resource):
         for element in item_tag_attribute_definitions:
             if not element.attribute_definition_id in attributes_dict:
                 attributes_dict[element.attribute_definition_id] = ""
-                new_attributes.append(ItemAttribute(item_id,
+                new_attributes.append(ItemToAttributeDefinition(item_id,
                                                     element.attribute_definition_id,
                                                     "")) #TODO: Get default values
         try:
@@ -280,7 +279,7 @@ class ItemAttributeList(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(404, 'Requested item not found!')
 
-        return ItemAttribute.query.filter(ItemAttribute.item_id == item_id).join(ItemAttribute.attribute_definition).order_by(AttributeDefinition.name).all()
+        return ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
 
 @ANS.route('/<int:item_id>/attributes/<int:attribute_definition_id>/')
 class ItemAttributeDetail(Resource):
@@ -301,10 +300,10 @@ class ItemAttributeDetail(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(404, 'Requested item not found!')
 
-        attribute = (ItemAttribute
+        attribute = (ItemToAttributeDefinition
                      .query
-                     .filter(ItemAttribute.item_id == item_id)
-                     .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
+                     .filter(ItemToAttributeDefinition.item_id == item_id)
+                     .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
                      .first())
 
         if attribute is None:
@@ -328,10 +327,10 @@ class ItemAttributeDetail(Resource):
             abort(404, 'Requested item not found!')
 
         value = request.get_json()["value"]
-        attribute = (ItemAttribute
+        attribute = (ItemToAttributeDefinition
                      .query
-                     .filter(ItemAttribute.item_id == item_id)
-                     .filter(ItemAttribute.attribute_definition_id == attribute_definition_id)
+                     .filter(ItemToAttributeDefinition.item_id == item_id)
+                     .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
                      .first())
 
         if attribute is None:

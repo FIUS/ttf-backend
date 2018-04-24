@@ -12,8 +12,8 @@ from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID
 from ... import DB
 from ...login import UserRole
 
+from ...db_models.item import AttributeDefinition
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
-from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item_types'
 ANS = API.namespace('item_type', description='ItemTypes', path=PATH)

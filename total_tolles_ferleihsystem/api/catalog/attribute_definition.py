@@ -11,8 +11,7 @@ from .. import API, satisfies_role
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT, ATTRIBUTE_DEFINITION_VALUES
 from ... import DB
 from ...login import UserRole
-from ...db_models.item import ItemAttribute
-from ...db_models.attributeDefinition import AttributeDefinition
+from ...db_models.item import AttributeDefinition, ItemToAttributeDefinition
 
 PATH: str = '/catalog/attribute_definitions'
 ANS = API.namespace('attribute_definition', description='The attribute definitions', path=PATH)
@@ -147,4 +146,4 @@ class AttributeDefinitionValues(Resource):
         if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
             abort(404, 'Requested attribute not found!')
 
-        return [item.value for item in ItemAttribute.query.filter(ItemAttribute.attribute_definition_id == definition_id)]
+        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id)]

@@ -4,7 +4,7 @@ Module containing database models for everything concerning Item-Tags.
 
 from .. import DB
 from . import STD_STRING_SIZE
-from .attributeDefinition import AttributeDefinition
+from .item import AttributeDefinition
 
 class Tag(DB.Model):
     """
