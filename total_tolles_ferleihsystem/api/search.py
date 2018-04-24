@@ -61,7 +61,10 @@ class Search(Resource):
             search_result = search_result.filter(~Item.deleted)
 
         if not lent:
-            search_result = search_result.join(ItemToLending, isouter=True).filter(ItemToLending.lending_id is None)
+            search_result = search_result.join(ItemToLending, isouter=True).filter(ItemToLending.lending_id.is_(None))
+
+        if item_type != -1:
+            search_result = search_result.filter(Item.type_id == item_type)
 
         if tags:
             search_result = search_result.join(ItemToTag)
@@ -74,9 +77,4 @@ class Search(Resource):
                                                      attribute.split('-', 1)[0])
                 search_result = search_result.filter(ItemAttribute.value == attribute.split('-', 1)[1])
 
-        if item_type != -1:
-            search_result = search_result.filter(Item.type_id == item_type)
-
-        return_value = search_result.limit(limit).all()
-
-        return return_value
+        return search_result.order_by(Item.name).limit(limit).all()
