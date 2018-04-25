@@ -1,7 +1,18 @@
 import { Injectable } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 
 import { QuestionBase } from './question-base';
+
+function customNullValidator(customNull: any): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} => {
+        if (control.value === customNull ||
+            (customNull != null && customNull.id != null &&
+             control.value != null && control.value.id === customNull.id)) {
+            return {'null': {value: null}}
+        }
+        return null;
+    };
+}
 
 @Injectable()
 export class QuestionControlService {
@@ -19,15 +30,24 @@ export class QuestionControlService {
                     if (question.min != undefined && question.min === 1) {
                         validators.push(Validators.required);
                     }
+                    if (question.pattern != null) {
+                        validators.push(Validators.pattern(question.pattern));
+                    }
                 } else {
                     validators.push(Validators.required);
                 }
+            }
+            if (!question.nullable) {
+                validators.push(customNullValidator(question.nullValue));
             }
             if (question.min != undefined) {
                 if (question.controlType === 'number') {
                     validators.push(Validators.min(question.min as number));
                 }
                 if (question.controlType === 'string' || question.controlType === 'text') {
+                    if (!question.nullable) {
+                        validators.push(customNullValidator(question.nullValue));
+                    }
                     if (question.min > 1) {
                         validators.push(Validators.minLength(question.min as number))
                     }
