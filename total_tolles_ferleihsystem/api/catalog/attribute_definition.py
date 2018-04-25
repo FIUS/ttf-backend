@@ -146,4 +146,4 @@ class AttributeDefinitionValues(Resource):
         if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
             abort(404, 'Requested attribute not found!')
 
-        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).groupBy(ItemToAttributeDefinition.value)]
+        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).group_by(ItemToAttributeDefinition.value)]

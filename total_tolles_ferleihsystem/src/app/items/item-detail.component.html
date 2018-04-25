@@ -16,6 +16,9 @@
                 <span class="link" [ngClass]="{'underline-hover': jwt.isModerator(), 'pointer': jwt.isModerator()}" routerLink="{{jwt.isModerator() ? ('/item-types/' + item?.type?.id) : '/items/' + item?.id}}">
                     {{item?.type?.name}}
                 </span>
+                <span class="pointer dim" (click)="howTo.open()">
+                    <i class="fa fa-question-circle"></i>
+                </span>
             </p>
             <p class="f4">
                 <span class="b">Tags:</span>
@@ -75,6 +78,14 @@
         <h1 class="mv0" title>Choose Item:</h1>
         <div class="w-100 ph3 pv2" body>
             <ttf-search [asSelector]="true" [restrictToType]="chooseItemType" (selectedChanged)="addItemToContained($event); chooseItem.close()" #search></ttf-search>
+        </div>
+    </ttf-dialog>
+
+
+    <ttf-dialog [dialogType]="'info'" #howTo>
+        <h1 class="mv0" title>How To:</h1>
+        <div class="w-100 ph3 pv2" body>
+            <markdown [data]="item?.type?.how_to"></markdown>
         </div>
     </ttf-dialog>
 
