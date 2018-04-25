@@ -73,6 +73,11 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
             }
         }).take(1).subscribe(questions => {
             this.questions = questions;
+            this.questions.forEach(qstn => {
+                if (qstn.key === attribute.attribute_definition.name) {
+                    qstn.autocompleteData = this.api.getAttributeAutocomplete(attribute.attribute_definition);
+                }
+            });
             this.form = this.qcs.toFormGroup(this.questions);
             let value = attribute.value;
             try {

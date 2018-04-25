@@ -110,12 +110,14 @@ ITEM_TAG_GET = API.inherit('ItemTagGET', ITEM_TAG_PUT, ID, {
 ATTRIBUTE_DEFINITION_LINKS = API.inherit('AttributeDefinitionLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_detail', absolute=True,
                            url_data={'definition_id' : 'id'}), required=False),
+    'autocomplete': HaLUrl(UrlData('api.attribute_definition_attribute_definition_values', absolute=True,
+                                   url_data={'definition_id' : 'id'}), required=False),
 })
 
 ATTRIBUTE_DEFINITION_LIST_LINKS = API.inherit('AttributeDefinitionLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
 })
-nullable=True
+
 ATTRIBUTE_DEFINITION_POST = API.model('AttributeDefinitionPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'type': fields.String(enum=('string', 'integer', 'number', 'boolean')),

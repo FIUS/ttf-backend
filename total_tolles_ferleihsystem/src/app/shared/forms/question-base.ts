@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Rx';
 
 export interface QuestionOptions {
     value?: any;
@@ -33,6 +34,8 @@ export class QuestionBase<T>{
     isArray: boolean;
     order: number;
     controlType: string;
+
+    autocompleteData?: Observable<T[]>;
 
     constructor(options: QuestionOptions = {}) {
         this.value = (options.value as T);

@@ -130,7 +130,7 @@ class AttributeDefinitionDetail(Resource):
             abort(500)
 
 
-@ANS.route('/<int:definition_id>/values')
+@ANS.route('/<int:definition_id>/values/')
 class AttributeDefinitionValues(Resource):
     """
     The current values of a attribute
@@ -146,4 +146,4 @@ class AttributeDefinitionValues(Resource):
         if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
             abort(404, 'Requested attribute not found!')
 
-        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id)]
+        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).groupBy(ItemToAttributeDefinition.value)]
