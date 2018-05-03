@@ -1,0 +1,16 @@
+<ttf-dropdown [fitContent]="false" #dropdown>
+    <div class="w-100 bb b--gray flex flex-wrap gray hover-black" content>
+            <p class="bg-near-white pl3 pr2 pv1 mh1 mt0 mb1 br-pill black" *ngFor="let tag of tags" [hidden]="!selected.has(tag.id)">{{tag.name}}<i class="ml2 fa fa-close mr2 hover-red pointer" (click)="deselect(tag)"></i></p>
+            <input class="input-reset min-w5 bn pa1 black flex-grow-1" type="search" [(ngModel)]="searchTerm" (ngModelChange)="updateFilter()" placeholder="search tags"
+                    (focus)="dropdown.openDropdown()" (keyup)="dropdown.openDropdown()"
+                    (keyup.enter)="select()" (keyup.arrowdown)="highlightNext()" (keyup.arrowup)="highlightPrevious()">
+
+            <div class="w2 flex justify-around items-center pointer link" style="margin-left: -2rem" (click)="dropdown.toggleDropdown()"><i class="f4 fa fa-angle-down"></i></div>
+        </div>
+        <div dropdown-content dropdown-content>
+            <div class="pa1" *ngFor="let tag of tags" (click)="select(tag)" [ngClass]="{'bg-light-blue': tag.id === highlighted, 'b': selected.has(tag.id)}" (mouseenter)="highlighted = tag.id" [hidden]="filter.has(tag.id)">
+                {{tag.name}}
+            </div>
+        </div>
+</ttf-dropdown>
+

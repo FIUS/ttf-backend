@@ -9,10 +9,11 @@ import { HiddenQuestion } from './question-hidden';
 import { StringQuestion } from './question-string';
 import { TextQuestion } from './question-text';
 import { DateQuestion } from './question-date';
-import { IntegerQuestion } from './question-integer';
+import { NumberQuestion } from './question-number';
 import { DurationQuestion } from './question-duration';
 import { DropdownQuestion } from './question-dropdown';
 import { BooleanQuestion } from './question-boolean';
+import { TypeQuestion } from './question-type';
 
 import { Options } from 'selenium-webdriver';
 
@@ -33,7 +34,7 @@ export class QuestionService implements OnInit {
 
     // Todo: get from a remote source of question metadata
     // Todo: make asynchronous
-    getQuestions(model: string): Observable<QuestionBase<any>[]> {
+    getQuestions = (model: string): Observable<QuestionBase<any>[]> => {
         if (this.swagger == undefined) {
             this.swagger = this.api.getSpec();
         }
@@ -54,7 +55,31 @@ export class QuestionService implements OnInit {
 
     }
 
-    private parseModel(spec:any, modelID: string, questionOptions?: Map<string, QuestionOptions>) {
+    getQuestionsFromScheme = (scheme: object): Observable<QuestionBase<any>[]> => {
+        if (this.swagger == undefined) {
+            this.swagger = this.api.getSpec();
+        }
+
+        return this.swagger.flatMap(spec => {
+            if (spec == undefined) {
+                return Observable.of([]);
+            }
+
+            const result = new AsyncSubject<QuestionBase<any>[]>();
+
+            const questionOptions = new Map<string, QuestionOptions>()
+            const model = this.parseJsonSchemeModel(scheme, spec, questionOptions);
+            const questionsArray: QuestionBase<any>[] = [];
+            questionOptions.forEach(options => questionsArray.push(this.getQuestion(options)));
+            result.next(questionsArray.sort((a, b) => a.order - b.order));
+            result.complete();
+
+            return result;
+        });
+
+    }
+
+    private parseModel(spec: any, modelID: string, questionOptions?: Map<string, QuestionOptions>) {
         let recursionStart = false;
         if (questionOptions == undefined) {
             questionOptions = new Map<string, QuestionOptions>();
@@ -66,6 +91,17 @@ export class QuestionService implements OnInit {
 
         let model = spec.definitions[modelID];
 
+        model = this.parseJsonSchemeModel(model, spec, questionOptions);
+
+        if (recursionStart) {
+            let questionsArray: QuestionBase<any>[] = [];
+            questionOptions.forEach(options => questionsArray.push(this.getQuestion(options)));
+            this.observables[modelID].next(questionsArray.sort((a, b) => a.order - b.order));
+            this.observables[modelID].complete();
+        }
+    }
+
+    private parseJsonSchemeModel(model: any, spec: any, questionOptions: Map<string, QuestionOptions>) {
         if (model != undefined) {
             if (model.allOf != undefined) {
                 let tempModel;
@@ -85,13 +121,7 @@ export class QuestionService implements OnInit {
                 }
             }
         }
-
-        if (recursionStart) {
-            let questionsArray: QuestionBase<any>[] = [];
-            questionOptions.forEach(options => questionsArray.push(this.getQuestion(options)));
-            this.observables[modelID].next(questionsArray.sort((a, b) => a.order - b.order));
-            this.observables[modelID].complete();
-        }
+        return model;
     }
 
     private updateOptions(questionOptions: Map<string, QuestionOptions>, propID: string, model: any) {
@@ -165,10 +195,16 @@ export class QuestionService implements OnInit {
             return new BooleanQuestion(options);
         }
         if (options.controlType === 'integer') {
+            if (options.key.toUpperCase().includes('TYPE_ID')) {
+                return new TypeQuestion(options);
+            }
             if (options.key.toUpperCase().includes('DURATION')) {
                 return new DurationQuestion(options);
             }
-            return new IntegerQuestion(options);
+            return new NumberQuestion(options);
+        }
+        if (options.controlType === 'number') {
+            return new NumberQuestion(options);
         }
         if (options.controlType === 'string') {
             if (options.pattern != undefined || options.max != undefined) {

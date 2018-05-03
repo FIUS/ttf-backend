@@ -10,7 +10,7 @@ export class JWTService implements OnInit {
     readonly TOKEN = 'token';
     readonly REFRESH_TOKEN = 'refresh_token';
 
-    private api;
+    private api: ApiService;
 
     constructor (private injector: Injector, private router: Router) {
         Observable.timer(1).take(1).subscribe((() => {
@@ -29,6 +29,9 @@ export class JWTService implements OnInit {
                 }
             }
         }).bind(this));
+        if (!this.loggedIn()) {
+            this.api.guestLogin();
+        }
     }
 
     updateTokens(loginToken: string, refreshToken?: string) {
@@ -44,6 +47,7 @@ export class JWTService implements OnInit {
     logout() {
         localStorage.removeItem(this.TOKEN);
         localStorage.removeItem(this.REFRESH_TOKEN);
+        this.api.guestLogin();
         this.router.navigate(['/login']);
     }
 
@@ -87,6 +91,11 @@ export class JWTService implements OnInit {
             return undefined;
         }
         return this.tokenToJson(token).identity;
+    }
+
+    isUser() {
+        const token = this.token();
+        return (token != null) && (this.tokenToJson(token).user_claims === 0);
     }
 
     isModerator() {

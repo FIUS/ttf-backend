@@ -1,0 +1,28 @@
+<div class="flex flex-wrap">
+    <ttf-box>
+        <h1 class="mv0" title>Lendings:</h1>
+        <div class="w-100 ph3 pv2" body>
+            <div class="mb3 flex flex-wrap justify-center">
+                <div class="mr1 pointer" [ngClass]="{underline: filter == null}" (click)="setFilter(null)">ALL</div>
+                <div class="mr1" (click)="setFilter(letter)" [ngClass]="{underline: filter === letter, pointer: data?.get(letter).length > 0, 'black-60': data?.get(letter).length <= 0}"  *ngFor="let letter of alphabet">{{letter}}</div>
+            </div>
+            <ng-container *ngFor="let letter of alphabet">
+                <div class="flex" [ngClass]="{flex: (filter == null || filter === letter), dn: true}">
+                    <ng-container *ngIf="data?.get(letter).length > 0">
+                        <div class="f3 gray" style="width: 1em">{{letter}}</div>
+                        <ul class="mt0 list">
+                            <li class="min-w2 mb1" *ngFor="let lending of data?.get(letter)">
+                                <p class="mv0 link underline-hover pointer" routerLink="/lendings/{{lending.id}}">
+                                    <span class="i black-80">User:</span> {{lending.user}} <span class="ml2 i black-80">Moderator:</span> {{lending.moderator}}
+                                </p>
+                                <p class="mv0 pl3 black-80 link underline-hover pointer" *ngFor="let item_lending of lending.itemLendings" routerLink="/items/{{item_lending.item?.id}}">
+                                    {{item_lending.item?.name}} ({{item_lending.item?.type?.name}})
+                                </p>
+                            </li>
+                        </ul>
+                    </ng-container>
+                </div>
+            </ng-container>
+        </div>
+    </ttf-box>
+</div>

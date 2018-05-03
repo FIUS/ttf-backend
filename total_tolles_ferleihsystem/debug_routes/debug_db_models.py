@@ -13,7 +13,7 @@ from datetime import datetime, date
 
 from flask import render_template, url_for, abort
 from . import debug_blueprint
-from .. import db
+from .. import DB
 from .. import db_models
 
 
@@ -31,8 +31,8 @@ def _inspect_module(module):
     module_list = getmembers(module, predicate=ismodule)
     classes = getmembers(module, predicate=isclass)
     for (name, cls) in classes:
-        if issubclass(cls, db.Model):
-            if cls is not db.Model:
+        if issubclass(cls, DB.Model):
+            if cls is not DB.Model:
                 _data_classes[name] = cls
     return [mod[1] for mod in module_list]
 

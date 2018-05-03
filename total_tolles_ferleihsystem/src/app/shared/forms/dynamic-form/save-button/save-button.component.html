@@ -1,0 +1,16 @@
+<div class="button h2 pv1 ph2 br2 bg-light-silver link bg-animate flex items-center justify-center"
+    [ngClass]="{'hover-bg-light-blue': formValid, 'pointer': formValid, 'bg-light-red': !formValid}"
+    (click)="save($event)" >
+    <span [hidden]="!saving">
+        <i class="mr2 fa fa-spinner fa-spin"></i>Saving
+    </span>
+    <span [hidden]="saving || !(saveSuccess && !saveFail)">
+        Saved<i class="ml2 fa fa-check"></i>
+    </span>
+    <span [hidden]="saving || !(saveFail && !saveSuccess)">
+        <i class="mr2 fa fa-exclamation-circle"></i>Error
+    </span>
+    <span [hidden]="saving || (saveSuccess || saveFail)">
+        Save changes
+    </span>
+</div>

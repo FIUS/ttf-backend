@@ -4,9 +4,9 @@ from logging import Logger, StreamHandler, Formatter
 from sys import stdout
 
 
-from .. import app, db
+from .. import APP, DB
 
-DB_COMMAND_LOGGER = logging.create_logger(app)  # type: Logger
+DB_COMMAND_LOGGER = logging.create_logger(APP)  # type: Logger
 
 formatter = Formatter(fmt='[%(levelname)s] [%(name)-16s] %(message)s')
 
@@ -19,10 +19,10 @@ DB_COMMAND_LOGGER.addHandler(handler)
 STD_STRING_SIZE = 255
 
 
-from . import blacklist, item, itemType, attribute, tag
+from . import blacklist, item, itemType, tag
 
 
-@app.cli.command('create_db')
+@APP.cli.command('create_db')
 def create_db():
     """Create all db tables."""
     create_db_function()
@@ -30,11 +30,11 @@ def create_db():
 
 
 def create_db_function():
-    db.create_all()
-    app.logger.info('Database created.')
+    DB.create_all()
+    APP.logger.info('Database created.')
 
 
-@app.cli.command('drop_db')
+@APP.cli.command('drop_db')
 def drop_db():
     """Drop all db tables."""
     drop_db_function()
@@ -42,5 +42,5 @@ def drop_db():
 
 
 def drop_db_function():
-    db.drop_all()
-    app.logger.info('Dropped Database.')
+    DB.drop_all()
+    APP.logger.info('Dropped Database.')

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'ttf-dropdown',
@@ -6,6 +6,9 @@ import { Component } from '@angular/core';
     styleUrls: ['./dropdown.component.scss']
 })
 export class myDropdownComponent {
+
+    @Input() fitContent: boolean = true;
+
     open: boolean = false;
 
     public openDropdown() {

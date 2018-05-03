@@ -1,16 +1,16 @@
-from .. import db
+from .. import DB
 from . import STD_STRING_SIZE
 from .itemType import ItemType
 
 
-class Blacklist (db.Model):
+class Blacklist (DB.Model):
 
     __tablename__ = 'Blacklist'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(STD_STRING_SIZE), unique=True, index=True)
-    system_wide = db.Column(db.Boolean, default=False)
-    reason = db.Column(db.Text, nullable=True)
+    id = DB.Column(DB.Integer, primary_key=True)
+    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True, index=True)
+    system_wide = DB.Column(DB.Boolean, default=False)
+    reason = DB.Column(DB.Text, nullable=True)
 
     def __init__(self, name: str, system_wide: bool = False, reason: str = None):
         self.name = name
@@ -20,18 +20,18 @@ class Blacklist (db.Model):
             self.reason = reason
 
 
-class BlacklistToItemType (db.Model):
+class BlacklistToItemType (DB.Model):
 
     __tablename__ = 'BlacklistToItemType'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('Blacklist.id'), primary_key=True)
-    item_type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'), primary_key=True)
-    end_time = db.Column(db.DateTime, nullable=True)
-    reason = db.Column(db.Text, nullable=True)
+    user_id = DB.Column(DB.Integer, DB.ForeignKey('Blacklist.id'), primary_key=True)
+    item_type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'), primary_key=True)
+    end_time = DB.Column(DB.DateTime, nullable=True)
+    reason = DB.Column(DB.Text, nullable=True)
 
-    user = db.relationship('Blacklist', backref=db.backref('_item_types', lazy='joined',
+    user = DB.relationship('Blacklist', backref=DB.backref('_item_types', lazy='joined',
                                                            single_parent=True, cascade="all, delete-orphan"))
-    item_type = db.relationship('ItemType', lazy='joined')
+    item_type = DB.relationship('ItemType', lazy='joined')
 
     def __init__(self, user: Blacklist, item_type: ItemType, end_time: any=None, reason: str=None):
         #TODO Fabi pls FIX duration time

@@ -1,3 +1,6 @@
+"""
+Main API Module
+"""
 from logging import Formatter, Logger, DEBUG
 from logging.handlers import RotatingFileHandler
 from os import path
@@ -7,11 +10,11 @@ from flask import Blueprint, logging
 from flask_restplus import Api, abort
 from flask_jwt_extended import get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
-from .. import app, jwt
+from .. import APP, JWT
 from ..login import User, UserRole
 
 
-authorizations = {
+AUTHORIZATIONS = {
     'jwt': {
         'type': 'apiKey',
         'in': 'header',
@@ -33,97 +36,128 @@ def satisfies_role(role: UserRole):
 
     Must be applied after jwt_required decorator!
     """
-    def has_roles_decorator(f):
-        @wraps(f)
+    def has_roles_decorator(func):
+        """
+        Decorator function
+        """
+        @wraps(func)
+        # pylint: disable=R1710
         def wrapper(*args, **kwargs):
+            """
+            Wrapper function
+            """
             role_claims = get_jwt_claims()
             if role > role_claims:
-                auth_logger.debug('Access to ressource with isufficient rights. User role: %s, required role: %s',
+                AUTH_LOGGER.debug('Access to ressource with isufficient rights. User role: %s, required role: %s',
                                   UserRole(role_claims), role)
                 abort(403, 'Only users with {} privileges have access to this resource.'.format(role.name))
             else:
-                return f(*args, **kwargs)
+                return func(*args, **kwargs)
         return wrapper
     return has_roles_decorator
 
 
-auth_logger = logging.create_logger(app)  # type: Logger
+AUTH_LOGGER = logging.create_logger(APP)  # type: Logger
 
-formatter = Formatter(fmt=app.config['AUTH_LOG_FORMAT'])
+FORMATTER = Formatter(fmt=APP.config['AUTH_LOG_FORMAT'])
 
-fh = RotatingFileHandler(path.join(app.config['LOG_PATH'], 'ttf_auth.log'),
+FH = RotatingFileHandler(path.join(APP.config['LOG_PATH'], 'ttf_auth.log'),
                          maxBytes=104857600, backupCount=10)
 
-fh.setFormatter(formatter)
+FH.setFormatter(FORMATTER)
 
-fh.setLevel(DEBUG)
+FH.setLevel(DEBUG)
 
-auth_logger.addHandler(fh)
+AUTH_LOGGER.addHandler(FH)
 
 
-api_blueprint = Blueprint('api', __name__)
+API_BLUEPRINT = Blueprint('api', __name__)
 
-api = Api(api_blueprint, version='0.1', title='TTF API', doc='/doc/',
-          authorizations=authorizations, security='jwt',
+API = Api(API_BLUEPRINT, version='0.1', title='TTF API', doc='/doc/',
+          authorizations=AUTHORIZATIONS, security='jwt',
           description='API for TTF.')
 
 
-@jwt.user_identity_loader
+@JWT.user_identity_loader
 def load_user_identity(user: User):
+    """
+    Loader for the user identity
+    """
     return user.name
 
 
-@jwt.user_claims_loader
+@JWT.user_claims_loader
 def load_user_claims(user: User):
+    """
+    Loader for the user claims
+    """
     return user.role.value
 
 
-@jwt.expired_token_loader
+@JWT.expired_token_loader
 def expired_token():
+    """
+    Handler function for a expired token
+    """
     message = 'Token is expired.'
     log_unauthorized(message)
     abort(401, message)
 
 
-@jwt.invalid_token_loader
+@JWT.invalid_token_loader
 def invalid_token(message: str):
+    """
+    Handler function for a invalid token
+    """
     log_unauthorized(message)
     abort(401, message)
 
 
-@jwt.unauthorized_loader
+@JWT.unauthorized_loader
 def unauthorized(message: str):
+    """
+    Handler function for a unauthorized api access
+    """
     log_unauthorized(message)
     abort(401, message)
 
 
-@jwt.needs_fresh_token_loader
+@JWT.needs_fresh_token_loader
 def stale_token():
+    """
+    Handler function for a no more fresh token
+    """
     message = 'The JWT Token is not fresh. Please request a new Token directly with the /auth resource.'
     log_unauthorized(message)
     abort(403, message)
 
 
-@jwt.revoked_token_loader
+@JWT.revoked_token_loader
 def revoked_token():
+    """
+    Handler function for a revoked or invalid token
+    """
     message = 'The Token has been revoked.'
     log_unauthorized(message)
     abort(401, message)
 
 
-@api.errorhandler(NoAuthorizationError)
+@API.errorhandler(NoAuthorizationError)
 def missing_header(error):
+    """
+    Handler function for a NoAuthorizationError
+    """
     log_unauthorized(error.message)
     return {'message': error.message}, 401
 
 
 def log_unauthorized(message):
-    auth_logger.debug('Unauthorized access: %s', message)
+    """
+    Logs unauthorized access
+    """
+    AUTH_LOGGER.debug('Unauthorized access: %s', message)
 
+# pylint: disable=C0413
+from . import root, authentication, catalog, lending, search
 
-from . import root, authentication, catalog
-
-
-app.register_blueprint(api_blueprint, url_prefix='/api')
-
-
+APP.register_blueprint(API_BLUEPRINT, url_prefix='/api')

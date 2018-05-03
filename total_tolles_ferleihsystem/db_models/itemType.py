@@ -1,22 +1,22 @@
-from .. import db
+from .. import DB
 from . import STD_STRING_SIZE
-from .attribute import AttributeDefinition
+from .item import AttributeDefinition
 
 
-class ItemType (db.Model):
+class ItemType (DB.Model):
 
     __tablename__ = 'ItemType'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(STD_STRING_SIZE), unique=True)
-    name_schema = db.Column(db.String(STD_STRING_SIZE))
-    lendable = db.Column(db.Boolean, default=True)
-    lending_duration = db.Column(db.Time, nullable=True)
-    deleted = db.Column(db.Boolean, default=False)
-    visible_for = db.Column(db.String(STD_STRING_SIZE), nullable=True)
-    how_to = db.Column(db.Text, nullable=True)
+    id = DB.Column(DB.Integer, primary_key=True)
+    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
+    name_schema = DB.Column(DB.String(STD_STRING_SIZE))
+    lendable = DB.Column(DB.Boolean, default=True)
+    lending_duration = DB.Column(DB.Integer, nullable=True)
+    deleted = DB.Column(DB.Boolean, default=False)
+    visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
+    how_to = DB.Column(DB.Text, nullable=True)
 
-    def __init__(self, name: str, name_schema: str, visible_for: str='', how_to: str=''):
+    def __init__(self, name: str, name_schema: str, visible_for: str = '', how_to: str = ''):
         self.name = name
         self.name_schema = name_schema
 
@@ -26,33 +26,41 @@ class ItemType (db.Model):
         if how_to != '' and how_to != None:
             self.how_to = how_to
 
+    def update(self, name: str, name_schema: str, lendable: bool, lending_duration: int, visible_for: str, how_to:str):
+        self.name = name
+        self.name_schema = name_schema
+        self.lendable = lendable
+        self.lending_duration = lending_duration
+        self.visible_for = visible_for
+        self.how_to = how_to
 
-class ItemTypeToItemType (db.Model):
+
+class ItemTypeToItemType (DB.Model):
 
     __tablename__ = 'ItemTypeToItemType'
 
-    parent_id = db.Column(db.Integer, db.ForeignKey('ItemType.id', ondelete='CASCADE'), primary_key=True)
-    item_type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'), primary_key=True)
+    parent_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id', ondelete='CASCADE'), primary_key=True)
+    item_type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'), primary_key=True)
 
-    parent = db.relationship('ItemType', foreign_keys=[parent_id],
-                             backref=db.backref('_contained_item_types', lazy='joined',
+    parent = DB.relationship('ItemType', foreign_keys=[parent_id],
+                             backref=DB.backref('_contained_item_types', lazy='joined',
                                                 single_parent=True, cascade="all, delete-orphan"))
-    item_type = db.relationship('ItemType', foreign_keys=[item_type_id], lazy='joined')
+    item_type = DB.relationship('ItemType', foreign_keys=[item_type_id], lazy='joined')
 
     def __init__(self, parent_id: int, item_type_id: int):
         self.parent_id = parent_id
         self.item_type_id = item_type_id
 
 
-class ItemTypeToAttributeDefinition (db.Model):
+class ItemTypeToAttributeDefinition (DB.Model):
 
     __tablename__ = 'ItemTypeToAttributeDefinition'
 
-    item_type_id = db.Column(db.Integer, db.ForeignKey('ItemType.id'), primary_key=True)
-    attribute_definition_id = db.Column(db.Integer, db.ForeignKey('AttributeDefinition.id'), primary_key=True)
+    item_type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'), primary_key=True)
+    attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
 
-    item_type = db.relationship('ItemType', backref=db.backref('_item_type_to_attribute_definitions', lazy='joined'))
-    attribute_definition = db.relationship('AttributeDefinition', lazy='joined')
+    item_type = DB.relationship('ItemType', backref=DB.backref('_item_type_to_attribute_definitions', lazy='joined'))
+    attribute_definition = DB.relationship('AttributeDefinition', lazy='joined')
 
     def __init__(self, item_type_id: int, attribute_definition_id: int):
         self.item_type_id = item_type_id

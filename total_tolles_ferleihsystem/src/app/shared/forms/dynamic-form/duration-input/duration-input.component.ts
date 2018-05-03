@@ -19,9 +19,8 @@ export class DurationInputComponent implements ControlValueAccessor {
 
     @Input() question: QuestionBase<any>;
 
-    days: string;
-    hours: string;
-    minutes: string;
+    days: string = '';
+    time: string = '';
     seconds: number = 0;
 
     onChange: any = () => {};
@@ -30,16 +29,18 @@ export class DurationInputComponent implements ControlValueAccessor {
 
     get value(): number {
         if ((this.days == null || this.days === '') &&
-            (this.hours == null || this.hours === '') &&
-            (this.minutes == null || this.minutes === '')) {
+            (this.time == null || this.time === '' || !this.time.match(/\d\d:\d\d/))) {
             return this.question.nullValue;
         } else {
             let val = this.seconds;
-            if (this.minutes != null && this.minutes !== '') {
-                val += parseInt(this.minutes, 10) * 60;
+            const temp = this.time.split(':');
+            const minutes = temp[1];
+            const hours = temp[0];
+            if (minutes != null && minutes !== '') {
+                val += parseInt(minutes, 10) * 60;
             }
-            if (this.hours != null && this.hours !== '') {
-                val += parseInt(this.hours, 10) * 60 * 60;
+            if (hours != null && hours !== '') {
+                val += parseInt(hours, 10) * 60 * 60;
             }
             if (this.days != null && this.days !== '') {
                 val += parseInt(this.days, 10) * 60 * 60 * 24;
@@ -51,14 +52,15 @@ export class DurationInputComponent implements ControlValueAccessor {
     @Input()
     set value(val: number) {
         if (val === this.question.nullValue) {
-            this.days = undefined;
-            this.hours = undefined;
-            this.minutes = undefined;
+            this.days = '';
+            this.time = '';
             this.seconds = 0;
         } else {
             this.seconds = val % 60;
-            this.minutes = Math.floor((val / 60) % 60).toString();
-            this.hours = Math.floor((val / (60 * 60)) % 24).toString();
+            const minutes = Math.floor((val / 60) % 60).toString();
+            const hours = Math.floor((val / (60 * 60)) % 24).toString();
+            this.time = ((hours.length < 2 ? '0' + hours : hours) + ':' +
+                         (minutes.length < 2 ? '0' + minutes : minutes));
             this.days = Math.floor(val / (60 * 60 * 24)).toString();
         }
         this.onChange(val);
@@ -70,13 +72,15 @@ export class DurationInputComponent implements ControlValueAccessor {
         this.onTouched();
     }
 
-    updateMinutes(event) {
-        this.minutes = event;
-        this.update();
-    }
-
-    updateHours(event) {
-        this.hours = event;
+    updateTime(event) {
+        if (event == null || event === '') {
+            this.time = '00:00';
+            return;
+        }
+        if (this.days == null || this.days === '') {
+            this.days = '0';
+        }
+        this.time = event;
         this.update();
     }
 

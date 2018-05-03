@@ -1,0 +1,11 @@
+<div>
+    <form *ngIf="form" [formGroup]="form">
+        <div *ngFor="let question of questions" class="form-row">
+            <df-question [question]="question" [form]="form"></df-question>
+        </div>
+    </form>
+    <div class="tr">
+        <span [hidden]="saved"><i class="fa fa-spin fa-spinner"></i></span>
+        <span [hidden]="!saved">saved <i class="fa fa-check"></i></span>
+    </div>
+</div>

@@ -10,9 +10,28 @@ import { SharedModule } from './shared/shared.module';
 import { BreadcrumbsComponent } from './navigation/breadcrumbs.component';
 import { TitleBarComponent } from './navigation/title-bar.component';
 import { NavigationService } from './navigation/navigation-service';
+import { StagingService } from './navigation/staging-service';
 
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+
+import { SearchOverviewComponent } from './search/search-overview.component';
+import { SearchComponent } from './search/search.component';
+
+import { StagingComponent } from './staging/staging.component';
+import { StagedItemComponent } from './staging/staged-item.component';
+
+import { LendingOverviewComponent } from './lending/lending-overview.component';
+import { LendingComponent } from './lending/lending.component';
+import { ItemLendingComponent } from './lending/item-lending.component';
+
+import { ItemsOverviewComponent } from './items/items-overview.component';
+import { ItemListComponent } from './items/item-list.component';
+import { ItemDetailComponent } from './items/item-detail.component';
+import { LendingDurationComponent } from './items/lending-duration.component';
+import { ItemEditComponent } from './items/item-edit.component';
+import { TagsChooserComponent } from './items/tags-chooser.component';
+import { AttributeEditComponent } from './items/attribute-edit.component';
 
 import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
 import { ItemTypeListComponent } from './item-types/item-type-list.component';
@@ -44,6 +63,24 @@ import { AppComponent } from './app.component';
 
         HomeComponent,
 
+        SearchOverviewComponent,
+        SearchComponent,
+
+        StagingComponent,
+        StagedItemComponent,
+
+        LendingOverviewComponent,
+        LendingComponent,
+        ItemLendingComponent,
+
+        ItemsOverviewComponent,
+        ItemListComponent,
+        ItemDetailComponent,
+        LendingDurationComponent,
+        ItemEditComponent,
+        TagsChooserComponent,
+        AttributeEditComponent,
+
         ItemTypesOverviewComponent,
         ItemTypeListComponent,
         ItemTypeDetailComponent,
@@ -70,6 +107,7 @@ import { AppComponent } from './app.component';
     ],
     providers: [
         NavigationService,
+        StagingService,
     ],
     bootstrap: [AppComponent]
 })

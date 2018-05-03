@@ -20,11 +20,26 @@ export class AttributeDefinitionCreateComponent {
     }
 
     onDataChange(data) {
+        if (data != null && data.type != null) {
+            if (data.type === 'string') {
+                if (data.jsonschema == null || data.jsonschema === '') {
+                    data.jsonschema = JSON.stringify({maxLength: 253}, undefined, '\t');
+                } else {
+                    try {
+                        const json = JSON.parse(data.jsonschema);
+                        if (json.maxLength == null || json.maxLength > 253) {
+                            json.maxLength = 253;
+                        }
+                        data.jsonschema = JSON.stringify({maxLength: 253}, undefined, '\t');
+                    } catch (error) {}
+                }
+            }
+        }
         this.newAttributeDefinitionData = data;
     }
 
-    save = (() => {
+    save = () => {
         this.api.postAttributeDefinition(this.newAttributeDefinitionData).subscribe();
-    }).bind(this);
+    };
 
 }
