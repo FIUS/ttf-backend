@@ -1,6 +1,6 @@
 from .. import DB
 from . import STD_STRING_SIZE
-from .item import AttributeDefinition
+from .attributeDefinition import AttributeDefinition
 
 
 class ItemType (DB.Model):

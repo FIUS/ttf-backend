@@ -7,6 +7,8 @@ import datetime
 from .. import DB
 from . import STD_STRING_SIZE
 
+from .itemType import ItemTypeToAttributeDefinition
+from .tag import TagToAttributeDefinition
 
 class Item(DB.Model):
     """
@@ -63,6 +65,53 @@ class Item(DB.Model):
     def get_lending_duration(self):
         return self.lending_duration
 
+    def get_new_attributes(self, definition_ids):
+        """
+        Get a list of new attributes to add, considering all definition_ids in the list.
+        """
+        attributes = []
+        for element in definition_ids:
+            item_found_ids = [ittad.item_id for ittad in element.attribute_definition._item_to_attribute_definitions]
+            if self.id in item_found_ids:
+                continue
+
+            attributes.append(ItemToAttributeDefinition(self.id,
+                                                        element.attribute_definition_id,
+                                                        "")) #TODO: Get default if possible.
+        return attributes
+
+    def get_new_attributes_from_type(self, type_id: int):
+        """
+        Get a list of new attributes to add, when this item would now get that type.
+        """
+        item_id = self.id
+        
+        item_type_attribute_definitions = (ItemTypeToAttributeDefinition
+                                           .query
+                                           .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
+                                           .all())
+        
+
+    def get_new_attributes_from_tag(self, tag_id: int):
+        """
+        Get a list of new attributes to add, when this item would now get that tag.
+        """
+        item_id = self.id
+        
+        tag_attribute_definitions = (TagToAttributeDefinition
+                                     .query
+                                     .filter(TagToAttributeDefinition.tag_id == tag_id)
+                                     .all())
+        attributes = []
+        for element in tag_attribute_definitions:
+            item_found_ids = [ittad.item_id for ittad in element.attribute_definition._item_to_attribute_definitions]
+            if item_id in item_found_ids:
+                continue
+
+            attributes.append(ItemToAttributeDefinition(item_id,
+                                                        element.attribute_definition_id,
+                                                        "")) #TODO: Get default if possible.
+        return attributes
 
 class File(DB.Model):
     """
@@ -111,31 +160,6 @@ class Lending(DB.Model):
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
-
-
-class AttributeDefinition (DB.Model):
-
-    __tablename__ = 'AttributeDefinition'
-
-    id = DB.Column(DB.Integer, primary_key=True)
-    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
-    type = DB.Column(DB.String(STD_STRING_SIZE))
-    jsonschema = DB.Column(DB.Text)
-    visible_for = DB.Column(DB.String(STD_STRING_SIZE))
-    deleted = DB.Column(DB.Boolean, default=False)
-
-    def __init__(self, name: str, type: str, jsonschema: str, visible_for: str):
-        self.name = name
-        self.type = type
-        self.jsonschema = jsonschema
-        self.visible_for = visible_for
-
-    def update(self, name: str, type: str, jsonschema: str, visible_for: str):
-        self.name = name
-        self.type = type
-        self.jsonschema = jsonschema
-        self.visible_for = visible_for
-
 
 class ItemToItem (DB.Model):
 
@@ -197,10 +221,11 @@ class ItemToAttributeDefinition (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
     value = DB.Column(DB.String(STD_STRING_SIZE))
+    deleted = DB.Column(DB.Boolean, default=False)
 
     item = DB.relationship('Item', backref=DB.backref('_attributes', lazy='joined',
                                                       single_parent=True, cascade="all, delete-orphan"))
-    attribute_definition = DB.relationship('AttributeDefinition', lazy='joined')
+    attribute_definition = DB.relationship('AttributeDefinition', backref=DB.backref('_item_to_attribute_definitions', lazy='joined'))
 
     def __init__(self, item_id: int, attribute_definition_id: int, value: str):
         self.item_id = item_id

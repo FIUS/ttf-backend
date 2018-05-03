@@ -11,7 +11,8 @@ from .. import API, satisfies_role
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT, ATTRIBUTE_DEFINITION_VALUES
 from ... import DB
 from ...login import UserRole
-from ...db_models.item import AttributeDefinition, ItemToAttributeDefinition
+from ...db_models.item import ItemToAttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/attribute_definitions'
 ANS = API.namespace('attribute_definition', description='The attribute definitions', path=PATH)

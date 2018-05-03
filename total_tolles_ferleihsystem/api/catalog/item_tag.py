@@ -13,7 +13,7 @@ from ... import DB
 from ...login import UserRole
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
-from ...db_models.item import AttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item_tags'
 ANS = API.namespace('item_tag', description='ItemTags', path=PATH)

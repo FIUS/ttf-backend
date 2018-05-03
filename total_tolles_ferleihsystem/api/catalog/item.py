@@ -12,9 +12,10 @@ from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_
 from ... import DB
 from ...login import UserRole
 
-from ...db_models.item import Item, AttributeDefinition, ItemToTag, ItemToAttributeDefinition, ItemToItem
+from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem
 from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemTypeToItemType
 from ...db_models.tag import TagToAttributeDefinition, Tag
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/item'
 ANS = API.namespace('item', description='Items', path=PATH)
@@ -48,7 +49,8 @@ class ItemList(Resource):
         """
         Add a new item to the system
         """
-        item_type = ItemType.query.filter(ItemType.id == request.get_json()["type_id"]).first()
+        type_id = request.get_json()["type_id"]
+        item_type = ItemType.query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(400, 'Requested item type not found!')
 
@@ -57,18 +59,7 @@ class ItemList(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            item_id = new.id
-            type_id = new.type_id
-            item_type_attribute_definitions = (ItemTypeToAttributeDefinition
-                                               .query
-                                               .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
-                                               .all())
-            attributes = []
-            for element in item_type_attribute_definitions:
-                attributes.append(ItemToAttributeDefinition(item_id,
-                                                element.attribute_definition_id,
-                                                "")) #TODO: Get default if possible.
-            DB.session.add_all(attributes)
+            DB.session.add_all(new.get_new_attributes([element.attribute_definition_id for element in item_type._item_type_to_attribute_definitions]))
             DB.session.commit()
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
@@ -144,18 +135,19 @@ class ItemDetail(Resource):
         if item is None:
             abort(404, 'Requested item not found!')
 
-        item_type = ItemType.query.filter(ItemType.id == request.get_json()["type_id"]).first()
+        type_id = request.get_json()["type_id"]
+        item_type = ItemType.query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(400, 'Requested item type not found!')
-
-        item.update(**request.get_json())
         try:
+            item.update(**request.get_json())
+            DB.session.add_all(item.get_new_attributes([element.attribute_definition_id for element in item_type._item_type_to_attribute_definitions]))
             DB.session.commit()
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
             message = str(err)
             if 'UNIQUE constraint failed' in message:
-                abort(409, 'Name is not unique!')
+                abort(409, 'Name is not unique!:' + message)
             abort(500)
 
 @ANS.route('/<int:item_id>/tags/')
@@ -191,34 +183,18 @@ class ItemItemTags(Resource):
         Associate a new tag with the item.
         """
         tag_id = request.get_json()["id"]
-
-        if Item.query.filter(Item.id == item_id).first() is None:
+        item = Item.query.filter(Item.id == item_id).first()
+        if item is None:
             abort(404, 'Requested item not found!')
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        tag = Tag.query.filter(Tag.id == tag_id).first()
+        if tag is None:
             abort(400, 'Requested item tag not found!')
 
         new = ItemToTag(item_id, tag_id)
-        attributes = ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).all()
-
-        attributes_dict = {}
-        new_attributes = []
-
-        for element in attributes:
-            attributes_dict[element.attribute_definition_id] = element.value
-
-        item_tag_attribute_definitions = (TagToAttributeDefinition
-                                          .query
-                                          .filter(TagToAttributeDefinition.tag_id == tag_id)
-                                          .all())
-        for element in item_tag_attribute_definitions:
-            if not element.attribute_definition_id in attributes_dict:
-                attributes_dict[element.attribute_definition_id] = ""
-                new_attributes.append(ItemToAttributeDefinition(item_id,
-                                                    element.attribute_definition_id,
-                                                    "")) #TODO: Get default values
+       
         try:
             DB.session.add(new)
-            DB.session.add_all(new_attributes)
+            DB.session.add_all(item.get_new_attributes([element.attribute_definition_id for element in tag._tag_to_attribute_definitions]))
             DB.session.commit()
             associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
             return [e.tag for e in associations]

@@ -12,7 +12,7 @@ from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID
 from ... import DB
 from ...login import UserRole
 
-from ...db_models.item import AttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
 
 PATH: str = '/catalog/item_types'
