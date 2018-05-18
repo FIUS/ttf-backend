@@ -12,8 +12,9 @@ from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID
 from ... import DB
 from ...login import UserRole
 
-from ...db_models.item import AttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
+from ...db_models.item import Item 
 
 PATH: str = '/catalog/item_types'
 ANS = API.namespace('item_type', description='ItemTypes', path=PATH)
@@ -168,15 +169,21 @@ class ItemTypeAttributes(Resource):
         Associate a new attribute definition with the item type.
         """
         attribute_definition_id = request.get_json()["id"]
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first()
+
 
         if ItemType.query.filter(ItemType.id == type_id).first() is None:
             abort(404, 'Requested item type not found!')
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
+        if attribute_definition is None:
             abort(400, 'Requested attribute definition not found!')
+
+        items = Item.query.filter(Item.type_id == type_id).all()
 
         new = ItemTypeToAttributeDefinition(type_id, attribute_definition_id)
         try:
             DB.session.add(new)
+            for item in items:
+                DB.session.add_all(item.get_new_attributes([attribute_definition]))
             DB.session.commit()
             associations = (ItemTypeToAttributeDefinition
                             .query

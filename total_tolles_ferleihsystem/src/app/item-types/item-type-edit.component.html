@@ -5,7 +5,7 @@
     </div>
     <div class="w-100 ph3 pv2" body>
         <dynamic-form [objectModel]="'ItemTypePUT'" [startValues]="itemType" [showSaveButton]="true" (save)="save($event)"></dynamic-form>
-        <div class="pv2 flex">
+        <div class="mt3 pv2 flex">
             <span class="f4 flex-grow-1">Can contain:</span>
             <div>
                 <p class="f4 mb2 mt0" *ngFor="let itemType of canContain">{{itemType.name}} <i class="ml1 fa fa-times grow pointer" (click)="removeCanContain(itemType.id)"></i></p>

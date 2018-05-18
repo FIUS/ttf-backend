@@ -15,6 +15,9 @@ export class LendingDurationComponent implements OnChanges {
     years: number;
 
     get valid(): boolean {
+        if (this.duration == null) {
+            return false;
+        }
         return this.duration >= 0;
     }
 

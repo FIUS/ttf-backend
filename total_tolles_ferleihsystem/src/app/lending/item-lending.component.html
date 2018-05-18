@@ -12,6 +12,23 @@
         </div>
     </div>
     <div class="ph2 bt b--black-10" [hidden]="!open">
-        <p class="f4"><span class="b">Type:</span> <span class="link underline-hover pointer" routerLink="/item-types/{{itemLending?.item?.type?.id}}">{{itemLending?.item?.type?.name}}</span></p>
+        <p class="f4">
+            <span class="b">Type:</span>
+            <span class="link underline-hover pointer" routerLink="/item-types/{{itemLending?.item?.type?.id}}">{{itemLending?.item?.type?.name}}</span>
+            <span class="pointer dim" (click)="howTo.open()">
+                <i class="fa fa-question-circle"></i>
+            </span>
+        </p>
+        <p class="f4"><span class="b">Tags:</span> <span *ngFor="let tag of tags; let isLast=last" routerLink="/tags/{{tag.id}}"><span class="link underline-hover pointer">{{tag.name}}</span>{{isLast ? '' : ', '}}</span></p>
+        <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration></p>
+        <p class="f4 b">Attributes:</p>
+        <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
     </div>
 </div>
+
+<ttf-dialog [dialogType]="'info'" #howTo>
+    <h1 class="mv0" title>How To:</h1>
+    <div class="w-100 ph3 pv2" body>
+        <div>{{itemLending?.item?.type?.how_to}}</div>
+    </div>
+</ttf-dialog>

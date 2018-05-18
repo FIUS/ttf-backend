@@ -646,6 +646,23 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
+    getAttributeAutocomplete(attrDef: ApiObject): Observable<any[]> {
+        const resource = 'attribute_definitions/' + attrDef.id + '/autocomplete';
+        const stream: BehaviorSubject<any[]> = this.getStreamSource(resource) as any;
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.get(attrDef._links.autocomplete, token).subscribe(data => {
+                const parsed = [];
+                (data as any[]).forEach(element => {
+                    try {
+                        parsed.push(JSON.parse(element as string));
+                    } catch (error) {}
+                });
+                stream.next(parsed as any);
+            });
+        });
+        return stream.asObservable();
+    }
+
     getLinkedAttributeDefinitions(linkedObject: ApiObject): Observable<ApiObject[]> {
         const url = linkedObject._links.attributes.href;
         const resource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');

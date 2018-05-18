@@ -11,7 +11,8 @@ from .. import API, satisfies_role
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT, ATTRIBUTE_DEFINITION_VALUES
 from ... import DB
 from ...login import UserRole
-from ...db_models.item import AttributeDefinition, ItemToAttributeDefinition
+from ...db_models.item import ItemToAttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/attribute_definitions'
 ANS = API.namespace('attribute_definition', description='The attribute definitions', path=PATH)
@@ -130,7 +131,7 @@ class AttributeDefinitionDetail(Resource):
             abort(500)
 
 
-@ANS.route('/<int:definition_id>/values')
+@ANS.route('/<int:definition_id>/values/')
 class AttributeDefinitionValues(Resource):
     """
     The current values of a attribute
@@ -146,4 +147,4 @@ class AttributeDefinitionValues(Resource):
         if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
             abort(404, 'Requested attribute not found!')
 
-        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id)]
+        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).group_by(ItemToAttributeDefinition.value)]

@@ -103,7 +103,7 @@ import { AppComponent } from './app.component';
         BrowserModule,
         ReactiveFormsModule,
         SharedModule,
-        AppRoutingModule
+        AppRoutingModule,
     ],
     providers: [
         NavigationService,

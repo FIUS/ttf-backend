@@ -7,6 +7,10 @@ import datetime
 from .. import DB
 from . import STD_STRING_SIZE
 
+from .itemType import ItemTypeToAttributeDefinition
+from .tag import TagToAttributeDefinition
+
+__all__=['Item', 'File', 'Lending', 'ItemToItem', 'ItemToLending', 'ItemToTag', 'ItemToAttributeDefinition']
 
 class Item(DB.Model):
     """
@@ -60,9 +64,59 @@ class Item(DB.Model):
         """
         return self.lending_id != -1
 
-    def get_lending_duration(self):
-        return self.lending_duration
+    @property
+    def effective_lending_duration(self):
+        if(self.lending_duration != 0):
+            return self.lending_duration
 
+        tag_lending_duration = -1
+
+        for itt in self._tags:
+            if(tag_lending_duration < 0 or itt.tag.lending_duration < tag_lending_duration) and itt.tag.lending_duration != 0:
+                tag_lending_duration = itt.tag.lending_duration
+
+        if(tag_lending_duration > 0):
+            return tag_lending_duration    
+
+        return self.item_type.lending_duration
+
+    def get_new_attributes(self, definitions):
+        """
+        Get a list of new attributes to add, considering all definitions in the list.
+        """
+        attributes = []
+        for element in definitions:
+            item_found_ids = [itad.item_id for itad in element._item_to_attribute_definitions]
+            if self.id in item_found_ids:
+                continue
+
+            attributes.append(ItemToAttributeDefinition(self.id,
+                                                        element.id,
+                                                        "")) #TODO: Get default if possible.
+        return attributes
+
+    def get_new_attributes_from_type(self, type_id: int):
+        """
+        Get a list of new attributes to add, when this item would now get that type.
+        """
+
+        item_type_attribute_definitions = (ItemTypeToAttributeDefinition
+                                           .query
+                                           .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
+                                           .all())
+        return self.get_new_attributes([ittad.attribute_definition for ittad in item_type_attribute_definitions])
+        
+
+    def get_new_attributes_from_tag(self, tag_id: int):
+        """
+        Get a list of new attributes to add, when this item would now get that tag.
+        """
+
+        tag_attribute_definitions = (TagToAttributeDefinition
+                                     .query
+                                     .filter(TagToAttributeDefinition.tag_id == tag_id)
+                                     .all())
+        return self.get_new_attributes([ttad.attribute_definition for ttad in tag_attribute_definitions])
 
 class File(DB.Model):
     """
@@ -93,7 +147,6 @@ class Lending(DB.Model):
     __tablename__ = 'Lending'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    #FIXME used to have Integer as type possibly missing table ?
     moderator = DB.Column(DB.String(STD_STRING_SIZE))
     user = DB.Column(DB.String(STD_STRING_SIZE))
     date = DB.Column(DB.DateTime)
@@ -112,31 +165,6 @@ class Lending(DB.Model):
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
-
-
-class AttributeDefinition (DB.Model):
-
-    __tablename__ = 'AttributeDefinition'
-
-    id = DB.Column(DB.Integer, primary_key=True)
-    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
-    type = DB.Column(DB.String(STD_STRING_SIZE))
-    jsonschema = DB.Column(DB.Text)
-    visible_for = DB.Column(DB.String(STD_STRING_SIZE))
-    deleted = DB.Column(DB.Boolean, default=False)
-
-    def __init__(self, name: str, type: str, jsonschema: str, visible_for: str):
-        self.name = name
-        self.type = type
-        self.jsonschema = jsonschema
-        self.visible_for = visible_for
-
-    def update(self, name: str, type: str, jsonschema: str, visible_for: str):
-        self.name = name
-        self.type = type
-        self.jsonschema = jsonschema
-        self.visible_for = visible_for
-
 
 class ItemToItem (DB.Model):
 
@@ -172,7 +200,7 @@ class ItemToLending (DB.Model):
     def __init__(self, item: Item, lending: Lending):
         self.item = item
         self.lending = lending
-        self.due = lending.date + datetime.timedelta(0, item.get_lending_duration())
+        self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration())
 
 
 class ItemToTag (DB.Model):
@@ -198,10 +226,11 @@ class ItemToAttributeDefinition (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
     value = DB.Column(DB.String(STD_STRING_SIZE))
+    deleted = DB.Column(DB.Boolean, default=False)
 
     item = DB.relationship('Item', backref=DB.backref('_attributes', lazy='joined',
                                                       single_parent=True, cascade="all, delete-orphan"))
-    attribute_definition = DB.relationship('AttributeDefinition', lazy='joined')
+    attribute_definition = DB.relationship('AttributeDefinition', backref=DB.backref('_item_to_attribute_definitions', lazy='joined'))
 
     def __init__(self, item_id: int, attribute_definition_id: int, value: str):
         self.item_id = item_id

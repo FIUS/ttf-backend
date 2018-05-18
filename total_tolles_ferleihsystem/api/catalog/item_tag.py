@@ -13,7 +13,8 @@ from ... import DB
 from ...login import UserRole
 
 from ...db_models.tag import Tag, TagToAttributeDefinition
-from ...db_models.item import AttributeDefinition
+from ...db_models.attributeDefinition import AttributeDefinition
+from ...db_models.item import ItemToTag
 
 PATH: str = '/catalog/item_tags'
 ANS = API.namespace('item_tag', description='ItemTags', path=PATH)
@@ -170,15 +171,20 @@ class ItemTagAttributes(Resource):
         Associate a new attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() 
 
         if Tag.query.filter(Tag.id == tag_id).first() is None:
             abort(404, 'Requested item tag not found!')
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
+        if attribute_definition is None:
             abort(400, 'Requested attribute definition not found!')
+
+        items = [itt.item for itt in ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()]
 
         new = TagToAttributeDefinition(tag_id, attribute_definition_id)
         try:
             DB.session.add(new)
+            for item in items:
+                DB.session.add_all(item.get_new_attributes([attribute_definition]))
             DB.session.commit()
             associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
             return [e.attribute_definition for e in associations]
