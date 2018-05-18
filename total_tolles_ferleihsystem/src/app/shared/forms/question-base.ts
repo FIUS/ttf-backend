@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Rx';
 
 export interface QuestionOptions {
     value?: any;
@@ -11,6 +12,7 @@ export interface QuestionOptions {
     pattern?: string,
     options?: Array<any>,
     nullValue?: any,
+    nullable?: boolean,
     isArray?: boolean,
     order?: number,
     controlType?: string;
@@ -28,9 +30,12 @@ export class QuestionBase<T>{
     pattern: string | undefined;
     options: Array<T> | undefined;
     nullValue: T | undefined;
+    nullable: boolean;
     isArray: boolean;
     order: number;
     controlType: string;
+
+    autocompleteData?: Observable<T[]>;
 
     constructor(options: QuestionOptions = {}) {
         this.value = (options.value as T);
@@ -42,8 +47,9 @@ export class QuestionBase<T>{
         this.min = options.min;
         this.max = options.max;
         this.nullValue = options.nullValue;
-        this.isArray = options.isArray == undefined ? false : true;
-        this.order = options.order === undefined ? 1 : options.order;
+        this.nullable = !(!options.nullable);
+        this.isArray = options.isArray == null ? false : true;
+        this.order = options.order === null ? 1 : options.order;
         this.controlType = options.controlType || '';
     }
 }

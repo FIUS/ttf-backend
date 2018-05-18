@@ -4,6 +4,7 @@
 @import "./variables";
 @import '../node_modules/font-awesome/scss/font-awesome';
 @import "../node_modules/tachyons/css/tachyons";
+@import "../node_modules/prismjs/themes/prism.css";
 
 body {
     height: 100vh;
@@ -56,6 +57,7 @@ body {
 .tooltip:after {
     content: attr(data-tooltip);
     position: absolute;
+    z-index: 1;
     min-height: 1.2rem;
     max-width: 30em;
     width: max-content;
@@ -72,6 +74,7 @@ body {
 .tooltip:before {
     content: "";
     position: absolute;
+    z-index: 1;
     opacity: 0;
     transition: opacity 0.2s ease-in;
     pointer-events: none;

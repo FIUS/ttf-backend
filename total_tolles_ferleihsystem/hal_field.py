@@ -1,10 +1,57 @@
 from collections import OrderedDict
+from functools import wraps
 from flask_restplus import marshal
 from flask_restplus.fields import Raw, Nested, StringMixin, MarshallingError, get_value, urlparse, urlunparse
 from flask import url_for, request
 from typing import Dict, List, Union
 
 from . import APP
+
+
+# monkeypatch flask restplus to allow custom fields
+if True:
+    old_init = Raw.__init__
+    @wraps(old_init)
+    def newInit(self, **kwargs):
+        old_init(self, **kwargs)
+        std_args = ('default', 'attribute', 'title', 'description', 'required', 'readonly', 'example', 'mask')
+        self.extra_attributes = {'x-'+k: v for k, v in kwargs.items() if k not in std_args}
+    Raw.__init__ = newInit
+
+    old_schema = Raw.schema
+
+    @wraps(old_schema)
+    def newSchema(self):
+        schema = old_schema(self)
+        for k, v in self.extra_attributes.items():
+            schema[k] = v
+        return schema
+    Raw.schema = newSchema
+
+    from flask_restplus.model import Model, iteritems, instance, not_none
+
+    def _schema(self):
+        properties = OrderedDict()
+        required = set()
+        discriminator = None
+        for i, (name, field) in enumerate(iteritems(self)):
+            field = instance(field)
+            properties[name] = field.__schema__
+            properties[name]['x-order'] = i + 1
+            if field.required:
+                required.add(name)
+            if getattr(field, 'discriminator', False):
+                discriminator = name
+
+        return not_none({
+            'required': sorted(list(required)) or None,
+            'properties': properties,
+            'discriminator': discriminator,
+            'x-mask': str(self.__mask__) if self.__mask__ else None,
+            'type': 'object',
+        })
+
+    setattr(Model, '_schema', property(_schema))
 
 
 class NestedFields(Nested):

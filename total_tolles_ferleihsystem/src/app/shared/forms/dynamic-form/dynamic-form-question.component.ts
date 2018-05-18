@@ -15,13 +15,25 @@ export class DynamicFormQuestionComponent {
     get isValid() { return this.form.controls[this.question.key].valid; }
 
     get error() {
+        if (this.form.controls[this.question.key].valid) {
+            return '';
+        }
         const errors = this.form.controls[this.question.key].errors;
         if (errors) {
             if (errors.maxlength) {
                 return 'Nur '  + errors.maxlength.requiredLength + ' Zeichen erlaubt.';
             }
+            if (errors.pattern) {
+                return 'Der Eingegebene Text hat nicht das erwartete Format.'
+            }
+            if (errors.required) {
+                return 'Dieses Feld muss noch ausgefüllt werden.';
+            }
+            if (errors.null) {
+                return 'Dieses Feld muss noch ausgefüllt werden.';
+            }
             console.log(errors);
         }
-        return '';
+        return 'Überprüfen sie bitte die Eingabe.';
     }
 }

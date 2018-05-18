@@ -158,6 +158,7 @@ export class SearchComponent  {
             schema = JSON.parse(attribute_definition.jsonschema);
         }
         schema.type = attribute_definition.type;
+        schema['x-nullable'] = true;
         if (attribute_definition.type === 'string') {
             if (schema.maxLength == null || schema.maxLength > 253) {
                 schema.maxLength = 253;
@@ -169,6 +170,11 @@ export class SearchComponent  {
                 [attribute_definition.name]: schema,
             }
         }).take(1).subscribe(questions => {
+            questions.forEach(qstn => {
+                if (qstn.key === attribute_definition.name) {
+                    qstn.autocompleteData = this.api.getAttributeAutocomplete(attribute_definition);
+                }
+            });
             this.attributeQuestions.set(attribute_definition.id, questions);
             const form = this.qcs.toFormGroup(questions)
             this.attributeForms.set(attribute_definition.id, form);

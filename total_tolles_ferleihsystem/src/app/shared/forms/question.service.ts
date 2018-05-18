@@ -32,8 +32,6 @@ export class QuestionService implements OnInit {
         this.swagger = this.api.getSpec();
     }
 
-    // Todo: get from a remote source of question metadata
-    // Todo: make asynchronous
     getQuestions = (model: string): Observable<QuestionBase<any>[]> => {
         if (this.swagger == undefined) {
             this.swagger = this.api.getSpec();
@@ -79,9 +77,9 @@ export class QuestionService implements OnInit {
 
     }
 
-    private parseModel(spec: any, modelID: string, questionOptions?: Map<string, QuestionOptions>) {
+    private parseModel(spec: any, modelID: string, questionOptions?: Map<string, QuestionOptions>, orderMultiplier: number = 1) {
         let recursionStart = false;
-        if (questionOptions == undefined) {
+        if (questionOptions == null) {
             questionOptions = new Map<string, QuestionOptions>();
             recursionStart = true;
         }
@@ -101,32 +99,33 @@ export class QuestionService implements OnInit {
         }
     }
 
-    private parseJsonSchemeModel(model: any, spec: any, questionOptions: Map<string, QuestionOptions>) {
-        if (model != undefined) {
-            if (model.allOf != undefined) {
+    private parseJsonSchemeModel(model: any, spec: any, questionOptions: Map<string, QuestionOptions>, orderMultiplier: number = 1) {
+        if (model != null) {
+            if (model.allOf != null) {
                 let tempModel;
-                for (var parent of model.allOf) {
-                    if (parent.$ref != undefined) {
-                        this.parseModel(spec, parent.$ref, questionOptions);
+                for (const parent of model.allOf) {
+                    if (parent.$ref != null) {
+                        this.parseModel(spec, parent.$ref, questionOptions, orderMultiplier);
                     }
-                    if (parent.properties != undefined) {
+                    if (parent.properties != null) {
                         tempModel = parent;
                     }
+                    orderMultiplier *= 100;
                 }
                 model = tempModel;
             }
-            if (model.properties != undefined) {
-                for (var propID in model.properties) {
-                    this.updateOptions(questionOptions, propID, model);
+            if (model.properties != null) {
+                for (const propID in model.properties) {
+                    this.updateOptions(questionOptions, propID, model, orderMultiplier);
                 }
             }
         }
         return model;
     }
 
-    private updateOptions(questionOptions: Map<string, QuestionOptions>, propID: string, model: any) {
+    private updateOptions(questionOptions: Map<string, QuestionOptions>, propID: string, model: any, orderMultiplier: number = 1) {
         let options: QuestionOptions = questionOptions.get(propID);
-        if (options == undefined) {
+        if (options == null) {
             options = {
                 key: propID,
                 label: propID,
@@ -134,7 +133,7 @@ export class QuestionService implements OnInit {
             };
         }
         let prop = model.properties[propID];
-        if (model.required != undefined) {
+        if (model.required != null) {
             for (let name of model.required) {
                 if (name === propID) {
                     options.required = true;
@@ -143,49 +142,56 @@ export class QuestionService implements OnInit {
         }
         options.valueType = prop.type;
         options.controlType = prop.type;
-        if (prop.format != undefined) {
+        if (prop.format != null) {
             options.controlType = prop.format;
         }
-        if (prop.title != undefined) {
+        if (prop.title != null) {
             options.label = prop.title;
         }
-        if (prop.description != undefined) {
-            let re = /\{.*\}/;
-            let matches = prop.description.match(re);
-            if (matches != null && matches.length >= 1) {
-                let temp = JSON.parse(matches[0]);
-                if (temp.isArray != undefined) {
-                    options.isArray = temp.isArray;
-                }
-            }
+        if (prop.description != null) {
         }
+
         options.readOnly = !!prop.readOnly;
-        if (prop.example != undefined) {
+        if (prop.example != null) {
             options.value = prop.example;
         }
-        if (prop.enum != undefined) {
+        if (prop.enum != null) {
             options.options = prop.enum;
         }
 
-        if (prop.minLength != undefined) {
+        if (prop.minLength != null) {
             options.min = prop.minLength;
         }
-        if (prop.maxLength != undefined) {
+        if (prop.maxLength != null) {
             options.max = prop.maxLength;
         }
 
-        if (prop.minimum != undefined) {
+        if (prop.pattern != null) {
+            options.pattern = prop.pattern;
+        }
+
+        if (prop.minimum != null) {
             options.min = prop.minimum;
         }
-        if (prop.maximum != undefined) {
+        if (prop.maximum != null) {
             options.max = prop.maximum;
+        }
+
+        if (prop['x-order'] != null) {
+            options.order = prop['x-order'] * orderMultiplier;
+        }
+        if (prop['x-nullable'] != null) {
+            options.nullable = prop['x-nullable'];
+        }
+        if (prop['x-nullValue'] != null) {
+            options.nullValue = prop['x-nullValue'];
         }
 
         questionOptions.set(propID, options);
     }
 
     private getQuestion(options: QuestionOptions): QuestionBase<any> {
-        if (options.options != undefined) {
+        if (options.options != null) {
             return new DropdownQuestion(options);
         }
         if (options.controlType === 'date') {
@@ -207,7 +213,7 @@ export class QuestionService implements OnInit {
             return new NumberQuestion(options);
         }
         if (options.controlType === 'string') {
-            if (options.pattern != undefined || options.max != undefined) {
+            if (options.pattern != null || options.max != null) {
                 return new StringQuestion(options);
             } else {
                 return new TextQuestion(options);

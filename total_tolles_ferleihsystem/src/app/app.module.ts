@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-md';
 
 
 import { SharedModule } from './shared/shared.module';
@@ -103,7 +104,8 @@ import { AppComponent } from './app.component';
         BrowserModule,
         ReactiveFormsModule,
         SharedModule,
-        AppRoutingModule
+        MarkdownModule.forRoot(),
+        AppRoutingModule,
     ],
     providers: [
         NavigationService,
