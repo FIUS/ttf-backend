@@ -1,6 +1,8 @@
 from .. import DB
 from . import STD_STRING_SIZE
 
+__all__=['AttributeDefinition']
+
 class AttributeDefinition (DB.Model):
 
     __tablename__ = 'AttributeDefinition'

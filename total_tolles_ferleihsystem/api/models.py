@@ -175,6 +175,7 @@ ITEM_GET = API.inherit('ItemGET', ITEM_PUT, ID, {
     'id': fields.Integer(),
     'type': fields.Nested(ITEM_TYPE_GET),
     'is_currently_lent': fields.Boolean(),
+    'effective_lending_duration': fields.Integer(),
     'lending_id': fields.Integer(),
     '_links': NestedFields(ITEM_LINKS)
 })

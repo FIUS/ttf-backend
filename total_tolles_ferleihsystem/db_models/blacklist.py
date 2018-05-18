@@ -3,6 +3,8 @@ from . import STD_STRING_SIZE
 from .itemType import ItemType
 
 
+__all__=['Blacklist', 'BlacklistToItemType']
+
 class Blacklist (DB.Model):
 
     __tablename__ = 'Blacklist'
