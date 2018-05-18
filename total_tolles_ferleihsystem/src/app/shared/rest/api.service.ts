@@ -901,7 +901,7 @@ export class ApiService implements OnInit {
         const stream = this.getStreamSource(resource);
 
         const formData = new FormData();
-        formData.append('filename', item.id);
+        formData.append('item_id', item.id);
         formData.append('file', file);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
