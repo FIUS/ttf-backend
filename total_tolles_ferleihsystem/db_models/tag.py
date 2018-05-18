@@ -6,6 +6,8 @@ from .. import DB
 from . import STD_STRING_SIZE
 from .attributeDefinition import AttributeDefinition
 
+__all__ = [ 'Tag', 'TagToAttributeDefinition' ]
+
 class Tag(DB.Model):
     """
     The representation of a Item-Tag

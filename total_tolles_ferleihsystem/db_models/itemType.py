@@ -2,6 +2,7 @@ from .. import DB
 from . import STD_STRING_SIZE
 from .attributeDefinition import AttributeDefinition
 
+__all__= [ 'ItemType', 'ItemTypeToItemType', 'ItemTypeToAttributeDefinition' ] 
 
 class ItemType (DB.Model):
 

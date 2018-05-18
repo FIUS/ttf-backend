@@ -59,7 +59,7 @@ class ItemList(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            DB.session.add_all(new.get_new_attributes([element.attribute_definition_id for element in item_type._item_type_to_attribute_definitions]))
+            DB.session.add_all(new.get_new_attributes_from_type(type_id))
             DB.session.commit()
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
@@ -141,7 +141,7 @@ class ItemDetail(Resource):
             abort(400, 'Requested item type not found!')
         try:
             item.update(**request.get_json())
-            DB.session.add_all(item.get_new_attributes([element.attribute_definition_id for element in item_type._item_type_to_attribute_definitions]))
+            DB.session.add_all(item.get_new_attributes_from_type(type_id))
             DB.session.commit()
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
@@ -194,7 +194,7 @@ class ItemItemTags(Resource):
        
         try:
             DB.session.add(new)
-            DB.session.add_all(item.get_new_attributes([element.attribute_definition_id for element in tag._tag_to_attribute_definitions]))
+            DB.session.add_all(item.get_new_attributes_from_tag(tag_id))
             DB.session.commit()
             associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
             return [e.tag for e in associations]

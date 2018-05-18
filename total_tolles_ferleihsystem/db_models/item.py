@@ -10,6 +10,8 @@ from . import STD_STRING_SIZE
 from .itemType import ItemTypeToAttributeDefinition
 from .tag import TagToAttributeDefinition
 
+__all__=['Item', 'File', 'Lending', 'ItemToItem', 'ItemToLending', 'ItemToTag', 'ItemToAttributeDefinition']
+
 class Item(DB.Model):
     """
     This data model represents a single lendable item
@@ -62,21 +64,34 @@ class Item(DB.Model):
         """
         return self.lending_id != -1
 
-    def get_lending_duration(self):
-        return self.lending_duration
+    @property
+    def effective_lending_duration(self):
+        if(self.lending_duration != 0):
+            return self.lending_duration
 
-    def get_new_attributes(self, definition_ids):
+        tag_lending_duration = -1
+
+        for itt in self._tags:
+            if(tag_lending_duration < 0 or itt.tag.lending_duration < tag_lending_duration) and itt.tag.lending_duration != 0:
+                tag_lending_duration = itt.tag.lending_duration
+
+        if(tag_lending_duration > 0):
+            return tag_lending_duration    
+
+        return self.item_type.lending_duration
+
+    def get_new_attributes(self, definitions):
         """
-        Get a list of new attributes to add, considering all definition_ids in the list.
+        Get a list of new attributes to add, considering all definitions in the list.
         """
         attributes = []
-        for element in definition_ids:
-            item_found_ids = [ittad.item_id for ittad in element.attribute_definition._item_to_attribute_definitions]
+        for element in definitions:
+            item_found_ids = [itad.item_id for itad in element._item_to_attribute_definitions]
             if self.id in item_found_ids:
                 continue
 
             attributes.append(ItemToAttributeDefinition(self.id,
-                                                        element.attribute_definition_id,
+                                                        element.id,
                                                         "")) #TODO: Get default if possible.
         return attributes
 
@@ -84,34 +99,24 @@ class Item(DB.Model):
         """
         Get a list of new attributes to add, when this item would now get that type.
         """
-        item_id = self.id
-        
+
         item_type_attribute_definitions = (ItemTypeToAttributeDefinition
                                            .query
                                            .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
+        return self.get_new_attributes([ittad.attribute_definition for ittad in item_type_attribute_definitions])
         
 
     def get_new_attributes_from_tag(self, tag_id: int):
         """
         Get a list of new attributes to add, when this item would now get that tag.
         """
-        item_id = self.id
-        
+
         tag_attribute_definitions = (TagToAttributeDefinition
                                      .query
                                      .filter(TagToAttributeDefinition.tag_id == tag_id)
                                      .all())
-        attributes = []
-        for element in tag_attribute_definitions:
-            item_found_ids = [ittad.item_id for ittad in element.attribute_definition._item_to_attribute_definitions]
-            if item_id in item_found_ids:
-                continue
-
-            attributes.append(ItemToAttributeDefinition(item_id,
-                                                        element.attribute_definition_id,
-                                                        "")) #TODO: Get default if possible.
-        return attributes
+        return self.get_new_attributes([ttad.attribute_definition for ttad in tag_attribute_definitions])
 
 class File(DB.Model):
     """
@@ -141,7 +146,6 @@ class Lending(DB.Model):
     __tablename__ = 'Lending'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    #FIXME used to have Integer as type possibly missing table ?
     moderator = DB.Column(DB.String(STD_STRING_SIZE))
     user = DB.Column(DB.String(STD_STRING_SIZE))
     date = DB.Column(DB.DateTime)
@@ -195,7 +199,7 @@ class ItemToLending (DB.Model):
     def __init__(self, item: Item, lending: Lending):
         self.item = item
         self.lending = lending
-        self.due = lending.date + datetime.timedelta(0, item.get_lending_duration())
+        self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration())
 
 
 class ItemToTag (DB.Model):
