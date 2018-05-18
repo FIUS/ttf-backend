@@ -46,6 +46,7 @@ CATALOG_LINKS = API.inherit('CatalogLinks', WITH_CURIES, {
     'items': HaLUrl(UrlData('api.item_item_list', absolute=True)),
     'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
     'item_tags': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
+    'files': HaLUrl(UrlData('api.file_file_list', absolute=True)),
     'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
 })
 CATALOG_MODEL = API.model('CatalogModel', {
