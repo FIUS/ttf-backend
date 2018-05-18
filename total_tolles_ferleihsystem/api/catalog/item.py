@@ -59,7 +59,7 @@ class ItemList(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            attributes_to_add, _, attributes_to_undelete = new.get_attribute_from_type(type_id)
+            attributes_to_add, _, attributes_to_undelete = new.get_attribute_changes_from_type(type_id)
             DB.session.add_all(attributes_to_add)
             for attr in attributes_to_undelete:
                 attr.deleted = False
@@ -144,7 +144,7 @@ class ItemDetail(Resource):
             abort(400, 'Requested item type not found!')
         try:
             item.update(**request.get_json())
-            attributes_to_add, _, attributes_to_undelete = item.get_attribute_from_type(type_id)
+            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_type(type_id)
             DB.session.add_all(attributes_to_add)
             for attr in attributes_to_undelete:
                 attr.deleted = False
@@ -200,7 +200,7 @@ class ItemItemTags(Resource):
        
         try:
             DB.session.add(new)
-            attributes_to_add, _, attributes_to_undelete = item.get_attribute_from_tag(tag_id)
+            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_tag(tag_id)
             DB.session.add_all(attributes_to_add)
             for attr in attributes_to_undelete:
                 attr.deleted = False
