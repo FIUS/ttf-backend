@@ -901,12 +901,12 @@ export class ApiService implements OnInit {
         const stream = this.getStreamSource(resource);
 
         const formData = new FormData();
-        formData.append('filename', '');
+        formData.append('filename', item.id);
         formData.append('file', file);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe(catalog => {
-                this.rest.uploadFile(catalog._links.files, formData, file.type, token).subscribe(data => {
+                this.rest.uploadFile(catalog._links.files, formData, token).subscribe(data => {
                     stream.next(data);
                 }, error => this.errorHandler(error, resource, 'GET'));
             });

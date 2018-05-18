@@ -54,9 +54,11 @@ export class BaseApiService {
         return url;
     }
 
-    private headers(token?: string, mimetype= 'application/json'): RequestOptions {
+    private headers(token?: string, mimetypeJSON: boolean= true): RequestOptions {
         const headers = new Headers();
-        headers.append('Content-Type', mimetype);
+        if (mimetypeJSON) {
+            headers.append('Content-Type', 'application/json');
+        }
         if (token != null) {
             headers.append('Authorization', 'Bearer ' + token);
         }
@@ -116,11 +118,9 @@ export class BaseApiService {
             });
     }
 
-    uploadFile(url: string|LinkObject|ApiLinksObject|ApiObject, data: FormData, mimetype: string, token?: string): Observable<any> {
+    uploadFile(url: string|LinkObject|ApiLinksObject|ApiObject, data: FormData, token?: string): Observable<any> {
         url = this.extractUrl(url);
-        console.log(mimetype);
-        const options = this.headers(token, mimetype);
-        console.log(options);
+        const options = this.headers(token, false);
         return this.http.post(url, data, options)
             .map((res: Response) => res.json())
             .catch((error: any) => {
