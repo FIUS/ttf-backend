@@ -6,7 +6,7 @@ from flask_restplus import Resource
 
 from .. import API
 
-PATH: str = '/catalog/file'
+PATH: str = '/catalog/files'
 ANS = API.namespace('file', description='The file Endpoints', path=PATH)
 
 
