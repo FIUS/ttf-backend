@@ -68,21 +68,22 @@ class File(DB.Model):
     """
     This data model represents a file attached to a item
     """
+
     __tablename__ = 'File'
 
     id = DB.Column(DB.Integer, primary_key=True)
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'))
     name = DB.Column(DB.String(STD_STRING_SIZE))
-    path = DB.Column(DB.String(STD_STRING_SIZE))
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE))
 
     item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='joined',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, item: Item, name: str, path: str):
+    def __init__(self, item: Item, name: str, file_hash: str):
         self.item = item
         self.name = name
-        self.path = path
+        self.file_hash = file_hash
 
 
 class Lending(DB.Model):
