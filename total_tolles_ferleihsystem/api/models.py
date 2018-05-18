@@ -46,6 +46,7 @@ CATALOG_LINKS = API.inherit('CatalogLinks', WITH_CURIES, {
     'items': HaLUrl(UrlData('api.item_item_list', absolute=True)),
     'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
     'item_tags': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
+    'files': HaLUrl(UrlData('api.file_file_list', absolute=True)),
     'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
 })
 CATALOG_MODEL = API.model('CatalogModel', {
@@ -198,6 +199,13 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
     'attribute_definition_id': fields.Integer(),
     'attribute_definition': fields.Nested(ATTRIBUTE_DEFINITION_GET),
     '_links': NestedFields(ATTRIBUTE_LINKS)
+})
+
+FILE_GET = API.model('FileGET', {
+    'id': fields.Integer(),
+    'item': fields.Nested(ITEM_GET),
+    'name': fields.String(),
+    'file_hash': fields.String(),
 })
 
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {

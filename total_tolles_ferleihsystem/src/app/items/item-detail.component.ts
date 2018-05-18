@@ -35,6 +35,10 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     containedItemsAsMap: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     chooseItemType: number = -1;
 
+    dragover: boolean = false;
+    filesUploading: string[] = [];
+    filesUploadingMap: Map<string, any> = new Map;
+
     constructor(private data: NavigationService, private api: ApiService,
                 private jwt: JWTService, private staging: StagingService,
                 private route: ActivatedRoute) { }
@@ -162,6 +166,28 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     removeItemFromContained(item: ApiObject) {
         this.api.deleteContainedItem(this.item, item.id);
+    }
+
+    onDropFile(event: DragEvent) {
+        event.preventDefault();
+        Array.prototype.forEach.call(event.dataTransfer.files, (file: File) => {
+            console.log(file);
+            if (file.type === 'application/pdf') {
+                this.filesUploading.push(file.name);
+                this.filesUploadingMap.set(file.name, file);
+                this.api.uploadFile(this.item, file).subscribe(data => {
+                    console.log(data);
+                });
+            }
+        });
+        //this.uploadFile(event.dataTransfer.files);
+    }
+
+    // At the drag drop area
+    // (dragover)="onDragOverFile($event)"
+    onDragOverFile(event) {
+        event.stopPropagation();
+        event.preventDefault();
     }
 
 }

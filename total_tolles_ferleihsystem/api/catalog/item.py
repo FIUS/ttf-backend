@@ -17,7 +17,7 @@ from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
 
-PATH: str = '/catalog/item'
+PATH: str = '/catalog/items'
 ANS = API.namespace('item', description='Items', path=PATH)
 
 

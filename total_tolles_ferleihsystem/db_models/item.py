@@ -76,7 +76,7 @@ class Item(DB.Model):
                 tag_lending_duration = itt.tag.lending_duration
 
         if(tag_lending_duration > 0):
-            return tag_lending_duration    
+            return tag_lending_duration
 
         return self.item_type.lending_duration
 
@@ -134,21 +134,22 @@ class File(DB.Model):
     """
     This data model represents a file attached to a item
     """
+
     __tablename__ = 'File'
 
     id = DB.Column(DB.Integer, primary_key=True)
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'))
     name = DB.Column(DB.String(STD_STRING_SIZE))
-    path = DB.Column(DB.String(STD_STRING_SIZE))
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE))
 
     item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='joined',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, item: Item, name: str, path: str):
-        self.item = item
+    def __init__(self, item_id: int, name: str, file_hash: str):
+        self.item_id = item_id
         self.name = name
-        self.path = path
+        self.file_hash = file_hash
 
 
 class Lending(DB.Model):
