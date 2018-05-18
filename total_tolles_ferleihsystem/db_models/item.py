@@ -76,7 +76,7 @@ class Item(DB.Model):
                 tag_lending_duration = itt.tag.lending_duration
 
         if(tag_lending_duration > 0):
-            return tag_lending_duration    
+            return tag_lending_duration
 
         return self.item_type.lending_duration
 
@@ -105,7 +105,7 @@ class Item(DB.Model):
                                            .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
         return self.get_new_attributes([ittad.attribute_definition for ittad in item_type_attribute_definitions])
-        
+
 
     def get_new_attributes_from_tag(self, tag_id: int):
         """
@@ -134,8 +134,8 @@ class File(DB.Model):
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, item: Item, name: str, file_hash: str):
-        self.item = item
+    def __init__(self, item_id: int, name: str, file_hash: str):
+        self.item_id = item_id
         self.name = name
         self.file_hash = file_hash
 

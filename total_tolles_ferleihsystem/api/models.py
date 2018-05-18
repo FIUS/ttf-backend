@@ -201,6 +201,13 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
     '_links': NestedFields(ATTRIBUTE_LINKS)
 })
 
+FILE_GET = API.model('FileGET', {
+    'id': fields.Integer(),
+    'item': fields.Nested(ITEM_GET),
+    'name': fields.String(),
+    'file_hash': fields.String(),
+})
+
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.lending_lending_detail', absolute=True,
                            url_data={'lending_id' : 'id'}), required=False),

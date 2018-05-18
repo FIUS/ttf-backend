@@ -3,11 +3,18 @@ This module contains all API endpoints for the namespace 'file'
 """
 
 import os
+import hashlib
 from flask import request
 from flask_restplus import Resource, abort
-from werkzeug.utils import secure_filename
+from sqlalchemy.exc import IntegrityError
+
+from ..models import FILE_GET
+from ...db_models.item import Item, File
 
 from .. import API, APP
+from ... import DB
+
+TMP_FILE_NAME = 'tmp.upload'
 
 
 PATH: str = '/catalog/files'
@@ -26,6 +33,7 @@ class FileList(Resource):
         """
         pass
 
+    @API.marshal_with(FILE_GET)
     def post(self):
         """
         Create a file
@@ -33,12 +41,35 @@ class FileList(Resource):
         if 'file' not in request.files:
             abort(400)
         file = request.files['file']
-        if file:
-            if file.filename == '':
-                abort(400)
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(APP.config['DATA_DIRECTORY'], filename))
-            return 'Success'
+        if not file:
+            abort(400)
+        if file.filename == '':
+            abort(400)
+        if request.form['item_id'] is None:
+            abort(400)
+        if Item.query.filter(Item.id == request.form['item_id']).first() is None:
+            abort(400)
+
+        # Download File
+        path = os.path.join(APP.config['DATA_DIRECTORY'], TMP_FILE_NAME)
+        file.save(path)
+        file_hash = ''
+        with open(path, 'rb') as tmp_file:
+            # pylint: disable=E1101
+            file_hash = hashlib.sha3_256(tmp_file.read()).hexdigest()
+        os.rename(path, os.path.join(APP.config['DATA_DIRECTORY'], file_hash))
+
+        new = File(item_id= request.form['item_id'], name= file.filename, file_hash= file_hash)
+
+        try:
+            DB.session.add(new)
+            DB.session.commit()
+            return new
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)
 
 
 @ANS.route('/<int:file_id>/')
