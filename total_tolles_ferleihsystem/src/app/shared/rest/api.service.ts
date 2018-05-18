@@ -895,6 +895,28 @@ export class ApiService implements OnInit {
 
 
 
+    // Files ///////////////////////////////////////////////////////////////////
+    uploadFile(item: ApiObject, file: File): Observable<ApiObject> {
+        const resource = 'files';
+        const stream = this.getStreamSource(resource);
+
+        const formData = new FormData();
+        formData.append('filename', item.id);
+        formData.append('file', file);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe(catalog => {
+                this.rest.uploadFile(catalog._links.files, formData, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            });
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+
+
     // Attributes //////////////////////////////////////////////////////////////
     getAttributes(item: ApiObject): Observable<Array<ApiObject>> {
         const resource = 'items/' + item.id + '/attributes';
