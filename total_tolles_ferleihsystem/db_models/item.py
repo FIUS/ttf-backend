@@ -80,43 +80,55 @@ class Item(DB.Model):
 
         return self.item_type.lending_duration
 
-    def get_new_attributes(self, definitions):
+    def get_attribute_changes(self, definitions, remove: bool = False):
         """
-        Get a list of new attributes to add, considering all definitions in the list.
+        Get a list of attributes to add, to delete and to undelete,
+        considering all definitions in the list and whether to add or remove them.
         """
-        attributes = []
+        attributes_to_add = []
+        attributes_to_delete = []
+        attributes_to_undelete = []
         for element in definitions:
-            item_found_ids = [itad.item_id for itad in element._item_to_attribute_definitions]
-            if self.id in item_found_ids:
-                continue
+            itads = element._item_to_attribute_definitions
+            exists = False
+            for itad in itads: 
+                if(itad.item_id == self.id):
+                    exists = True
+                    if(remove):
+                        attributes_to_delete.append(itad)
+                    elif(itad.deleted):
+                        attributes_to_undelete.append(itad)
 
-            attributes.append(ItemToAttributeDefinition(self.id,
+            if not exists and not remove:
+                attributes_to_add.append(ItemToAttributeDefinition(self.id,
                                                         element.id,
                                                         "")) #TODO: Get default if possible.
-        return attributes
+        return attributes_to_add, attributes_to_delete, attributes_to_undelete
 
-    def get_new_attributes_from_type(self, type_id: int):
+    def get_attribute_changes_from_type(self, type_id: int, remove: bool = False):
         """
-        Get a list of new attributes to add, when this item would now get that type.
+        Get a list of attributes to add, to delete and to undelete,
+        when this item would now get that type or lose that type.
         """
 
         item_type_attribute_definitions = (ItemTypeToAttributeDefinition
                                            .query
                                            .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
-        return self.get_new_attributes([ittad.attribute_definition for ittad in item_type_attribute_definitions])
+        return self.get_attribute_changes([ittad.attribute_definition for ittad in item_type_attribute_definitions], remove)
         
 
-    def get_new_attributes_from_tag(self, tag_id: int):
+    def get_attribute_changes_from_tag(self, tag_id: int, remove: bool = False):
         """
-        Get a list of new attributes to add, when this item would now get that tag.
+        Get a list of attributes to add, to delete and to undelete,
+        when this item would now get that tag or loase that tag.
         """
 
         tag_attribute_definitions = (TagToAttributeDefinition
                                      .query
                                      .filter(TagToAttributeDefinition.tag_id == tag_id)
                                      .all())
-        return self.get_new_attributes([ttad.attribute_definition for ttad in tag_attribute_definitions])
+        return self.get_attribute_changes([ttad.attribute_definition for ttad in tag_attribute_definitions], remove)
 
 class File(DB.Model):
     """
