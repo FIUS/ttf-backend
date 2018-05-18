@@ -54,9 +54,9 @@ export class BaseApiService {
         return url;
     }
 
-    private headers(token?: string): RequestOptions {
+    private headers(token?: string, mimetype= 'application/json'): RequestOptions {
         const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
+        headers.append('Content-Type', mimetype);
         if (token != null) {
             headers.append('Authorization', 'Bearer ' + token);
         }
@@ -106,6 +106,22 @@ export class BaseApiService {
     post(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<ApiObject> {
         url = this.extractUrl(url);
         return this.http.post(url, JSON.stringify(data), this.headers(token))
+            .map((res: Response) => res.json())
+            .catch((error: any) => {
+                if (error.status != null) {
+                    return Observable.throw({status: error.status,
+                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                }
+                return Observable.throw(error.json().error || 'Server error')
+            });
+    }
+
+    uploadFile(url: string|LinkObject|ApiLinksObject|ApiObject, data: FormData, mimetype: string, token?: string): Observable<any> {
+        url = this.extractUrl(url);
+        console.log(mimetype);
+        const options = this.headers(token, mimetype);
+        console.log(options);
+        return this.http.post(url, data, options)
             .map((res: Response) => res.json())
             .catch((error: any) => {
                 if (error.status != null) {
