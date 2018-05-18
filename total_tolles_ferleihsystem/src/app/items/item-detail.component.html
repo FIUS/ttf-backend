@@ -85,7 +85,7 @@
     <ttf-dialog [dialogType]="'info'" #howTo>
         <h1 class="mv0" title>How To:</h1>
         <div class="w-100 ph3 pv2" body>
-            <markdown [data]="item?.type?.how_to"></markdown>
+            <div>{{item?.type?.how_to}}</div>
         </div>
     </ttf-dialog>
 
