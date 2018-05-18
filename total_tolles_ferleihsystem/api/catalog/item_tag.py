@@ -184,7 +184,10 @@ class ItemTagAttributes(Resource):
         try:
             DB.session.add(new)
             for item in items:
-                DB.session.add_all(item.get_new_attributes([attribute_definition]))
+                attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes([attribute_definition])
+                DB.session.add_all(attributes_to_add)
+                for attr in attributes_to_undelete:
+                    attr.deleted = False
             DB.session.commit()
             associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
             return [e.attribute_definition for e in associations]
