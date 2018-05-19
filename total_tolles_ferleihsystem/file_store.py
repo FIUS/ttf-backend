@@ -26,7 +26,7 @@ def save_file(file):
 
 def read_file(file_hash):
     """
-    Read a file in the store via it's hash
+    Readpa file in the store via it's hash
     """
     with open(os.path.join(APP.config['DATA_DIRECTORY'], file_hash), 'rb') as file:
         return file.read()
