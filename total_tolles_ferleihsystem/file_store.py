@@ -10,7 +10,7 @@ from . import APP
 TMP_FILE_NAME = 'tmp.upload'
 
 
-def save(file):
+def save_file(file):
     """
     Save a file from a flask endpoint
     """
@@ -22,3 +22,11 @@ def save(file):
     os.rename(path, os.path.join(APP.config['DATA_DIRECTORY'], file_hash))
 
     return file_hash
+
+
+def read_file(file_hash):
+    """
+    Read a file in the store via it's hash
+    """
+    with open(os.path.join(APP.config['DATA_DIRECTORY'], file_hash), 'rb') as file:
+        return file.read()

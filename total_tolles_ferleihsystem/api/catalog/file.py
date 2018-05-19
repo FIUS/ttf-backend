@@ -3,7 +3,7 @@ This module contains all API endpoints for the namespace 'file'
 """
 
 import os
-from flask import request
+from flask import request, make_response
 from flask_restplus import Resource, abort
 from sqlalchemy.exc import IntegrityError
 
@@ -13,7 +13,7 @@ from ...db_models.item import Item, File
 from .. import API
 from ... import DB
 
-from ...file_store import save
+from ...file_store import save_file, read_file
 
 TMP_FILE_NAME = 'tmp.upload'
 
@@ -55,7 +55,7 @@ class FileList(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(400)
 
-        file_hash = save(file)
+        file_hash = save_file(file)
         name, ext = os.path.splitext(file.filename)
         new = File(item_id=item_id, name=name, file_type=ext, file_hash=file_hash)
 
@@ -109,7 +109,7 @@ class FileDetail(Resource):
 
 
 PATH2: str = '/file-store'
-ANS2 = API.namespace('file', description='The download Endpoint to download any file from the system.', path=PATH)
+ANS2 = API.namespace('file', description='The download Endpoint to download any file from the system.', path=PATH2)
 
 @ANS2.route('/<string:file_hash>/')
 class FileData(Resource):
@@ -121,4 +121,9 @@ class FileData(Resource):
         """
         Get the actual file
         """
-        pass
+        file = File.query.filter(File.file_hash == file_hash).first()
+
+        headers = {
+            "Content-Disposition": "attachment; filename={}".format(file.name + file.file_type)
+        }
+        return make_response((read_file(file_hash), headers))
