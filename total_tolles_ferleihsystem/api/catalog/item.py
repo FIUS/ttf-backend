@@ -13,8 +13,8 @@ from ... import DB
 from ...login import UserRole
 
 from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem
-from ...db_models.itemType import ItemTypeToAttributeDefinition, ItemType, ItemTypeToItemType
-from ...db_models.tag import TagToAttributeDefinition, Tag
+from ...db_models.itemType import ItemType, ItemTypeToItemType
+from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
 
 PATH: str = '/catalog/items'
@@ -59,7 +59,10 @@ class ItemList(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            DB.session.add_all(new.get_new_attributes_from_type(type_id))
+            attributes_to_add, _, attributes_to_undelete = new.get_attribute_changes_from_type(type_id)
+            DB.session.add_all(attributes_to_add)
+            for attr in attributes_to_undelete:
+                attr.deleted = False
             DB.session.commit()
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
@@ -141,7 +144,10 @@ class ItemDetail(Resource):
             abort(400, 'Requested item type not found!')
         try:
             item.update(**request.get_json())
-            DB.session.add_all(item.get_new_attributes_from_type(type_id))
+            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_type(type_id)
+            DB.session.add_all(attributes_to_add)
+            for attr in attributes_to_undelete:
+                attr.deleted = False
             DB.session.commit()
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
@@ -194,7 +200,10 @@ class ItemItemTags(Resource):
        
         try:
             DB.session.add(new)
-            DB.session.add_all(item.get_new_attributes_from_tag(tag_id))
+            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_tag(tag_id)
+            DB.session.add_all(attributes_to_add)
+            for attr in attributes_to_undelete:
+                attr.deleted = False
             DB.session.commit()
             associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
             return [e.tag for e in associations]

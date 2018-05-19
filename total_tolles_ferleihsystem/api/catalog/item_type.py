@@ -171,7 +171,6 @@ class ItemTypeAttributes(Resource):
         attribute_definition_id = request.get_json()["id"]
         attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first()
 
-
         if ItemType.query.filter(ItemType.id == type_id).first() is None:
             abort(404, 'Requested item type not found!')
         if attribute_definition is None:
@@ -183,7 +182,10 @@ class ItemTypeAttributes(Resource):
         try:
             DB.session.add(new)
             for item in items:
-                DB.session.add_all(item.get_new_attributes([attribute_definition]))
+                attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes([attribute_definition])
+                DB.session.add_all(attributes_to_add)
+                for attr in attributes_to_undelete:
+                    attr.deleted = False
             DB.session.commit()
             associations = (ItemTypeToAttributeDefinition
                             .query
