@@ -10,7 +10,16 @@ from . import STD_STRING_SIZE
 from .itemType import ItemTypeToAttributeDefinition
 from .tag import TagToAttributeDefinition
 
-__all__=['Item', 'File', 'Container', 'Lending', 'ItemToItem', 'ItemToLending', 'ItemToTag', 'ItemToAttributeDefinition']
+__all__ = [
+    'Item',
+    'File',
+    'Container',
+    'Lending',
+    'ItemToItem',
+    'ItemToLending',
+    'ItemToTag',
+    'ItemToAttributeDefinition'
+]
 
 class Item(DB.Model):
     """
