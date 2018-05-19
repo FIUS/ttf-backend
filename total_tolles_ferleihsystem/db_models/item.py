@@ -13,7 +13,6 @@ from .tag import TagToAttributeDefinition
 __all__ = [
     'Item',
     'File',
-    'Container',
     'Lending',
     'ItemToItem',
     'ItemToLending',
@@ -161,20 +160,6 @@ class File(DB.Model):
         self.name = name
         self.file_type = file_type
         self.file_hash = file_hash
-
-
-class Container(DB.Model):
-    """
-    This data model represents a packed collection of files
-    """
-    __tablename__ = 'Container'
-
-    file_hash = DB.Column(DB.String(STD_STRING_SIZE), primary_key=True)
-    name = DB.Column(DB.String(STD_STRING_SIZE))
-
-    def __init__(self, hash: str, name: str):
-        self.file_hash = hash
-        self.name = name
 
 
 class Lending(DB.Model):

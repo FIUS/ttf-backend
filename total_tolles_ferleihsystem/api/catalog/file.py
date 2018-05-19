@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from ..models import FILE_GET
 from ...db_models.item import Item, File
 
-from .. import API, APP
+from .. import API
 from ... import DB
 
 from ...file_store import save_file, read_file
