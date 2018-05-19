@@ -13,7 +13,7 @@ class Config(object):
                  %(funcName)s, %(lineno)s; %(pathname)s>'
     AUTH_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
     TMP_DIRECTORY = '/tmp'
-    DATA_DIRECTORY = '/tmp/data'
+    DATA_DIRECTORY = '/tmp'
 
 
 class ProductionConfig(Config):
