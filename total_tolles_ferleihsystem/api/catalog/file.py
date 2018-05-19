@@ -27,11 +27,12 @@ class FileList(Resource):
     Files root element
     """
 
+    @API.marshal_list_with(FILE_GET)
     def get(self):
         """
         Get a list of files
         """
-        pass
+        return File.query.all()
 
     @API.marshal_with(FILE_GET)
     #TODO Add security and swagger doc
@@ -82,17 +83,30 @@ class FileDetail(Resource):
     Single file object
     """
 
+    @ANS.response(404, 'Requested item not found!')
+    @API.marshal_with(FILE_GET)
     def get(self, file_id):
         """
         Get a single file object
         """
-        pass
+        file = File.query.filter(File.id == file_id).first()
+        if file is None:
+            abort(404, 'Requested item not found!')
 
+        return file
+
+    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(204, 'Success.')
     def delete(self, file_id):
         """
         Delete a file object
         """
-        pass
+        file = File.query.filter(File.id == file_id).first()
+        if file is None:
+            abort(404, 'Requested item not found!')
+        DB.session.delete(file)
+        DB.session.commit()
+        return "", 204
 
     def put(self, file_id):
         """
