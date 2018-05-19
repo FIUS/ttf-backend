@@ -34,10 +34,12 @@ class FileList(Resource):
         pass
 
     @API.marshal_with(FILE_GET)
+    #TODO Add security and swagger doc
     def post(self):
         """
         Create a file
         """
+        #FIXME Do better aborts and error checking
         if 'file' not in request.files:
             abort(400)
         file = request.files['file']
@@ -45,9 +47,10 @@ class FileList(Resource):
             abort(400)
         if file.filename == '':
             abort(400)
-        if request.form['item_id'] is None:
+        item_id = request.form['item_id']
+        if item_id is None:
             abort(400)
-        if Item.query.filter(Item.id == request.form['item_id']).first() is None:
+        if Item.query.filter(Item.id == item_id).first() is None:
             abort(400)
 
         # Download File
@@ -59,7 +62,7 @@ class FileList(Resource):
             file_hash = hashlib.sha3_256(tmp_file.read()).hexdigest()
         os.rename(path, os.path.join(APP.config['DATA_DIRECTORY'], file_hash))
 
-        new = File(item_id= request.form['item_id'], name= file.filename, file_hash= file_hash)
+        new = File(item_id= item_id, name= file.filename, file_hash= file_hash)
 
         try:
             DB.session.add(new)
@@ -98,7 +101,7 @@ class FileDetail(Resource):
 
 
 PATH2: str = '/file-store'
-ANS2 = API.namespace('file', description='The download Endpoints to get the actual stored files', path=PATH)
+ANS2 = API.namespace('file', description='The download Endpoint to download any file from the system.', path=PATH)
 
 @ANS2.route('/<string:hash>/')
 class FileData(Resource):
