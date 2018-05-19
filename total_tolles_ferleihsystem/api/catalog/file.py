@@ -3,7 +3,6 @@ This module contains all API endpoints for the namespace 'file'
 """
 
 import os
-import hashlib
 from flask import request
 from flask_restplus import Resource, abort
 from sqlalchemy.exc import IntegrityError
@@ -11,8 +10,10 @@ from sqlalchemy.exc import IntegrityError
 from ..models import FILE_GET
 from ...db_models.item import Item, File
 
-from .. import API, APP
+from .. import API
 from ... import DB
+
+from ...file_store import save
 
 TMP_FILE_NAME = 'tmp.upload'
 
@@ -54,15 +55,7 @@ class FileList(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(400)
 
-        # Download File
-        path = os.path.join(APP.config['DATA_DIRECTORY'], TMP_FILE_NAME)
-        file.save(path)
-        file_hash = ''
-        with open(path, 'rb') as tmp_file:
-            # pylint: disable=E1101
-            file_hash = hashlib.sha3_256(tmp_file.read()).hexdigest()
-        os.rename(path, os.path.join(APP.config['DATA_DIRECTORY'], file_hash))
-
+        file_hash = save(file)
         name, ext = os.path.splitext(file.filename)
         new = File(item_id=item_id, name=name, file_type=ext, file_hash=file_hash)
 
@@ -118,13 +111,13 @@ class FileDetail(Resource):
 PATH2: str = '/file-store'
 ANS2 = API.namespace('file', description='The download Endpoint to download any file from the system.', path=PATH)
 
-@ANS2.route('/<string:hash>/')
+@ANS2.route('/<string:file_hash>/')
 class FileData(Resource):
     """
     The endpoints to get the actual stored file
     """
 
-    def get(self, hash):
+    def get(self, file_hash):
         """
         Get the actual file
         """
