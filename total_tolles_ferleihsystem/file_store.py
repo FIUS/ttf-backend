@@ -9,7 +9,7 @@ from . import APP
 
 
 TMP_FILE_NAME = 'ttf.upload'
-DATA_FILE_NAME = 'ttf-file.dat'
+DATA_FILE_NAME = 'file-store.dat'
 
 TMP_FOLDER_PATH = APP.config['TMP_DIRECTORY']
 DATA_FOLDER_PATH = APP.config['DATA_DIRECTORY']
