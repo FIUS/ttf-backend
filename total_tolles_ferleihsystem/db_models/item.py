@@ -10,7 +10,7 @@ from . import STD_STRING_SIZE
 from .itemType import ItemTypeToAttributeDefinition
 from .tag import TagToAttributeDefinition
 
-__all__=['Item', 'File', 'Lending', 'ItemToItem', 'ItemToLending', 'ItemToTag', 'ItemToAttributeDefinition']
+__all__=['Item', 'File', 'Container', 'Lending', 'ItemToItem', 'ItemToLending', 'ItemToTag', 'ItemToAttributeDefinition']
 
 class Item(DB.Model):
     """
@@ -128,16 +128,32 @@ class File(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True)
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'))
     name = DB.Column(DB.String(STD_STRING_SIZE))
+    file_type = DB.Column(DB.String(STD_STRING_SIZE))
     file_hash = DB.Column(DB.String(STD_STRING_SIZE))
 
     item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='joined',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, item_id: int, name: str, file_hash: str):
+    def __init__(self, item_id: int, name: str, file_type: str, file_hash: str):
         self.item_id = item_id
         self.name = name
+        self.file_type = file_type
         self.file_hash = file_hash
+
+
+class Container(DB.Model):
+    """
+    This data model represents a packed collection of files
+    """
+    __tablename__ = 'Container'
+
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE), primary_key=True)
+    name = DB.Column(DB.String(STD_STRING_SIZE))
+
+    def __init__(self, hash: str, name: str):
+        self.file_hash = hash
+        self.name = name
 
 
 class Lending(DB.Model):
@@ -166,7 +182,7 @@ class Lending(DB.Model):
         self.user = user
         self.deposit = deposit
 
-class ItemToItem (DB.Model):
+class ItemToItem(DB.Model):
 
     __tablename__ = 'ItemToItem'
 
