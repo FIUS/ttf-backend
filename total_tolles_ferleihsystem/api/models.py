@@ -207,6 +207,8 @@ FILE_GET = API.model('FileGET', {
     'name': fields.String(),
     'file_type': fields.String(),
     'file_hash': fields.String(),
+    'creation': fields.DateTime(),
+    'invalidation': fields.DateTime(),
 })
 
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {

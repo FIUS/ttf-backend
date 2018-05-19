@@ -3,6 +3,7 @@ The database models of the item and all connected tables
 """
 
 import datetime
+from sqlalchemy.sql import func
 
 from .. import DB
 from . import STD_STRING_SIZE
@@ -146,10 +147,12 @@ class File(DB.Model):
     __tablename__ = 'File'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'))
+    item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), nullable=True)
     name = DB.Column(DB.String(STD_STRING_SIZE))
     file_type = DB.Column(DB.String(STD_STRING_SIZE))
-    file_hash = DB.Column(DB.String(STD_STRING_SIZE))
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE), index=True)
+    creation = DB.Column(DB.DateTime, server_default=func.now())
+    invalidation = DB.Column(DB.DateTime, nullable=True)
 
     item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='joined',
                                                                      single_parent=True,
