@@ -62,7 +62,8 @@ class FileList(Resource):
             file_hash = hashlib.sha3_256(tmp_file.read()).hexdigest()
         os.rename(path, os.path.join(APP.config['DATA_DIRECTORY'], file_hash))
 
-        new = File(item_id= item_id, name= file.filename, file_hash= file_hash)
+        name, ext = os.path.splitext(file.filename)
+        new = File(item_id=item_id, name=name, file_type=ext, file_hash=file_hash)
 
         try:
             DB.session.add(new)

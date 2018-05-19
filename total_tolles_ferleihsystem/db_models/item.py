@@ -100,7 +100,7 @@ class Item(DB.Model):
         for element in definitions:
             itads = element._item_to_attribute_definitions
             exists = False
-            for itad in itads: 
+            for itad in itads:
                 if(itad.item_id == self.id):
                     exists = True
                     if(remove):
@@ -125,7 +125,7 @@ class Item(DB.Model):
                                            .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
         return self.get_attribute_changes([ittad.attribute_definition for ittad in item_type_attribute_definitions], remove)
-        
+
 
     def get_attribute_changes_from_tag(self, tag_id: int, remove: bool = False):
         """

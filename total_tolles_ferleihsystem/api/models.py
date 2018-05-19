@@ -205,6 +205,7 @@ FILE_GET = API.model('FileGET', {
     'id': fields.Integer(),
     'item': fields.Nested(ITEM_GET),
     'name': fields.String(),
+    'file_type': fields.String(),
     'file_hash': fields.String(),
 })
 
