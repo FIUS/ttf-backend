@@ -14,6 +14,8 @@ from . import APP
 
 
 Hash = str
+# pylint: disable=C0103
+FileEntry = Tuple[Hash, str]
 
 
 TMP_DOWNLOAD_FILE_NAME = 'data.upload'
@@ -43,7 +45,7 @@ def save_file(file: FileStorage) -> Hash:
 
 
 def _store(file_path: os.PathLike, file_hash: Hash) -> None:
-    with ZipFile(DATA_FILE_PATH, 'ab', ZIP_STORED, True) as data_file:
+    with ZipFile(DATA_FILE_PATH, 'a', ZIP_STORED, True) as data_file:
         data_file.write(file_path, file_hash)
 
 
@@ -51,15 +53,15 @@ def read_file(file_hash: str) -> bytes:
     """
     Read a file in the store via it's hash
     """
-    with ZipFile(DATA_FILE_PATH, 'rb', ZIP_STORED, True) as data_file:
+    with ZipFile(DATA_FILE_PATH, 'r', ZIP_STORED, True) as data_file:
         return data_file.read(file_hash)
 
 
-def create_archive(files: List[Tuple[Hash, str]]) -> Hash:
+def create_archive(files: List[FileEntry]) -> Hash:
     """
     Create a archive collection full of files from the store
     """
-    with ZipFile(TMP_ARCHIVE_FILE_PATH, 'wb', ZIP_DEFLATED) as tmp_archive:
+    with ZipFile(TMP_ARCHIVE_FILE_PATH, 'w', ZIP_DEFLATED) as tmp_archive:
         for file in files:
             with open(TMP_DATA_FILE_PATH, 'wb') as data_file:
                 data_file.write(read_file(file[0]))
