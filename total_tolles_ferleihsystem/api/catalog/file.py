@@ -15,12 +15,9 @@ from ... import DB
 
 from ...file_store import save_file, read_file
 
-TMP_FILE_NAME = 'tmp.upload'
-
 
 PATH: str = '/catalog/files'
 ANS = API.namespace('file', description='The file Endpoints', path=PATH)
-
 
 @ANS.route('/')
 class FileList(Resource):
