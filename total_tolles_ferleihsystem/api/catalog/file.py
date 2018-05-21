@@ -105,6 +105,19 @@ class FileDetail(Resource):
         pass
 
 
+@ANS.route('/archive')
+class ArchiveHandler(Resource):
+    """
+    Archive Endpoints
+    """
+
+    def post(self):
+        """
+        Create a Archive
+        """
+        pass
+
+
 PATH2: str = '/file-store'
 ANS2 = API.namespace('file', description='The download Endpoint to download any file from the system.', path=PATH2)
 
