@@ -3,6 +3,7 @@ This module contains all API endpoints for the namespace 'file'
 """
 
 import os
+from typing import Tuple
 from flask import request, make_response
 from flask_restplus import Resource, abort
 from sqlalchemy.exc import IntegrityError
@@ -13,7 +14,7 @@ from ...db_models.item import Item, File
 from .. import API
 from ... import DB
 
-from ...file_store import save_file, read_file
+from ...file_store import save_file, read_file, create_archive
 
 
 PATH: str = '/catalog/files'
@@ -103,6 +104,42 @@ class FileDetail(Resource):
         Replace a file object
         """
         pass
+
+
+@ANS.route('/archive')
+class ArchiveHandler(Resource):
+    """
+    Archive Endpoints
+    """
+
+    @API.param('name', 'The name of the archive file', type=str, required=False, default='archive')
+    @API.param('file', 'The file_ids to be added to the archive', type=str, required=True)
+    def post(self):
+        """
+        Create a Archive of files
+        """
+        file_name = request.args.get('name', default='archive', type=str)
+        file_ids = request.args.getlist('file', type=int)
+
+        def map_function(file_id: int) -> Tuple[str, str]:
+            """
+            Inline function which maps the id to its file entry
+            """
+            file = File.query.filter(File.id == file_id).first()
+            return (file.file_hash, file.name + file.file_type)
+
+        archive_hash = create_archive(file_ids.map(map_function))
+        new = File(name=file_name, file_type='.zip', file_hash=archive_hash)
+
+        try:
+            DB.session.add(new)
+            DB.session.commit()
+            return new
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)
 
 
 PATH2: str = '/file-store'
