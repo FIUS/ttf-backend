@@ -155,6 +155,7 @@ ITEM_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
     'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'}, absolute=True)),
     'contained_items': HaLUrl(UrlData('api.item_item_contained_items', url_data={'item_id' : 'id'}, absolute=True)),
+    'files': HaLUrl(UrlData('api.item_item_file', url_data={'item_id' : 'id'}, absolute=True))
 })
 
 ITEM_LIST_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
