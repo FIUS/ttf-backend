@@ -158,8 +158,9 @@ class File(DB.Model):
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, item_id: int, name: str, file_type: str, file_hash: str):
-        self.item_id = item_id
+    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int=None):
+        if item_id is not None:
+            self.item_id = item_id
         self.name = name
         self.file_type = file_type
         self.file_hash = file_hash
