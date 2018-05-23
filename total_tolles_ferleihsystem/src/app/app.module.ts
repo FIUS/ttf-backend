@@ -28,6 +28,7 @@ import { ItemLendingComponent } from './lending/item-lending.component';
 import { ItemsOverviewComponent } from './items/items-overview.component';
 import { ItemListComponent } from './items/item-list.component';
 import { ItemDetailComponent } from './items/item-detail.component';
+import { FileDetailComponent } from './items/file-detail.component';
 import { LendingDurationComponent } from './items/lending-duration.component';
 import { ItemEditComponent } from './items/item-edit.component';
 import { TagsChooserComponent } from './items/tags-chooser.component';
@@ -76,6 +77,7 @@ import { AppComponent } from './app.component';
         ItemsOverviewComponent,
         ItemListComponent,
         ItemDetailComponent,
+        FileDetailComponent,
         LendingDurationComponent,
         ItemEditComponent,
         TagsChooserComponent,

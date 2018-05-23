@@ -21,6 +21,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private tagsSubscription: Subscription;
     private containedTypeSubscription: Subscription;
     private containedItemsSubscription: Subscription;
+    private filesSubscription: Subscription;
 
     edit: boolean = false;
 
@@ -35,9 +36,12 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     containedItemsAsMap: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     chooseItemType: number = -1;
 
+    fileIDs: ApiObject[] = [];
+
     dragover: boolean = false;
     filesUploading: string[] = [];
-    filesUploadingMap: Map<string, any> = new Map;
+    filesUploadingMap: Map<string, any> = new Map();
+    filenameMap: Map<number, string> = new Map();
 
     constructor(private data: NavigationService, private api: ApiService,
                 private jwt: JWTService, private staging: StagingService,
@@ -56,14 +60,14 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             this.itemSubscription.unsubscribe();
         }
         this.data.changeBreadcrumbs([new Breadcrumb('Items', '/items'),
-            new Breadcrumb('"' + itemID.toString() + '"', '/items/' + itemID)]);
+        new Breadcrumb('"' + itemID.toString() + '"', '/items/' + itemID)]);
         this.itemSubscription = this.api.getItem(itemID).subscribe(item => {
             if (item == null) {
                 return;
             }
             this.item = item;
             this.data.changeBreadcrumbs([new Breadcrumb('Items', '/items'),
-                new Breadcrumb('"' + item.name + '"', '/items/' + itemID)]);
+            new Breadcrumb('"' + item.name + '"', '/items/' + itemID)]);
 
             if (this.attributesSubscription != null) {
                 this.attributesSubscription.unsubscribe();
@@ -112,6 +116,39 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 this.containedItemsAsMap = itemMap;
                 this.containedItems = containedItems;
             });
+            if (this.filesSubscription != null) {
+                this.filesSubscription.unsubscribe();
+            }
+            this.filesSubscription = this.api.getFiles(item).subscribe(files => {
+                const ids = [];
+                const nameMap = new Map();
+                files.forEach(file => {
+                    ids.push(file.id);
+                    nameMap.set(file.id, file.name);
+                });
+                ids.sort((a, b) => {
+                    if (nameMap.get(a) > nameMap.get(b)) {
+                        return -1;
+                    } else if (nameMap.get(a) === nameMap.get(b)) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
+                for (let i = 0; i < ids.length && i < this.fileIDs.length; i++) {
+                    if (this.fileIDs[i] !== ids[i]) {
+                        this.fileIDs[i] = ids[i];
+                    }
+                }
+                if (ids.length < this.fileIDs.length) {
+                    this.fileIDs.splice(ids.length, this.fileIDs.length - ids.length);
+                }
+                if (ids.length > this.fileIDs.length) {
+                    for (let i = this.fileIDs.length; i < ids.length; i++) {
+                        this.fileIDs.push(ids[i]);
+                    }
+                }
+            })
         });
     }
 
@@ -158,6 +195,9 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         if (this.containedItemsSubscription != null) {
             this.containedItemsSubscription.unsubscribe();
         }
+        if (this.filesSubscription != null) {
+            this.filesSubscription.unsubscribe();
+        }
     }
 
     addItemToContained = (item: ApiObject) => {
@@ -177,6 +217,13 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 this.filesUploadingMap.set(file.name, file);
                 this.api.uploadFile(this.item, file).subscribe(data => {
                     console.log(data);
+                    const index = this.filesUploading.findIndex(name => name === file.name);
+                    if (index >= 0) {
+                        this.filesUploading.splice(index, 1);
+                    }
+                    this.filenameMap.set(data.id, file.name);
+                    this.filesUploadingMap.delete(file.name);
+                    this.api.getFiles(this.item);
                 });
             }
         });
