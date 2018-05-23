@@ -28,8 +28,6 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
             this.fileSubscription.unsubscribe();
         }
         this.fileSubscription = this.api.getFile(this.fileID).subscribe(file => {
-            console.log(file);
-            console.log(this);
             this.file = file;
         });
     }
