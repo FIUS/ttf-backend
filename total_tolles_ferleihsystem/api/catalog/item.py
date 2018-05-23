@@ -8,11 +8,11 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET
 from ... import DB
 from ...login import UserRole
 
-from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem
+from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File
 from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
@@ -197,7 +197,7 @@ class ItemItemTags(Resource):
             abort(400, 'Requested item tag not found!')
 
         new = ItemToTag(item_id, tag_id)
-       
+
         try:
             DB.session.add(new)
             attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_tag(tag_id)
@@ -422,3 +422,23 @@ class ItemContainedItems(Resource):
             return '', 204
         except IntegrityError:
             abort(500)
+
+
+@ANS.route('/<int:item_id>/files/')
+class ItemFile(Resource):
+    """
+    The files of a singe item
+    """
+
+    @jwt_required
+    @ANS.response(404, 'Requested item not found!')
+    @API.marshal_list_with(FILE_GET)
+    # pylint: disable=R0201
+    def get(self, item_id):
+        """
+        Get all files for this item.
+        """
+        if Item.query.filter(Item.id == item_id).first() is None:
+            abort(404, 'Requested item not found!')
+
+        return File.query.filter(File.item_id == item_id).all()
