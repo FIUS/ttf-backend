@@ -896,9 +896,55 @@ export class ApiService implements OnInit {
 
 
     // Files ///////////////////////////////////////////////////////////////////
+    getFiles(item: ApiObject): Observable<Array<ApiObject>> {
+        let url;
+        let resource = 'files';
+
+        if (item != null) {
+            resource = 'items/' + item.id + '/files';
+            url = item._links.files;
+        }
+
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            if (item != null) {
+                this.rest.get(url, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            } else {
+                this.getCatalog().subscribe(catalog => {
+                    url = catalog._links.files;
+                    this.rest.get(url, token).subscribe(data => {
+                        stream.next(data);
+                    }, error => this.errorHandler(error, resource, 'GET'));
+                })
+            }
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
+    getFile(fileID: number): Observable<ApiObject> {
+        const baseResource = 'files';
+        const resource = baseResource + '/' + fileID;
+
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe(catalog => {
+                this.rest.get(catalog._links.files.href + fileID, token).subscribe(data => {
+                    this.updateResource(baseResource, data as ApiObject);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            })
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
     uploadFile(item: ApiObject, file: File): Observable<ApiObject> {
         const resource = 'files';
-        const stream = this.getStreamSource(resource);
+        const stream = new AsyncSubject<ApiObject>();
 
         const formData = new FormData();
         formData.append('item_id', item.id);
@@ -908,6 +954,7 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe(catalog => {
                 this.rest.uploadFile(catalog._links.files, formData, token).subscribe(data => {
                     stream.next(data);
+                    stream.complete();
                 }, error => this.errorHandler(error, resource, 'GET'));
             });
         });

@@ -43,6 +43,7 @@
             </div>
             <div>
                 <p class="f4 b">Files:</p>
+                <ttf-file-detail *ngFor="let file of fileIDs" [fileID]="file" [uploadFileName]="filenameMap.get(file)"></ttf-file-detail>
                 <div class="mt1 ba b--dashed br2 bw2 pa2 flex items-center justify-center" *ngFor="let file of filesUploading" >
                     Uploading "{{file}}" <i class="ml2 fa fa-spin fa-spinner"></i>
                 </div>

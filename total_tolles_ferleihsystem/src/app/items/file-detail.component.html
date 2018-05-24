@@ -1,0 +1,22 @@
+<div class="br2 ba b--black-10 mb2">
+    <div class="min-h2 mv0 pv2 ph3 flex items-center justify-between f4 bg-near-white br2 br--top pointer" (click)="open = !open">
+        <div>
+            <i class="f5 fa fa-chevron-right" [hidden]="open"></i>
+            <i class="f5 fa fa-chevron-down" [hidden]="!open"></i>
+            {{file?.name}}
+        </div>
+        <div>
+            <div class="tooltip tooltip-left button h2 pv1 ph2 br2 ml link bg-animate hover-bg-light-silver pointer" data-tooltip="remove">
+                <i class="fa fa-cart-arrow-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="ph2 bt b--black-10" [hidden]="!open">
+        <p class="f4" *ngIf="uploadFileName != null" ><span class="b">Filename before Upload:</span> <span>{{uploadFileName}}</span></p>
+        <p class="f4"><span class="b">Filetype:</span> <span>{{file?.file_type}}</span></p>
+        <p class="f4"><span class="b">Creation Date:</span> <span>{{file?.creation | date}}</span></p>
+        <p class="f4" *ngIf="file?.invalidation != null" ><span class="b">Invaldidation Date:</span> <span>{{file?.invalidation | date}}</span></p>
+        <p class="f4"><span class="b">Hash:</span> <span style="word-break: break-all">{{file?.file_hash}}</span></p>
+    </div>
+</div>
