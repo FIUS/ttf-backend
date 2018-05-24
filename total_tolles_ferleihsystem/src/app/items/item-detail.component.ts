@@ -208,33 +208,19 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         this.api.deleteContainedItem(this.item, item.id);
     }
 
-    onDropFile(event: DragEvent) {
-        event.preventDefault();
-        Array.prototype.forEach.call(event.dataTransfer.files, (file: File) => {
-            console.log(file);
-            if (file.type === 'application/pdf') {
-                this.filesUploading.push(file.name);
-                this.filesUploadingMap.set(file.name, file);
-                this.api.uploadFile(this.item, file).subscribe(data => {
-                    console.log(data);
-                    const index = this.filesUploading.findIndex(name => name === file.name);
-                    if (index >= 0) {
-                        this.filesUploading.splice(index, 1);
-                    }
-                    this.filenameMap.set(data.id, file.name);
-                    this.filesUploadingMap.delete(file.name);
-                    this.api.getFiles(this.item);
-                });
+    upload(file: File) {
+        this.filesUploading.push(file.name);
+        this.filesUploadingMap.set(file.name, file);
+        this.api.uploadFile(this.item, file).subscribe(data => {
+            console.log(data);
+            const index = this.filesUploading.findIndex(name => name === file.name);
+            if (index >= 0) {
+                this.filesUploading.splice(index, 1);
             }
+            this.filenameMap.set(data.id, file.name);
+            this.filesUploadingMap.delete(file.name);
+            this.api.getFiles(this.item);
         });
-        //this.uploadFile(event.dataTransfer.files);
-    }
-
-    // At the drag drop area
-    // (dragover)="onDragOverFile($event)"
-    onDragOverFile(event) {
-        event.stopPropagation();
-        event.preventDefault();
     }
 
 }
