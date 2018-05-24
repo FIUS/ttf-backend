@@ -28,6 +28,7 @@ import { myBoxComponent } from './box/box.component';
 import { myDialogComponent } from './dialog/dialog.component';
 import { myDropdownComponent } from './dropdown/dropdown.component';
 import { myTableComponent } from './table/table.component';
+import { FileSelectorComponent } from './file-selector/file-selector.component';
 
 import { ClickOutsideDirective } from './click-outside.directive';
 
@@ -39,6 +40,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         myDialogComponent,
         myDropdownComponent,
         myTableComponent,
+        FileSelectorComponent,
         DynamicFormComponent,
         DynamicFormQuestionComponent,
         SaveButtonComponent,
@@ -66,6 +68,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         myDialogComponent,
         myDropdownComponent,
         myTableComponent,
+        FileSelectorComponent,
         DynamicFormComponent,
         DynamicFormQuestionComponent,
         SaveButtonComponent,

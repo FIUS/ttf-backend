@@ -47,12 +47,7 @@
                 <div class="mt1 ba b--dashed br2 bw2 pa2 flex items-center justify-center" *ngFor="let file of filesUploading" >
                     Uploading "{{file}}" <i class="ml2 fa fa-spin fa-spinner"></i>
                 </div>
-                <div class="mt1 ba b--dashed br2 bw2 pa2 flex items-center justify-center"
-                    [ngClass]="{'b--gray': !dragover, 'gray': !dragover}"
-                    (dragenter)="dragover=true" (dragleave)="dragover=false"
-                    (drop)="onDropFile($event); dragover=false" (dragover)="onDragOverFile($event)">
-                    Dop File here...
-                </div>
+                <ttf-file-selector (file)="upload($event)"></ttf-file-selector>
             </div>
         </div>
     </ttf-box>
