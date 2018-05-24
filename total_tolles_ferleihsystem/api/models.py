@@ -13,7 +13,7 @@ WITH_CURIES = API.model('WithCuries', {
 })
 
 ID = API.model('Id', {
-    'id': fields.Integer(min=1),
+    'id': fields.Integer(min=1, example=1),
 })
 
 ROOT_LINKS = API.inherit('RootLinks', WITH_CURIES, {
@@ -79,7 +79,6 @@ ITEM_TYPE_PUT = API.inherit('ItemTypePUT', ITEM_TYPE_POST, {
 
 ITEM_TYPE_GET = API.inherit('ItemType', ITEM_TYPE_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
-    'id': fields.Integer(),
     '_links': NestedFields(ITEM_TYPE_LINKS),
 })
 
@@ -104,7 +103,6 @@ ITEM_TAG_PUT = API.inherit('ItemTagPUT', ITEM_TAG_POST, {
 
 ITEM_TAG_GET = API.inherit('ItemTagGET', ITEM_TAG_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
-    'id': fields.Integer(),
     '_links': NestedFields(ITEM_TAG_LINKS),
 })
 
@@ -131,7 +129,6 @@ ATTRIBUTE_DEFINITION_PUT = API.inherit('AttributeDefinitionPUT', ATTRIBUTE_DEFIN
 
 ATTRIBUTE_DEFINITION_GET = API.inherit('AttributeDefinitionGET', ATTRIBUTE_DEFINITION_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
-    'id': fields.Integer(),
     '_links': NestedFields(ATTRIBUTE_DEFINITION_LINKS),
 })
 
@@ -140,10 +137,6 @@ ATTRIBUTE_DEFINITION_VALUES = API.schema_model('AttributeDefinitionVALUE', {
     "items": {
         "type": "string",
     }
-})
-
-ID = API.model('Id', {
-    'id': fields.Integer(min=1, example=1),
 })
 
 ID_LIST = API.model('IdList', {
@@ -174,7 +167,6 @@ ITEM_PUT = API.inherit('ItemPUT', ITEM_POST, {
 
 ITEM_GET = API.inherit('ItemGET', ITEM_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
-    'id': fields.Integer(),
     'type': fields.Nested(ITEM_TYPE_GET),
     'is_currently_lent': fields.Boolean(),
     'effective_lending_duration': fields.Integer(),
@@ -202,14 +194,19 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
     '_links': NestedFields(ATTRIBUTE_LINKS)
 })
 
-FILE_GET = API.model('FileGET', {
-    'id': fields.Integer(),
+FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.file_file_detail', absolute=True,
+                           url_data={'file_id' : 'id'}), required=False),
+})
+
+FILE_GET = API.inherit('FileGET', ID, {
     'item': fields.Nested(ITEM_GET),
     'name': fields.String(),
     'file_type': fields.String(),
     'file_hash': fields.String(),
     'creation': fields.DateTime(),
     'invalidation': fields.DateTime(),
+    '_links': NestedFields(FILE_LINKS)
 })
 
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {
