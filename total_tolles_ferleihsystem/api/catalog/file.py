@@ -8,7 +8,7 @@ from flask import request, make_response
 from flask_restplus import Resource, abort
 from sqlalchemy.exc import IntegrityError
 
-from ..models import FILE_GET
+from ..models import FILE_GET, FILE_PUT
 from ...db_models.item import Item, File
 
 from .. import API
@@ -74,7 +74,7 @@ class FileDetail(Resource):
     Single file object
     """
 
-    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(404, 'Requested file not found!')
     @API.marshal_with(FILE_GET)
     def get(self, file_id):
         """
@@ -86,7 +86,7 @@ class FileDetail(Resource):
 
         return file
 
-    @ANS.response(404, 'Requested item not found!')
+    @ANS.response(404, 'Requested file not found!')
     @ANS.response(204, 'Success.')
     def delete(self, file_id):
         """
@@ -99,11 +99,28 @@ class FileDetail(Resource):
         DB.session.commit()
         return "", 204
 
+    @ANS.doc(model=FILE_GET, body=FILE_PUT)
+    @ANS.response(409, 'Name is not Unique.')
+    @ANS.response(404, 'Requested file not found!')
+    @ANS.marshal_with(FILE_GET)
     def put(self, file_id):
         """
         Replace a file object
         """
-        pass
+        file = File.query.filter(File.id == file_id).first()
+        if file is None:
+            abort(404, 'Requested file not found!')
+
+        file.update(**request.get_json())
+
+        try:
+            DB.session.commit()
+            return file
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)
 
 
 @ANS.route('/archive')

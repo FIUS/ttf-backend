@@ -199,14 +199,21 @@ FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
                            url_data={'file_id' : 'id'}), required=False),
 })
 
-FILE_GET = API.inherit('FileGET', ID, {
-    'item': fields.Nested(ITEM_GET),
+FILE_BASIC = API.inherit('FileBASIC', ID, {
     'name': fields.String(),
     'file_type': fields.String(),
+    'invalidation': fields.DateTime(),
+})
+
+FILE_GET = API.inherit('FileGET', FILE_BASIC, {
+    'item': fields.Nested(ITEM_GET),
     'file_hash': fields.String(),
     'creation': fields.DateTime(),
-    'invalidation': fields.DateTime(),
     '_links': NestedFields(FILE_LINKS)
+})
+
+FILE_PUT = API.inherit('FilePUT', FILE_BASIC, {
+    'item_id': fields.Integer(min=1)
 })
 
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {

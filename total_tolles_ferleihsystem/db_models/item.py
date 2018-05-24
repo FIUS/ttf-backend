@@ -165,6 +165,15 @@ class File(DB.Model):
         self.file_type = file_type
         self.file_hash = file_hash
 
+    def update(self, name: str, file_type: str, invalidation, item_id: int) -> None:
+        """
+        Function to update the objects data
+        """
+        self.name = name
+        self.file_type = file_type
+        self.invalidation = invalidation
+        self.item_id = item_id
+
 
 class Lending(DB.Model):
     """
