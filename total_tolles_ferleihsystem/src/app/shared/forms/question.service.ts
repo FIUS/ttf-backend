@@ -9,6 +9,7 @@ import { HiddenQuestion } from './question-hidden';
 import { StringQuestion } from './question-string';
 import { TextQuestion } from './question-text';
 import { DateQuestion } from './question-date';
+import { DateTimeQuestion } from './question-datetime';
 import { NumberQuestion } from './question-number';
 import { DurationQuestion } from './question-duration';
 import { DropdownQuestion } from './question-dropdown';
@@ -196,6 +197,9 @@ export class QuestionService implements OnInit {
         }
         if (options.controlType === 'date') {
             return new DateQuestion(options);
+        }
+        if (options.controlType === 'datetime') {
+            return new DateTimeQuestion(options);
         }
         if (options.controlType === 'boolean') {
             return new BooleanQuestion(options);

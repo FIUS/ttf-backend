@@ -9,6 +9,7 @@ import { TypeChooserComponent } from './forms/dynamic-form/type-chooser/type-cho
 import { BooleanInputComponent } from './forms/dynamic-form/boolean-input/boolean-input.component';
 import { NumberInputComponent } from './forms/dynamic-form/number-input/number-input.component';
 import { DateInputComponent } from './forms/dynamic-form/date-input/date-input.component';
+import { DateTimeInputComponent } from './forms/dynamic-form/date-input/datetime-input.component';
 import { DurationInputComponent } from './forms/dynamic-form/duration-input/duration-input.component';
 
 import { QuestionControlService } from './forms/question-control.service';
@@ -48,6 +49,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         BooleanInputComponent,
         NumberInputComponent,
         DateInputComponent,
+        DateTimeInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
     ],
@@ -76,6 +78,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         BooleanInputComponent,
         NumberInputComponent,
         DateInputComponent,
+        DateTimeInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
 
