@@ -6,8 +6,8 @@
             <span style="word-break: break-all">{{file?.name}}</span>
         </div>
         <div>
-            <div class="tooltip tooltip-left button h2 pv1 ph2 br2 ml link bg-animate hover-bg-light-silver pointer" data-tooltip="remove">
-                <i class="fa fa-cart-arrow-down"></i>
+            <div class="tooltip tooltip-left button h2 pv1 ph2 br2 ml link bg-animate hover-bg-light-silver pointer" data-tooltip="edit" (click)="editFile.open(); $event.stopPropagation()">
+                <i class="fa fa-pencil"></i>
             </div>
         </div>
     </div>
@@ -20,3 +20,10 @@
         <p class="f4"><span class="b">Hash:</span> <span style="word-break: break-all">{{file?.file_hash}}</span></p>
     </div>
 </div>
+
+<ttf-dialog [dialogType]="'save-cancel'" [valid]="form?.valid | async" [icon]="'save'" [okCallback]="save" #editFile >
+    <h1 class="mv0" title>File "{{file?.name}}":</h1>
+    <div class="w-100 ph3 pv2" body>
+        <dynamic-form [objectModel]="'FilePUT'" [startValues]="file" (data)="onDataChange($event)" #form ></dynamic-form>
+    </div>
+</ttf-dialog>

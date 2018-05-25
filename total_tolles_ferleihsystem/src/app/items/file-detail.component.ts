@@ -18,6 +18,8 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
 
     file: ApiObject;
 
+    newFileData: any;
+
     open: boolean = false;
 
 
@@ -36,6 +38,14 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
         if (this.fileSubscription != null) {
             this.fileSubscription.unsubscribe();
         }
+    }
+
+    onDataChanges(event) {
+        this.newFileData = event;
+    }
+
+    save = () => {
+        console.log(this.newFileData);
     }
 
 }
