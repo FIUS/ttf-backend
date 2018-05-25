@@ -45,7 +45,7 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
     }
 
     save = () => {
-        console.log(this.newFileData);
+        this.api.putFile(this.fileID, this.newFileData).take(1).subscribe();
     }
 
 }
