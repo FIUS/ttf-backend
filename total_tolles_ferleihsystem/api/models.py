@@ -13,7 +13,7 @@ WITH_CURIES = API.model('WithCuries', {
 })
 
 ID = API.model('Id', {
-    'id': fields.Integer(min=1, example=1),
+    'id': fields.Integer(min=1, example=1, readonly=True),
 })
 
 ROOT_LINKS = API.inherit('RootLinks', WITH_CURIES, {
@@ -200,15 +200,16 @@ FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
 })
 
 FILE_BASIC = API.inherit('FileBASIC', ID, {
-    'name': fields.String(),
-    'file_type': fields.String(),
-    'invalidation': fields.DateTime(),
+    'name': fields.String(max_length=255),
+    'file_type': fields.String(max_length=20),
+    'invalidation': fields.DateTime(nullable=True),
 })
 
 FILE_GET = API.inherit('FileGET', FILE_BASIC, {
     'item': fields.Nested(ITEM_GET),
     'file_hash': fields.String(),
     'creation': fields.DateTime(),
+    'item_id': fields.Integer(min=1),
     '_links': NestedFields(FILE_LINKS)
 })
 

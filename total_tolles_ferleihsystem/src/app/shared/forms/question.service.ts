@@ -198,7 +198,7 @@ export class QuestionService implements OnInit {
         if (options.controlType === 'date') {
             return new DateQuestion(options);
         }
-        if (options.controlType === 'datetime') {
+        if (options.controlType === 'date-time') {
             return new DateTimeQuestion(options);
         }
         if (options.controlType === 'boolean') {

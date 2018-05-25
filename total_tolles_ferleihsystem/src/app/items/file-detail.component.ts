@@ -40,7 +40,7 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
         }
     }
 
-    onDataChanges(event) {
+    onDataChange(event) {
         this.newFileData = event;
     }
 
