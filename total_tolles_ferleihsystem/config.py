@@ -12,6 +12,8 @@ class Config(object):
     LOG_FORMAT = '%(asctime)s [%(levelname)s] [%(name)-16s] %(message)s <%(module)s, \
                  %(funcName)s, %(lineno)s; %(pathname)s>'
     AUTH_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+    CELERY_BROKER_URL = 'amqp://localhost',
+    CELERY_RESULT_BACKEND = 'rpc://'
     TMP_DIRECTORY = '/tmp'
     DATA_DIRECTORY = '/tmp'
 

@@ -7,6 +7,7 @@
 - python 3.6
 - pip [python 3.6]
 - venv [python 3.6]
+- celery compatible Broker (documentation)[http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html]
 
 ## First start:
 
@@ -58,6 +59,9 @@ flask create_db
 
 # start server
 flask run
+
+# start celery worker (needs new terminal)
+celery -A total_tolles_ferleihsystem.celery worker --loglevel=info
 ```
 
 Subsequent starts:
@@ -67,7 +71,7 @@ flask run
 
 Drop and recreate DB:
 ```shell
-flask drop_db
+flask drop_dbcelery -A total_tolles_ferleihsystem.celery worker --loglevel=info
 flask create_db
 ```
 

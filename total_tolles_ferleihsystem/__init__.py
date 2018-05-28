@@ -11,6 +11,7 @@ from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_webpack import Webpack
 from flask_cors import CORS, cross_origin
+from .tasks import make_celery
 
 
 WEBPACK = Webpack()  # type: Webpack
@@ -56,6 +57,9 @@ CORS(APP)
 
 
 WEBPACK.init_app(APP)
+
+# Setup Celery
+celery = make_celery(APP)
 
 # pylint: disable=C0413
 from . import db_models
