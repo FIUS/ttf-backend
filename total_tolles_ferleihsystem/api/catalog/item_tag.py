@@ -184,7 +184,7 @@ class ItemTagAttributes(Resource):
         try:
             DB.session.add(new)
             for item in items:
-                attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes([attribute_definition])
+                attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes([attribute_definition_id])
                 DB.session.add_all(attributes_to_add)
                 for attr in attributes_to_undelete:
                     attr.deleted = False

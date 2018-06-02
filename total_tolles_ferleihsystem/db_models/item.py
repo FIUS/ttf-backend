@@ -75,6 +75,9 @@ class Item(DB.Model):
 
     @property
     def effective_lending_duration(self):
+        """
+        The effective lending duration computed from item type, tags and item
+        """
         if(self.lending_duration != 0):
             return self.lending_duration
 
@@ -89,43 +92,77 @@ class Item(DB.Model):
 
         return self.item_type.lending_duration
 
-    def get_attribute_changes(self, definitions, remove: bool = False):
+    def get_attribute_changes(self, definition_ids, remove: bool = False):
         """
         Get a list of attributes to add, to delete and to undelete,
-        considering all definitions in the list and whether to add or remove them.
+        considering all definition_ids in the list and whether to add or remove them.
         """
         attributes_to_add = []
         attributes_to_delete = []
         attributes_to_undelete = []
-        for element in definitions:
-            itads = element._item_to_attribute_definitions
+        for def_id in definition_ids:
+            itads = self._attributes
             exists = False
             for itad in itads:
-                if(itad.item_id == self.id):
+                if(itad.attribute_definition_id == def_id):
                     exists = True
                     if(remove):
-                        attributes_to_delete.append(itad)
+                        # Check if multiple sources bring it, if yes don't delete it.
+                        sources = 0
+                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions]):
+                            sources += 1
+                        for tag in [itt.tag for itt in self._tags]:
+                            if(def_id in [ttad.attribute_definition_id for ttad in tag._tag_to_attribute_definitions]):
+                                sources += 1
+                        if sources == 1 :
+                            attributes_to_delete.append(itad)
                     elif(itad.deleted):
                         attributes_to_undelete.append(itad)
 
             if not exists and not remove:
                 attributes_to_add.append(ItemToAttributeDefinition(self.id,
-                                                        element.id,
+                                                        def_id,
                                                         "")) #TODO: Get default if possible.
         return attributes_to_add, attributes_to_delete, attributes_to_undelete
 
-    def get_attribute_changes_from_type(self, type_id: int, remove: bool = False):
+    def get_new_attributes_from_type(self, type_id: int):
         """
-        Get a list of attributes to add, to delete and to undelete,
-        when this item would now get that type or lose that type.
+        Get a list of attributes to add to a new item which has the given type.
         """
 
         item_type_attribute_definitions = (ItemTypeToAttributeDefinition
                                            .query
                                            .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
-        return self.get_attribute_changes([ittad.attribute_definition for ittad in item_type_attribute_definitions], remove)
+        attributes_to_add, _, _ = self.get_attribute_changes([ittad.attribute_definition_id for ittad in item_type_attribute_definitions], False)
 
+        return attributes_to_add
+
+    def get_attribute_changes_from_type_change(self, from_type_id: int, to_type_id: int):
+        """
+        Get a list of attributes to add, to delete and to undelete,
+        when this item would now switch from the first to the second type.
+        """
+        old_item_type_attr_defs = (ItemTypeToAttributeDefinition
+                                   .query
+                                   .filter(ItemTypeToAttributeDefinition.item_type_id == from_type_id)
+                                   .all())
+
+        new_item_type_attr_defs = (ItemTypeToAttributeDefinition
+                                   .query
+                                   .filter(ItemTypeToAttributeDefinition.item_type_id == to_type_id)
+                                   .all())
+
+        old_attr_def_ids = [ittad.attribute_definition_id for ittad in old_item_type_attr_defs]
+        new_attr_def_ids = [ittad.attribute_definition_id for ittad in new_item_type_attr_defs]
+
+        added_attr_def_ids = [attr_def_id for attr_def_id in new_attr_def_ids if attr_def_id not in old_attr_def_ids]
+        removed_attr_def_ids = [attr_def_id for attr_def_id in old_attr_def_ids if attr_def_id not in new_attr_def_ids]
+
+        attributes_to_add, _, attributes_to_undelete = self.get_attribute_changes(added_attr_def_ids, False)
+        _, attributes_to_delete, _ = self.get_attribute_changes(removed_attr_def_ids, True)
+
+        return attributes_to_add, attributes_to_delete, attributes_to_undelete
 
     def get_attribute_changes_from_tag(self, tag_id: int, remove: bool = False):
         """
@@ -137,7 +174,7 @@ class Item(DB.Model):
                                      .query
                                      .filter(TagToAttributeDefinition.tag_id == tag_id)
                                      .all())
-        return self.get_attribute_changes([ttad.attribute_definition for ttad in tag_attribute_definitions], remove)
+        return self.get_attribute_changes([ttad.attribute_definition_id for ttad in tag_attribute_definitions], remove)
 
 class File(DB.Model):
     """
@@ -173,7 +210,6 @@ class File(DB.Model):
         self.file_type = file_type
         self.invalidation = invalidation
         self.item_id = item_id
-
 
 class Lending(DB.Model):
     """
@@ -235,7 +271,7 @@ class ItemToLending (DB.Model):
     def __init__(self, item: Item, lending: Lending):
         self.item = item
         self.lending = lending
-        self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration())
+        self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration)
 
 
 class ItemToTag (DB.Model):
@@ -271,3 +307,22 @@ class ItemToAttributeDefinition (DB.Model):
         self.item_id = item_id
         self.attribute_definition_id = attribute_definition_id
         self.value = value
+    
+    def delete(self):
+        """
+        Soft-deletes this association
+        """
+        self.deleted = True
+
+    def undelete(self):
+        """
+        Undeletes this association
+        """
+        self.deleted = False
+    
+    @property
+    def is_deleted(self):
+        """
+        Checks whether this association is currently soft deleted
+        """
+        return self.deleted

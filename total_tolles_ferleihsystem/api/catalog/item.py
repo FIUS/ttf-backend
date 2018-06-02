@@ -59,10 +59,8 @@ class ItemList(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            attributes_to_add, _, attributes_to_undelete = new.get_attribute_changes_from_type(type_id)
+            attributes_to_add = new.get_new_attributes_from_type(type_id)
             DB.session.add_all(attributes_to_add)
-            for attr in attributes_to_undelete:
-                attr.deleted = False
             DB.session.commit()
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
@@ -94,6 +92,7 @@ class ItemDetail(Resource):
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, 'Requested item is currently lent!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def delete(self, item_id):
@@ -103,7 +102,16 @@ class ItemDetail(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
+        if item.is_currently_lent:
+            abort(400, "Requested item is currently lent!")
         item.deleted = True
+        for element in item._attributes:
+            element.delete()
+        for element in item._contained_items:
+            DB.session.delete(element)
+        for element in item._tags:
+            DB.session.delete(element)
+
         DB.session.commit()
         return "", 204
 
@@ -142,12 +150,27 @@ class ItemDetail(Resource):
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(400, 'Requested item type not found!')
+
+        attributes_to_add, attributes_to_delete, attributes_to_undelete = item.get_attribute_changes_from_type_change(item.type_id, type_id)
+        
+        child_itis = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+        new_containable_type_ids = [ittit.item_type_id for ittit in ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()]
+        child_itis_to_delete = [iti for iti in child_itis if iti.item.type_id not in new_containable_type_ids]
+
+        parent_itis = ItemToItem.query.filter(ItemToItem.item_id == item_id).all()
+        parent_itis_to_delete = [iti for iti in parent_itis if type_id not in [ittit.item_type_id for ittit in iti.parent.type._contained_item_types]]
+
         try:
             item.update(**request.get_json())
-            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_type(type_id)
             DB.session.add_all(attributes_to_add)
             for attr in attributes_to_undelete:
                 attr.deleted = False
+            for attr in attributes_to_delete:
+                attr.deleted = True
+            for iti in child_itis_to_delete:
+                DB.session.delete(iti)
+            for iti in parent_itis_to_delete:
+                DB.session.delete(iti)
             DB.session.commit()
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
@@ -226,7 +249,8 @@ class ItemItemTags(Resource):
         """
         tag_id = request.get_json()["id"]
 
-        if Item.query.filter(Item.id == item_id).first() is None:
+        item = Item.query.filter(Item.id == item_id).first()
+        if item is None:
             abort(404, 'Requested item not found!')
         if Tag.query.filter(Tag.id == tag_id).first() is None:
             abort(400, 'Requested item tag not found!')
@@ -240,8 +264,12 @@ class ItemItemTags(Resource):
         if association is None:
             return '', 204
 
+        _, attributes_to_delete, _ = item.get_attribute_changes_from_tag(tag_id, True)
+
         try:
             DB.session.delete(association)
+            for attr in attributes_to_delete:
+                attr.deleted = True
             DB.session.commit()
             return '', 204
         except IntegrityError:
@@ -264,7 +292,7 @@ class ItemAttributeList(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(404, 'Requested item not found!')
 
-        return ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
+        return ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
 
 @ANS.route('/<int:item_id>/attributes/<int:attribute_definition_id>/')
 class ItemAttributeDetail(Resource):
@@ -288,6 +316,7 @@ class ItemAttributeDetail(Resource):
         attribute = (ItemToAttributeDefinition
                      .query
                      .filter(ItemToAttributeDefinition.item_id == item_id)
+                     .filter(ItemToAttributeDefinition.deleted == False)
                      .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
                      .first())
 
@@ -316,6 +345,7 @@ class ItemAttributeDetail(Resource):
                      .query
                      .filter(ItemToAttributeDefinition.item_id == item_id)
                      .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
+                     .filter(ItemToAttributeDefinition.deleted == False)
                      .first())
 
         if attribute is None:
