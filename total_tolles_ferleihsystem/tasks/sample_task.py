@@ -1,8 +1,10 @@
 from .. import celery, APP
 
+from . import TASK_LOGGER
+
 
 @celery.task()
 def sample(a, b):
     result = a + b
-    APP.logger.info(result)
+    TASK_LOGGER.info(result)
     return result
