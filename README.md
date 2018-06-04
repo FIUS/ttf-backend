@@ -8,6 +8,7 @@
 - pip [python 3.6]
 - venv [python 3.6]
 - celery compatible Broker (documentation)[http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html]
+- celery scheduler for recurring tasks (documentation)[http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html]
 
 ## First start:
 
@@ -60,8 +61,13 @@ flask create_db
 # start server
 flask run
 
-# start celery worker (needs new terminal)
-celery -A total_tolles_ferleihsystem.celery worker --loglevel=info
+# start celery worker (needs new terminal) with beats (only for debugging!)
+celery -A total_tolles_ferleihsystem.celery worker -B --loglevel=info
+
+## start celery worker for production:
+# celery -A total_tolles_ferleihsystem.celery worker
+## startcelery scheduler (beats) for production (needed for periodic tasks):
+# celery -A total_tolles_ferleihsystem.celery beat -s <path to persitence db>
 ```
 
 Subsequent starts:
