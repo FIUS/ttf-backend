@@ -15,10 +15,10 @@ def sample(a, b):
 def recurring():
     TASK_LOGGER.info('Recurring Task executed at %s', datetime.now())
 
-
-celery.conf.beat_schedule = {
-    'execute-recurring': {
-        'task': 'ttf.tasks.sample_tasks.recurring',
-        'schedule': crontab(minute='*/5')
+if APP.config['DEBUG']:
+    celery.conf.beat_schedule = {
+        'execute-recurring': {
+            'task': 'ttf.tasks.sample_tasks.recurring',
+            'schedule': crontab(minute='*/5')
+        }
     }
-}
