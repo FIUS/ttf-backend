@@ -77,7 +77,7 @@ flask run
 
 Drop and recreate DB:
 ```shell
-flask drop_dbcelery -A total_tolles_ferleihsystem.celery worker --loglevel=info
+flask drop_db
 flask create_db
 ```
 
