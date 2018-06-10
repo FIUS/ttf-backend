@@ -770,6 +770,8 @@ export class ApiService implements OnInit {
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
+                // reset dependent caches!
+                this.getStreamSource(resource + '/attributes').next([]);
                 this.rest.put(catalog._links.items.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
                 }, error => this.errorHandler(error, resource, 'PUT'));
