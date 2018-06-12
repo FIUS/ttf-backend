@@ -977,7 +977,7 @@ export class ApiService implements OnInit {
 
         stream.subscribe(data => {
             console.log(data);
-            const blob = new Blob([data._body], {type: 'application/pdf'}); //octet-stream
+            const blob = new Blob([data.blob()], {type: 'application/pdf'}); //octet-stream
             console.log(blob);
             saveAs(blob, file.name + file.file_type);
         })

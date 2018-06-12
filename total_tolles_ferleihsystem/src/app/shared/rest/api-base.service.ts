@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 export interface LinkObject {
@@ -131,9 +131,10 @@ export class BaseApiService {
             });
     }
 
-    downloadFile(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<any> {
+    downloadFile(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<Response> {
         url = this.extractUrl(url);
         const options = this.headers(token, false);
+        options.responseType = ResponseContentType.Blob
         return this.http.get(url, options)
             .catch((error: any) => {
                 if (error.status != null) {
