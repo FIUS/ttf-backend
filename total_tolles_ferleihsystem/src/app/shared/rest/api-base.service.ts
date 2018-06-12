@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
-import { ApiService } from './api.service';
 
 export interface LinkObject {
     readonly href: string;
@@ -129,6 +128,19 @@ export class BaseApiService {
                         message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
+            });
+    }
+
+    downloadFile(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<any> {
+        url = this.extractUrl(url);
+        const options = this.headers(token, false);
+        return this.http.get(url, options)
+            .catch((error: any) => {
+                if (error.status != null) {
+                    return Observable.throw({status: error.status,
+                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                }
+                return Observable.throw(error || 'Server error')
             });
     }
 

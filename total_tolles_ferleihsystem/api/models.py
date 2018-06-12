@@ -196,7 +196,9 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
 
 FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.file_file_detail', absolute=True,
-                           url_data={'file_id' : 'id'}), required=False),
+                           url_data={'file_id': 'id'}), required=False),
+    'download': HaLUrl(UrlData('api.file_file_data', absolute=True,
+                               url_data={'file_hash': 'file_hash'}), required=False),
 })
 
 FILE_BASIC = API.inherit('FileBASIC', ID, {
