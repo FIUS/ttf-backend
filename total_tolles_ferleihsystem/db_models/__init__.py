@@ -1,12 +1,12 @@
 import click
 from flask import Flask, logging
-from logging import Logger, StreamHandler, Formatter
+from logging import Logger, StreamHandler, Formatter, getLogger, DEBUG
 from sys import stdout
 
 
 from .. import APP, DB
 
-DB_COMMAND_LOGGER = logging.create_logger(APP)  # type: Logger
+DB_COMMAND_LOGGER = getLogger(app.logger_name + '.db')  # type: Logger
 
 formatter = Formatter(fmt='[%(levelname)s] [%(name)-16s] %(message)s')
 
@@ -15,6 +15,8 @@ handler = StreamHandler(stream=stdout)
 handler.setFormatter(formatter)
 
 DB_COMMAND_LOGGER.addHandler(handler)
+
+DB_COMMAND_LOGGER.setLevel(DEBUG)
 
 STD_STRING_SIZE = 255
 

@@ -1,7 +1,7 @@
 """
 Main API Module
 """
-from logging import Formatter, Logger, DEBUG
+from logging import Formatter, Logger, getLogger, DEBUG
 from logging.handlers import RotatingFileHandler
 from os import path
 from functools import wraps
@@ -57,7 +57,7 @@ def satisfies_role(role: UserRole):
     return has_roles_decorator
 
 
-AUTH_LOGGER = logging.create_logger(APP)  # type: Logger
+AUTH_LOGGER = getLogger(app.logger_name + '.auth')  # type: Logger
 
 FORMATTER = Formatter(fmt=APP.config['AUTH_LOG_FORMAT'])
 

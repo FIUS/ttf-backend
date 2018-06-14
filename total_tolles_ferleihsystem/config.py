@@ -1,11 +1,14 @@
 """Module containing default config values."""
 
+from random import randint
+
 
 class Config(object):
     DEBUG = False
     TESTING = False
     RESTPLUS_VALIDATE = True
     BCRYPT_HANDLE_LONG_PASSWORDS = True
+    JWT_SECRET_KEY = ''.join(hex(randint(0, 255))[2:] for i in range(16))
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WEBPACK_MANIFEST_PATH = './build/manifest.json'
@@ -25,7 +28,6 @@ class ProductionConfig(Config):
 class DebugConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
-    JWT_SECRET_KEY = 'debug'  # FIXME
     LOG_PATH = '/tmp'
     SQLALCHEMY_ECHO = True
 
