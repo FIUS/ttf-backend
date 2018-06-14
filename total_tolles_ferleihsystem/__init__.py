@@ -28,10 +28,10 @@ elif APP.config['MODE'] == 'TEST':
     APP.config.from_object('total_tolles_ferleihsystem.config.TestingConfig')
 
 
-APP.config.from_pyfile('/etc/total_tolles_ferleihsystem.conf', silent=True)
-APP.config.from_pyfile('total_tolles_ferleihsystem.conf', silent=True)
+APP.config.from_pyfile('/etc/total-tolles-ferleihsystem.conf', silent=True)
+APP.config.from_pyfile('total-tolles-ferleihsystem.conf', silent=True)
 if ('CONFIG_FILE' in environ):
-    APP.config.from_pyfile(environ.get('CONFIG_FILE', 'total_tolles_ferleihsystem.conf'), silent=True)
+    APP.config.from_pyfile(environ.get('CONFIG_FILE', 'total-tolles-ferleihsystem.conf'), silent=True)
 
 
 CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY', 'LOG_PATH')
