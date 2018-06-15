@@ -7,6 +7,8 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask, logging
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.schema import MetaData
+from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_webpack import Webpack
@@ -51,12 +53,20 @@ APP.logger.addHandler(FH)
 APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
 
 
-# Setup DB and bcrypt
-DB = SQLAlchemy(APP)  # type: SQLAlchemy
-BCRYPT = Bcrypt(APP)  # type: Bcrypt
+# Setup DB with Migrations and bcrypt
+DB: SQLAlchemy
+DB = SQLAlchemy(APP, metadata=MetaData(naming_convention={
+    'pk': 'pk_%(table_name)s',
+    'fk': 'fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s',
+    'ix': 'ix_%(table_name)s_%(column_0_name)s',
+    'uq': 'uq_%(table_name)s_%(column_0_name)s',
+    'ck': 'ck_%(table_name)s_%(column_0_name)s',
+}))
+MIGRATE: Migrate = Migrate(APP, DB)
+BCRYPT: Bcrypt = Bcrypt(APP)
 
 # Setup JWT
-JWT = JWTManager(APP)  # type: JWTManager
+JWT: JWTManager = JWTManager(APP)
 
 # Setup Headers
 CORS(APP)
@@ -65,6 +75,7 @@ CORS(APP)
 WEBPACK.init_app(APP)
 
 # Setup Celery
+# pylint: disable=C0413
 from .tasks import make_celery
 celery = make_celery(APP)
 

@@ -94,6 +94,25 @@ Only in debug mode:
 [debug](http://127.0.0.1:5000/debug)
 
 
+## Update DB Migrations:
+
+The migrations use [Flask-Migrate](flask-migrate.readthedocs.io/en/latest/).
+
+Commands:
+```shell
+# create new migration after model changes:
+flask db migrate
+
+# update db to newest migration:
+flask db upgrade
+
+# get help for db operations:
+flask db --help
+```
+
+After creating a new migration file with `flask db migrate` it is neccessary to manually check the generated upgrade script. Please refer to the [alembic documentation](alembic.zzzcomputing.com/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
+
+
 ## Install:
 
 Prerequisites:
@@ -130,3 +149,4 @@ Troubleshooting:
  *  Check apache logs
  *  Check apache config
  *  Check TTF logs
+ *  Check Python version (>3.6!)
