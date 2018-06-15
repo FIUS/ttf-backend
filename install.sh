@@ -7,7 +7,7 @@ PYTHON=/usr/bin/python3
 PIP="$PYTHON -m pip"
 PIP_VENV="python -m pip"
 VENV="virtualenv --python=$PYTHON"
-VENV_DIR=/var/venv/
+VENV_DIR=/usr/lib/
 VENV_FOLDER=total-tolles-ferleihsystem
 NPM_BUILD_SCRIPT=build-docker
 
