@@ -187,7 +187,7 @@ class File(DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), nullable=True)
     name = DB.Column(DB.String(STD_STRING_SIZE))
     file_type = DB.Column(DB.String(STD_STRING_SIZE))
-    file_hash = DB.Column(DB.String(STD_STRING_SIZE), index=True)
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True, index=True)
     creation = DB.Column(DB.DateTime, server_default=func.now())
     invalidation = DB.Column(DB.DateTime, nullable=True)
 
@@ -307,7 +307,7 @@ class ItemToAttributeDefinition (DB.Model):
         self.item_id = item_id
         self.attribute_definition_id = attribute_definition_id
         self.value = value
-    
+
     def delete(self):
         """
         Soft-deletes this association
@@ -319,7 +319,7 @@ class ItemToAttributeDefinition (DB.Model):
         Undeletes this association
         """
         self.deleted = False
-    
+
     @property
     def is_deleted(self):
         """

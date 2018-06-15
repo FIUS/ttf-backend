@@ -23,6 +23,6 @@ class Taks(Resource):
 @ANS.route('/test/')
 class TestTaks(Resource):
 
-    def post(self):
+    def get(self):
         sample.delay(1, 2)
         return 'task run'
