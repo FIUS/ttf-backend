@@ -57,7 +57,7 @@ def satisfies_role(role: UserRole):
     return has_roles_decorator
 
 
-AUTH_LOGGER = getLogger(app.logger_name + '.auth')  # type: Logger
+AUTH_LOGGER = getLogger(APP.logger_name + '.auth')  # type: Logger
 
 FORMATTER = Formatter(fmt=APP.config['AUTH_LOG_FORMAT'])
 
