@@ -16,6 +16,6 @@ def index():
                            title='Total Tolles Ferleihsystem')
 
 
-@app.route('/assets/<path:file>')
+@APP.route('/assets/<path:file>')
 def asset(file):
     return send_from_directory('./build', file)
