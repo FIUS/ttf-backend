@@ -1,4 +1,4 @@
-from flask import render_template, url_for
+from flask import render_template, url_for, send_from_directory
 from flask_cors import CORS, cross_origin
 
 from . import APP
@@ -14,3 +14,8 @@ if APP.config['DEBUG']:
 def index():
     return render_template('index.html',
                            title='Total Tolles Ferleihsystem')
+
+
+@app.route('/assets/<path:file>')
+def asset(file):
+    return send_from_directory('./build', file)
