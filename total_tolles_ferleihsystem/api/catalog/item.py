@@ -102,22 +102,20 @@ class ItemDetail(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        if item.is_currently_lent:
-            abort(400, "Requested item is currently lent!")
-        item.deleted = True
-        for element in item._attributes:
-            element.delete()
-        for element in item._contained_items:
-            DB.session.delete(element)
-        for element in item._tags:
-            DB.session.delete(element)
+        
+        code, msg, commit = item.delete()
 
-        DB.session.commit()
-        return "", 204
+        if commit:
+            DB.session.commit
+        if code == 204:
+            return "", 204
+        
+        abort(code, msg)
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested item not found!')
+    @ANS.response(400, 'The type of this item does not currently exist!')
     @ANS.response(204, 'Success.')
     # pylint: disable=R0201
     def post(self, item_id):
@@ -127,6 +125,8 @@ class ItemDetail(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
+        if item.type is None or item.type.deleted:
+            abort(400, 'The type of this item does not currently exist!')
         item.deleted = False
         DB.session.commit()
         return "", 204
@@ -153,13 +153,6 @@ class ItemDetail(Resource):
 
         attributes_to_add, attributes_to_delete, attributes_to_undelete = item.get_attribute_changes_from_type_change(item.type_id, type_id)
         
-        child_itis = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
-        new_containable_type_ids = [ittit.item_type_id for ittit in ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()]
-        child_itis_to_delete = [iti for iti in child_itis if iti.item.type_id not in new_containable_type_ids]
-
-        parent_itis = ItemToItem.query.filter(ItemToItem.item_id == item_id).all()
-        parent_itis_to_delete = [iti for iti in parent_itis if type_id not in [ittit.item_type_id for ittit in iti.parent.type._contained_item_types]]
-
         try:
             item.update(**request.get_json())
             DB.session.add_all(attributes_to_add)
@@ -167,10 +160,6 @@ class ItemDetail(Resource):
                 attr.deleted = False
             for attr in attributes_to_delete:
                 attr.deleted = True
-            for iti in child_itis_to_delete:
-                DB.session.delete(iti)
-            for iti in parent_itis_to_delete:
-                DB.session.delete(iti)
             DB.session.commit()
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:

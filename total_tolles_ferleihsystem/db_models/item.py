@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 from .. import DB
 from . import STD_STRING_SIZE
 
-from .itemType import ItemTypeToAttributeDefinition
+from . import itemType
 from .tag import TagToAttributeDefinition
 
 __all__ = [
@@ -92,6 +92,19 @@ class Item(DB.Model):
 
         return self.item_type.lending_duration
 
+    def delete(self):
+        if self.is_currently_lent:
+            return(400, "Requested item is currently lent!", False)
+        self.deleted = True
+    # Not intender -neumantm
+    #    for element in self._attributes:
+    #        element.delete()
+    #    for element in self._contained_items:
+    #        DB.session.delete(element)
+    #    for element in self._tags:
+    #        DB.session.delete(element)
+        return(204, "", True)
+
     def get_attribute_changes(self, definition_ids, remove: bool = False):
         """
         Get a list of attributes to add, to delete and to undelete,
@@ -130,9 +143,9 @@ class Item(DB.Model):
         Get a list of attributes to add to a new item which has the given type.
         """
 
-        item_type_attribute_definitions = (ItemTypeToAttributeDefinition
+        item_type_attribute_definitions = (itemType.ItemTypeToAttributeDefinition
                                            .query
-                                           .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
+                                           .filter(itemType.ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
         attributes_to_add, _, _ = self.get_attribute_changes([ittad.attribute_definition_id for ittad in item_type_attribute_definitions], False)
 
@@ -143,14 +156,14 @@ class Item(DB.Model):
         Get a list of attributes to add, to delete and to undelete,
         when this item would now switch from the first to the second type.
         """
-        old_item_type_attr_defs = (ItemTypeToAttributeDefinition
+        old_item_type_attr_defs = (itemType.ItemTypeToAttributeDefinition
                                    .query
-                                   .filter(ItemTypeToAttributeDefinition.item_type_id == from_type_id)
+                                   .filter(itemType.ItemTypeToAttributeDefinition.item_type_id == from_type_id)
                                    .all())
 
-        new_item_type_attr_defs = (ItemTypeToAttributeDefinition
+        new_item_type_attr_defs = (itemType.ItemTypeToAttributeDefinition
                                    .query
-                                   .filter(ItemTypeToAttributeDefinition.item_type_id == to_type_id)
+                                   .filter(itemType.ItemTypeToAttributeDefinition.item_type_id == to_type_id)
                                    .all())
 
         old_attr_def_ids = [ittad.attribute_definition_id for ittad in old_item_type_attr_defs]
@@ -167,7 +180,7 @@ class Item(DB.Model):
     def get_attribute_changes_from_tag(self, tag_id: int, remove: bool = False):
         """
         Get a list of attributes to add, to delete and to undelete,
-        when this item would now get that tag or loase that tag.
+        when this item would now get that tag or loose that tag.
         """
 
         tag_attribute_definitions = (TagToAttributeDefinition

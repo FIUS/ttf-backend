@@ -14,6 +14,9 @@ from ...login import UserRole
 from ...db_models.item import ItemToAttributeDefinition
 from ...db_models.attributeDefinition import AttributeDefinition
 
+from ...db_models.tag import TagToAttributeDefinition
+from ...db_models.itemType import ItemTypeToAttributeDefinition
+
 PATH: str = '/catalog/attribute_definitions'
 ANS = API.namespace('attribute_definition', description='The attribute definitions', path=PATH)
 
@@ -87,6 +90,25 @@ class AttributeDefinitionDetail(Resource):
         attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if attribute is None:
             abort(404, 'Requested attribute not found!')
+        
+        ttads = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.attribute_definition_id == definition_id).all()
+        ittads = ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.attribute_definition_id == definition_id).all()
+
+        tags = [ ttad.tag for ttad in ttads ]
+        types = [ ittad.item_type for ittad in ittads ]
+
+        for tag in tags:
+            tag.unassociate_attr_def(definition_id)
+
+        for t in types:
+            t.unassociate_attr_def(definition_id)
+
+        for ttad in ttads:
+            DB.session.delete(ttad)
+
+        for ittad in ittads:
+            DB.session.delete(ittad)
+
         attribute.deleted = True
         DB.session.commit()
         return "", 204

@@ -89,7 +89,20 @@ class ItemTagDetail(Resource):
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
+
+        itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
+        items = [itt.item for itt in itts]
+
         item_tag.deleted = True
+
+        for itt in itts:
+            DB.session.delete(itt)
+
+        for item in items:
+            _, attributes_to_delete, _ = item.get_attribute_changes_from_tag(tag_id, True)
+            for attr in attributes_to_delete:
+                attr.deleted = True
+
         DB.session.commit()
         return "", 204
 
@@ -209,21 +222,15 @@ class ItemTagAttributes(Resource):
         Remove association of a attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        tag = Tag.query.filter(Tag.id == tag_id).first()
+        if tag is None:
             abort(404, 'Requested item tag not found!')
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
-            abort(400, 'Requested attribute definition not found!')
-        association = (TagToAttributeDefinition
-                       .query
-                       .filter(TagToAttributeDefinition.tag_id == tag_id)
-                       .filter(TagToAttributeDefinition.attribute_definition_id == attribute_definition_id)
-                       .first())
-        if association is None:
-            return '', 204
-        try:
-            DB.session.delete(association)
+
+        code, msg, commit = tag.unassociate_attr_def(attribute_definition_id)
+        if commit:
             DB.session.commit()
+
+        if code == 204:
             return '', 204
-        except IntegrityError:
-            abort(500)
+        
+        abort(code, msg)

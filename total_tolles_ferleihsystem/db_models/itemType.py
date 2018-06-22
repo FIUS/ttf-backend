@@ -1,6 +1,7 @@
 from .. import DB
 from . import STD_STRING_SIZE
 from .attributeDefinition import AttributeDefinition
+from . import item
 
 __all__= [ 'ItemType', 'ItemTypeToItemType', 'ItemTypeToAttributeDefinition' ] 
 
@@ -34,6 +35,33 @@ class ItemType (DB.Model):
         self.lending_duration = lending_duration
         self.visible_for = visible_for
         self.how_to = how_to
+
+    def unassociate_attr_def(self, attribute_definition_id):
+        """
+        Does all necessary changes to the database for unassociating a attribute definition from this type.
+        Does not commit the changes.
+        """
+        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
+            return(400, 'Requested attribute definition not found!', False)
+        association = (ItemTypeToAttributeDefinition
+                       .query
+                       .filter(ItemTypeToAttributeDefinition.item_type_id == self.id)
+                       .filter(ItemTypeToAttributeDefinition.attribute_definition_id == attribute_definition_id)
+                       .first())
+        if association is None:
+            return(204, '', False)
+
+        itads = item.ItemToAttributeDefinition.query.filter(item.ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id).all()
+
+        items = [itad.item for itad in itads]
+
+        DB.session.delete(association)
+        
+        for i in items:
+            _, attributes_to_delete, _ = i.get_attribute_changes([attribute_definition_id], True)
+            for attr in attributes_to_delete:
+                attr.deleted = True
+        return(204, '', True)
 
 
 class ItemTypeToItemType (DB.Model):

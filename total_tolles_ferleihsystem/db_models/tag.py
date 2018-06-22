@@ -4,7 +4,8 @@ Module containing database models for everything concerning Item-Tags.
 
 from .. import DB
 from . import STD_STRING_SIZE
-from .attributeDefinition import AttributeDefinition
+from . import attributeDefinition
+from . import item
 
 __all__ = [ 'Tag', 'TagToAttributeDefinition' ]
 
@@ -30,6 +31,33 @@ class Tag(DB.Model):
         self.name = name
         self.lending_duration = lending_duration
         self.visible_for = visible_for
+
+    def unassociate_attr_def(self, attribute_definition_id):
+        """
+        Does all necessary changes to the database for unassociating a attribute definition from this tag.
+        Does not commit the changes.
+        """
+        if attributeDefinition.AttributeDefinition.query.filter(attributeDefinition.AttributeDefinition.id == attribute_definition_id).first() is None:
+            return(400, 'Requested attribute definition not found!', False)
+        association = (TagToAttributeDefinition
+                       .query
+                       .filter(TagToAttributeDefinition.tag_id == self.id)
+                       .filter(TagToAttributeDefinition.attribute_definition_id == attribute_definition_id)
+                       .first())
+        if association is None:
+            return(204, '', False)
+
+        itads = item.ItemToAttributeDefinition.query.filter(item.ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id).all()
+
+        items = [itad.item for itad in itads]
+
+        DB.session.delete(association)
+        
+        for i in items:
+            _, attributes_to_delete, _ = i.get_attribute_changes([attribute_definition_id], True)
+            for attr in attributes_to_delete:
+                attr.deleted = True
+        return(204, '', True)
 
 class TagToAttributeDefinition (DB.Model):
 
