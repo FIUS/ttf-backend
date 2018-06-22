@@ -96,9 +96,11 @@ class Item(DB.Model):
         if self.is_currently_lent:
             return(400, "Requested item is currently lent!", False)
         self.deleted = True
+    
+        for element in self._attributes:
+            element.delete()
+    
     # Not intender -neumantm
-    #    for element in self._attributes:
-    #        element.delete()
     #    for element in self._contained_items:
     #        DB.session.delete(element)
     #    for element in self._tags:
