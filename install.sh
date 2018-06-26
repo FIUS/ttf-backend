@@ -47,7 +47,6 @@ pushd $SOURCE
 $PIP_VENV install -r requirements.txt
 
 $PIP_VENV install -e .
-MODE=production FLASK_APP=$PACKAGE flask db upgrade
 
 pushd $PACKAGE
 
@@ -132,6 +131,12 @@ fi
 
 popd
 
+# run db migrations
+pushd $SOURCE
+    MODE=production FLASK_APP=$PACKAGE flask db upgrade
+popd
+
+# reload apache
 pushd $HTTP_ROOT
     touch $WSGI_FILE
 popd
