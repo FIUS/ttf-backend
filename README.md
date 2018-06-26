@@ -7,8 +7,8 @@
 - python 3.6
 - pip [python 3.6]
 - venv [python 3.6]
-- celery compatible Broker (documentation)[http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html]
-- celery scheduler for recurring tasks (documentation)[http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html]
+- celery compatible Broker [documentation](http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html)
+- celery scheduler for recurring tasks [documentation](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 
 ## First start:
 
@@ -120,8 +120,8 @@ Prerequisites:
  *  Python >3.6, Virtualenv, Pip
  *  npm, node >8
  *  Apache2, mod-wsgi
- *  Celery Broker (documentation)[http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html]
- *  Celery Scheduler celery scheduler for recurring tasks (documentation)[http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html]
+ *  Celery Broker [documentation](http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html)
+ *  Celery Scheduler celery scheduler for recurring tasks [documentation](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 
 Installation / Upgrade process:
 
