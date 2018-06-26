@@ -5,6 +5,8 @@ from . import APP
 
 from . import api
 
+from .db_models import STD_STRING_SIZE
+
 if APP.config['DEBUG']:
     from . import debug_routes
 
@@ -13,7 +15,8 @@ if APP.config['DEBUG']:
 @APP.route('/index')
 def index():
     return render_template('index.html',
-                           title='Total Tolles Ferleihsystem')
+                           title='Total Tolles Ferleihsystem',
+                           maxDBStringLength=STD_STRING_SIZE)
 
 
 @APP.route('/assets/<path:file>')

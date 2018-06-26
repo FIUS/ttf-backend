@@ -18,7 +18,7 @@ DB_COMMAND_LOGGER.addHandler(handler)
 
 DB_COMMAND_LOGGER.setLevel(DEBUG)
 
-STD_STRING_SIZE = 255
+STD_STRING_SIZE = 190  # Max size that allows Indices while using utf8mb4 in MySql DB
 
 
 from . import attributeDefinition, blacklist, item, itemType, tag
