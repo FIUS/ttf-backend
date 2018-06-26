@@ -117,9 +117,9 @@ After creating a new migration file with `flask db migrate` it is neccessary to 
 
 Prerequisites:
 
- *  Python 3.6, Virtualenv, Pip
- *  npm, node>8
- *  Apache2, mode-wsgi
+ *  Python >3.6, Virtualenv, Pip
+ *  npm, node >8
+ *  Apache2, mod-wsgi
  *  Celery Broker (documentation)[http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html]
  *  Celery Scheduler celery scheduler for recurring tasks (documentation)[http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html]
 
@@ -150,3 +150,6 @@ Troubleshooting:
  *  Check apache config
  *  Check TTF logs
  *  Check Python version (>3.6!)
+ *  Check if Celery Broker is running
+ *  Check if workers are running
+ *  Check if Celery Scheduler is running
