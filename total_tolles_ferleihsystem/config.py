@@ -30,6 +30,7 @@ class DebugConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
     LOG_PATH = '/tmp'
     SQLALCHEMY_ECHO = True
+    JWT_SECRET_KEY = 'debug'
 
 
 class TestingConfig(Config):
