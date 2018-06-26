@@ -158,6 +158,6 @@ def log_unauthorized(message):
     AUTH_LOGGER.debug('Unauthorized access: %s', message)
 
 # pylint: disable=C0413
-from . import root, authentication, catalog, lending, search
+from . import root, authentication, catalog, lending, search, tasks
 
 APP.register_blueprint(API_BLUEPRINT, url_prefix='/api')

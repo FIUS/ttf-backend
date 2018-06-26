@@ -57,6 +57,10 @@ CORS(APP)
 
 WEBPACK.init_app(APP)
 
+# Setup Celery
+from .tasks import make_celery
+celery = make_celery(APP)
+
 # pylint: disable=C0413
 from . import db_models
 # pylint: disable=C0413

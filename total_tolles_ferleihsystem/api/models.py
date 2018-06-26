@@ -69,7 +69,7 @@ ITEM_TYPE_POST = API.model('ItemTypePOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'name_schema': fields.String(max_length=STD_STRING_SIZE),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
-    'how_to': fields.String(nullable=True),
+    'how_to': fields.String(nullable=True, max_length=STD_STRING_SIZE),
 })
 
 ITEM_TYPE_PUT = API.inherit('ItemTypePUT', ITEM_TYPE_POST, {
@@ -95,7 +95,7 @@ ITEM_TAG_LIST_LINKS = API.inherit('ItemTagLinks', WITH_CURIES, {
 ITEM_TAG_POST = API.model('ItemTagPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'lending_duration': fields.Integer(nullable=True),
-    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
 })
 
 ITEM_TAG_PUT = API.inherit('ItemTagPUT', ITEM_TAG_POST, {
@@ -119,9 +119,9 @@ ATTRIBUTE_DEFINITION_LIST_LINKS = API.inherit('AttributeDefinitionLinks', WITH_C
 
 ATTRIBUTE_DEFINITION_POST = API.model('AttributeDefinitionPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
-    'type': fields.String(enum=('string', 'integer', 'number', 'boolean')),
-    'jsonschema': fields.String(nullable=True, default='{\n    \n}'),
-    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
+    'type': fields.String(enum=('string', 'integer', 'number', 'boolean'), max_length=STD_STRING_SIZE),
+    'jsonschema': fields.String(nullable=True, default='{\n    \n}', max_length=STD_STRING_SIZE),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
 })
 
 ATTRIBUTE_DEFINITION_PUT = API.inherit('AttributeDefinitionPUT', ATTRIBUTE_DEFINITION_POST, {
@@ -159,7 +159,7 @@ ITEM_POST = API.model('ItemPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'type_id': fields.Integer(min=1),
     'lending_duration': fields.Integer(nullable=True),
-    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
 })
 
 ITEM_PUT = API.inherit('ItemPUT', ITEM_POST, {
@@ -185,7 +185,7 @@ ATTRIBUTE_LIST_LINKS = API.inherit('AttributeLinks', WITH_CURIES, {
 })
 
 ATTRIBUTE_PUT = API.model('AttributePUT', {
-    'value': fields.String(),
+    'value': fields.String(max_length=STD_STRING_SIZE),
 })
 
 ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
@@ -196,18 +196,20 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
 
 FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.file_file_detail', absolute=True,
-                           url_data={'file_id' : 'id'}), required=False),
+                           url_data={'file_id': 'id'}), required=False),
+    'download': HaLUrl(UrlData('api.file_file_data', absolute=True,
+                               url_data={'file_hash': 'file_hash'}), required=False),
 })
 
 FILE_BASIC = API.inherit('FileBASIC', ID, {
-    'name': fields.String(max_length=255),
+    'name': fields.String(max_length=STD_STRING_SIZE),
     'file_type': fields.String(max_length=20),
     'invalidation': fields.DateTime(nullable=True),
 })
 
 FILE_GET = API.inherit('FileGET', FILE_BASIC, {
     'item': fields.Nested(ITEM_GET),
-    'file_hash': fields.String(),
+    'file_hash': fields.String(max_length=STD_STRING_SIZE),
     'creation': fields.DateTime(),
     'item_id': fields.Integer(min=1),
     '_links': NestedFields(FILE_LINKS)
@@ -228,9 +230,9 @@ ITEM_LENDING = API.model('ItemLending', {
 })
 
 LENDING_BASIC = API.model('LendingBASIC', {
-    'moderator': fields.String(),
-    'user': fields.String(),
-    'deposit': fields.String(example="Studentenausweis"),
+    'moderator': fields.String(max_length=STD_STRING_SIZE),
+    'user': fields.String(max_length=STD_STRING_SIZE),
+    'deposit': fields.String(example="Studentenausweis", max_length=STD_STRING_SIZE),
 })
 
 LENDING_POST = API.inherit('LendingPOST', LENDING_BASIC, {

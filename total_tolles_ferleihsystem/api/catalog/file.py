@@ -8,13 +8,14 @@ from flask import request, make_response
 from flask_restplus import Resource, abort
 from sqlalchemy.exc import IntegrityError
 
+from total_tolles_ferleihsystem.tasks.file import create_archive
 from ..models import FILE_GET, FILE_PUT
 from ...db_models.item import Item, File
 
 from .. import API
 from ... import DB
 
-from ...file_store import save_file, read_file, create_archive
+from ...file_store import save_file, read_file
 
 
 PATH: str = '/catalog/files'
@@ -131,6 +132,7 @@ class ArchiveHandler(Resource):
 
     @API.param('name', 'The name of the archive file', type=str, required=False, default='archive')
     @API.param('file', 'The file_ids to be added to the archive', type=str, required=True)
+    @ANS.marshal_with(FILE_GET)
     def post(self):
         """
         Create a Archive of files
@@ -145,12 +147,15 @@ class ArchiveHandler(Resource):
             file = File.query.filter(File.id == file_id).first()
             return (file.file_hash, file.name + file.file_type)
 
-        archive_hash = create_archive(file_ids.map(map_function))
-        new = File(name=file_name, file_type='.zip', file_hash=archive_hash)
+        new = File(name=file_name, file_type='.zip', file_hash=None)
 
         try:
             DB.session.add(new)
             DB.session.commit()
+
+            # Run task
+            create_archive.delay(new.id, list(map(map_function, file_ids)))
+
             return new
         except IntegrityError as err:
             message = str(err)

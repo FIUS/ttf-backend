@@ -5,7 +5,10 @@
             <i class="f5 fa fa-chevron-down" [hidden]="!open"></i>
             <span style="word-break: break-all">{{file?.name}}</span>
         </div>
-        <div>
+        <div class="flex">
+            <div class="tooltip tooltip-left button h2 pv1 ph2 br2 ml link bg-animate hover-bg-light-silver pointer" data-tooltip="download" (click)="api.downloadFile(file); $event.stopPropagation()">
+                <i class="fa fa-download"></i>
+            </div>
             <div class="tooltip tooltip-left button h2 pv1 ph2 br2 ml link bg-animate hover-bg-light-silver pointer" data-tooltip="edit" (click)="editFile.open(); $event.stopPropagation()">
                 <i class="fa fa-pencil"></i>
             </div>

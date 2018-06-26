@@ -5,6 +5,7 @@ import { JWTService } from './jwt.service';
 import { InfoService } from '../info/info.service';
 import { AsyncSubject } from 'rxjs/AsyncSubject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { saveAs } from 'file-saver';
 
 
 export interface RootLinks extends ApiLinksObject {
@@ -770,6 +771,8 @@ export class ApiService implements OnInit {
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
+                // reset dependent caches!
+                this.getStreamSource(resource + '/attributes').next([]);
                 this.rest.put(catalog._links.items.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
                 }, error => this.errorHandler(error, resource, 'PUT'));
@@ -960,6 +963,24 @@ export class ApiService implements OnInit {
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
+    downloadFile(file: ApiObject) {
+        const stream = new AsyncSubject<any>();
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.downloadFile(file._links.download, token).subscribe(data => {
+                stream.next(data);
+                stream.complete();
+            }, error => this.errorHandler(error, 'file-store/' + 'file.file_hash', 'GET'));
+        });
+
+        stream.subscribe(data => {
+            console.log(data);
+            const blob = new Blob([data.blob()], {type: 'application/pdf'}); //octet-stream
+            console.log(blob);
+            saveAs(blob, file.name + file.file_type);
+        })
     }
 
     putFile(id: number, data): Observable<ApiObject> {
