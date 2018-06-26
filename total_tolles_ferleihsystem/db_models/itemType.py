@@ -41,7 +41,7 @@ class ItemType (DB.Model):
         Does all necessary changes to the database for unassociating a attribute definition from this type.
         Does not commit the changes.
         """
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
+        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first() is None:
             return(400, 'Requested attribute definition not found!', False)
         association = (ItemTypeToAttributeDefinition
                        .query

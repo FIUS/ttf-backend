@@ -37,7 +37,7 @@ class Tag(DB.Model):
         Does all necessary changes to the database for unassociating a attribute definition from this tag.
         Does not commit the changes.
         """
-        if attributeDefinition.AttributeDefinition.query.filter(attributeDefinition.AttributeDefinition.id == attribute_definition_id).first() is None:
+        if attributeDefinition.AttributeDefinition.query.filter(attributeDefinition.AttributeDefinition.id == attribute_definition_id).filter(attributeDefinition.AttributeDefinition.deleted == False).first() is None:
             return(400, 'Requested attribute definition not found!', False)
         association = (TagToAttributeDefinition
                        .query

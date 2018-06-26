@@ -100,7 +100,7 @@ class Item(DB.Model):
         for element in self._attributes:
             element.delete()
     
-    # Not intender -neumantm
+    # Not intended -neumantm
     #    for element in self._contained_items:
     #        DB.session.delete(element)
     #    for element in self._tags:
@@ -124,10 +124,10 @@ class Item(DB.Model):
                     if(remove):
                         # Check if multiple sources bring it, if yes don't delete it.
                         sources = 0
-                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions]):
+                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions if not ittad.attribute_definition.deleted ]):
                             sources += 1
                         for tag in [itt.tag for itt in self._tags]:
-                            if(def_id in [ttad.attribute_definition_id for ttad in tag._tag_to_attribute_definitions]):
+                            if(def_id in [ttad.attribute_definition_id for ttad in tag._tag_to_attribute_definitions if not ttad.attribute_definition.deleted]):
                                 sources += 1
                         if sources == 1 :
                             attributes_to_delete.append(itad)
@@ -149,7 +149,7 @@ class Item(DB.Model):
                                            .query
                                            .filter(itemType.ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
-        attributes_to_add, _, _ = self.get_attribute_changes([ittad.attribute_definition_id for ittad in item_type_attribute_definitions], False)
+        attributes_to_add, _, _ = self.get_attribute_changes([ittad.attribute_definition_id for ittad in item_type_attribute_definitions if not ittad.item_type.deleted], False)
 
         return attributes_to_add
 

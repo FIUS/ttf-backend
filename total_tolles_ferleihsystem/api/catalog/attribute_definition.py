@@ -103,9 +103,11 @@ class AttributeDefinitionDetail(Resource):
         for t in types:
             t.unassociate_attr_def(definition_id)
 
+        #Maybe it's better to not delete the associations like with all other objects. But here this would mean a 
+        # lot of work on undelte. So for now, all associations of this attribute definition are deleted. -neumantm
         for ttad in ttads:
             DB.session.delete(ttad)
-
+        
         for ittad in ittads:
             DB.session.delete(ittad)
 

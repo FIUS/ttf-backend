@@ -182,11 +182,11 @@ class ItemItemTags(Resource):
         """
         Get all tags for this item.
         """
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
-        return [e.tag for e in associations]
+        return [e.tag for e in associations if not e.tag.deleted]
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
@@ -201,18 +201,18 @@ class ItemItemTags(Resource):
         Associate a new tag with the item.
         """
         tag_id = request.get_json()["id"]
-        item = Item.query.filter(Item.id == item_id).first()
+        item = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        tag = Tag.query.filter(Tag.id == tag_id).first()
+        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
         if tag is None:
             abort(400, 'Requested item tag not found!')
 
         new = ItemToTag(item_id, tag_id)
 
+        attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_tag(tag_id)
         try:
             DB.session.add(new)
-            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_tag(tag_id)
             DB.session.add_all(attributes_to_add)
             for attr in attributes_to_undelete:
                 attr.deleted = False
@@ -238,10 +238,10 @@ class ItemItemTags(Resource):
         """
         tag_id = request.get_json()["id"]
 
-        item = Item.query.filter(Item.id == item_id).first()
+        item = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
             abort(400, 'Requested item tag not found!')
 
         association = (ItemToTag
@@ -278,7 +278,7 @@ class ItemAttributeList(Resource):
         """
         Get the attributes of this item.
         """
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         return ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
@@ -299,7 +299,7 @@ class ItemAttributeDetail(Resource):
         Get a single attribute of this item.
         """
 
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         attribute = (ItemToAttributeDefinition
@@ -326,7 +326,7 @@ class ItemAttributeDetail(Resource):
         Set a single attribute of this item.
         """
 
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         value = request.get_json()["value"]
@@ -361,11 +361,11 @@ class ItemContainedItems(Resource):
         """
         Get all contained items of this item.
         """
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
-        return [e.item for e in associations]
+        return [e.item for e in associations if not e.item.deleted]
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
@@ -381,8 +381,8 @@ class ItemContainedItems(Resource):
         Add a new contained item to this item
         """
         contained_item_id = request.get_json()["id"]
-        parent = Item.query.filter(Item.id == item_id).first()
-        child = Item.query.filter(Item.id == contained_item_id).first()
+        parent = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
+        child = Item.query.filter(Item.id == contained_item_id).filter(Item.deleted == False).first()
 
         if parent is None:
             abort(404, 'Requested item (current) not found!')
@@ -423,9 +423,9 @@ class ItemContainedItems(Resource):
         """
         contained_item_id = request.get_json()["id"]
 
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item (current) not found!')
-        if Item.query.filter(Item.id == contained_item_id).first() is None:
+        if Item.query.filter(Item.id == contained_item_id).filter(Item.deleted == False).first() is None:
             abort(400, 'Requested item (to be contained) not found!')
 
         association = (ItemToItem
@@ -457,7 +457,7 @@ class ItemFile(Resource):
         """
         Get all files for this item.
         """
-        if Item.query.filter(Item.id == item_id).first() is None:
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         return File.query.filter(File.item_id == item_id).all()
