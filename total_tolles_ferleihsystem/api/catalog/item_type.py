@@ -89,7 +89,19 @@ class ItemTypeDetail(Resource):
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(404, 'Requested item type not found!')
+
         item_type.deleted = True
+
+        # Not intended -neumantm
+        # for element in item_type._contained_item_types:
+        #     DB.session.delete(element)
+        # for element in item_type._item_type_to_attribute_definitions:
+        #     DB.session.delete(element)
+
+        items = Item.query.filter(Item.type_id == type_id).all()
+        for item in items:
+            item.delete()
+        
         DB.session.commit()
         return "", 204
 
@@ -147,14 +159,14 @@ class ItemTypeAttributes(Resource):
         """
         Get all attribute definitions for this item type.
         """
-        if ItemType.query.filter(ItemType.id == type_id).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
             abort(404, 'Requested item type not found!')
 
         associations = (ItemTypeToAttributeDefinition
                         .query
                         .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
                         .all())
-        return [element.attribute_definition for element in associations]
+        return [element.attribute_definition for element in associations if not element.item_type.deleted]
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -169,9 +181,9 @@ class ItemTypeAttributes(Resource):
         Associate a new attribute definition with the item type.
         """
         attribute_definition_id = request.get_json()["id"]
-        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first()
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
 
-        if ItemType.query.filter(ItemType.id == type_id).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
             abort(404, 'Requested item type not found!')
         if attribute_definition is None:
             abort(400, 'Requested attribute definition not found!')
@@ -210,25 +222,19 @@ class ItemTypeAttributes(Resource):
         Remove association of a attribute definition with the item type.
         """
         attribute_definition_id = request.get_json()["id"]
-
-        if ItemType.query.filter(ItemType.id == type_id).first() is None:
+        item_type = ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first()
+        if item_type is None:
             abort(404, 'Requested item type not found!')
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
-            abort(400, 'Requested attribute definition not found!')
 
-        association = (ItemTypeToAttributeDefinition
-                       .query
-                       .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
-                       .filter(ItemTypeToAttributeDefinition.attribute_definition_id == attribute_definition_id)
-                       .first())
-        if association is None:
-            return '', 204
-        try:
-            DB.session.delete(association)
+        code, msg, commit = item_type.unassociate_attr_def(attribute_definition_id)
+      
+        if commit:
             DB.session.commit()
+
+        if code == 204:
             return '', 204
-        except IntegrityError:
-            abort(500)
+        
+        abort(code, msg)
 
 
 @ANS.route('/<int:type_id>/can_contain/')
@@ -245,11 +251,11 @@ class ItemTypeCanContainTypes(Resource):
         """
         Get all item types, this item_type may contain.
         """
-        if ItemType.query.filter(ItemType.id == type_id).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
             abort(404, 'Requested item type not found!')
 
         associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
-        return [e.item_type for e in associations]
+        return [e.item_type for e in associations if not e.parent.deleted]
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -266,9 +272,9 @@ class ItemTypeCanContainTypes(Resource):
         child_id = request.get_json()["id"]
 
 
-        if ItemType.query.filter(ItemType.id == type_id).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
             abort(404, 'Requested item type not found!')
-        if ItemType.query.filter(ItemType.id == child_id).first() is None:
+        if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
             abort(400, 'Requested attribute definition not found!')
 
         new = ItemTypeToItemType(type_id, child_id)
@@ -297,9 +303,9 @@ class ItemTypeCanContainTypes(Resource):
         child_id = request.get_json()["id"]
 
 
-        if ItemType.query.filter(ItemType.id == type_id).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
             abort(404, 'Requested item type not found!')
-        if ItemType.query.filter(ItemType.id == child_id).first() is None:
+        if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
             abort(400, 'Requested attribute definition not found!')
 
         association = (ItemTypeToItemType

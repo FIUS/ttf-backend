@@ -26,6 +26,7 @@ class ItemTagList(Resource):
     Item tags root item tag
     """
 
+
     @jwt_required
     @API.param('deleted', 'get all deleted item tags (and only these)', type=bool, required=False, default=False)
     @API.marshal_list_with(ITEM_TAG_GET)
@@ -89,7 +90,21 @@ class ItemTagDetail(Resource):
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
+
+        itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
+        items = [itt.item for itt in itts]
+
+        #Not intended -neumantm
+        #for itt in itts:
+        #    DB.session.delete(itt)
+
+        for item in items:
+            _, attributes_to_delete, _ = item.get_attribute_changes_from_tag(tag_id, True)
+            for attr in attributes_to_delete:
+                attr.deleted = True
+
         item_tag.deleted = True
+
         DB.session.commit()
         return "", 204
 
@@ -105,6 +120,16 @@ class ItemTagDetail(Resource):
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
+       
+        itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
+        items = [itt.item for itt in itts]
+
+        for item in items:
+            attributes_to_add, _, attributes_to_undelete = item.get_attribute_changes_from_tag(tag_id)
+            for attr in attributes_to_undelete:
+                attr.deleted = False
+            DB.session.add_all(attributes_to_add)
+
         item_tag.deleted = False
         DB.session.commit()
         return "", 204
@@ -148,15 +173,16 @@ class ItemTagAttributes(Resource):
         """
         Get all attribute definitions for this tag.
         """
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
             abort(404, 'Requested item tag not found!')
        # Two possibilitys:
        # return [e.attribute_definition for e in TagToAttributeDefinition.query
        # .filter(TagToAttributeDefinition.tag_id == tag_id).all()]
        # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id)
        # .first()._tag_to_attribute_definitions ]
+
         associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
-        return [e.attribute_definition for e in associations]
+        return [e.attribute_definition for e in associations if not e.tag.deleted]
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -171,9 +197,9 @@ class ItemTagAttributes(Resource):
         Associate a new attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() 
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first() 
 
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
             abort(404, 'Requested item tag not found!')
         if attribute_definition is None:
             abort(400, 'Requested attribute definition not found!')
@@ -209,21 +235,15 @@ class ItemTagAttributes(Resource):
         Remove association of a attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-
-        if Tag.query.filter(Tag.id == tag_id).first() is None:
+        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
+        if tag is None:
             abort(404, 'Requested item tag not found!')
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).first() is None:
-            abort(400, 'Requested attribute definition not found!')
-        association = (TagToAttributeDefinition
-                       .query
-                       .filter(TagToAttributeDefinition.tag_id == tag_id)
-                       .filter(TagToAttributeDefinition.attribute_definition_id == attribute_definition_id)
-                       .first())
-        if association is None:
-            return '', 204
-        try:
-            DB.session.delete(association)
+
+        code, msg, commit = tag.unassociate_attr_def(attribute_definition_id)
+        if commit:
             DB.session.commit()
+
+        if code == 204:
             return '', 204
-        except IntegrityError:
-            abort(500)
+        
+        abort(code, msg)
