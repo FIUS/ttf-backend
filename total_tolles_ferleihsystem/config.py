@@ -16,6 +16,7 @@ class Config(object):
     CELERY_RESULT_BACKEND = 'rpc://'
     TMP_DIRECTORY = '/tmp'
     DATA_DIRECTORY = '/tmp'
+    LOGIN_PROVIDERS = ['LDAP',]
 
 
 class ProductionConfig(Config):
@@ -28,6 +29,7 @@ class DebugConfig(Config):
     JWT_SECRET_KEY = 'debug'  # FIXME
     LOG_PATH = '/tmp'
     SQLALCHEMY_ECHO = True
+    LOGIN_PROVIDERS = ['BasicAuthProvider', 'LDAP']
 
 
 class TestingConfig(Config):

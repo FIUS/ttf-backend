@@ -11,17 +11,12 @@ from . import AUTH_LOGGER
 from .models import AUTHENTICATION_ROUTES_MODEL
 from .. import APP
 
-from ..login import LoginService, BasicAuthProvider
+from ..login import LoginService
 
 
 ANS = API.namespace('auth', description='Authentication Resources:')
 
-LOGIN_SERVICE: LoginService
-if APP.config['DEBUG']:
-    LOGIN_SERVICE = LoginService(BasicAuthProvider())
-else:
-    #FIXME add LDAP auth provider here
-    LOGIN_SERVICE = LoginService(None)
+LOGIN_SERVICE: LoginService = LoginService(APP.config.get('LOGIN_PROVIDERS', []))
 
 USER_AUTH_MODEL = API.model('UserAuth', {
     'username': fields.String(required=True, example='admin'),

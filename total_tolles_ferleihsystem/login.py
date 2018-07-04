@@ -3,7 +3,7 @@ Module for the authentication and user handling
 """
 
 from enum import IntEnum
-from typing import Dict, List
+from typing import Dict, List, Union
 from abc import ABC, abstractmethod
 
 
@@ -24,15 +24,59 @@ class User():
 
     name: str
     role: UserRole = UserRole.GUEST
+    _login_provider: Union['LoginProvider', None]
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, login_provider: Union['LoginProvider', None] = None):
         self.name = name
+        self._login_provider = login_provider
 
 
 class LoginProvider(ABC):
     """
     Abstract class which allows the login service to lookup users.
     """
+
+    __registered_providers__: Dict[str, 'LoginProvider'] = {}
+
+    @staticmethod
+    def registerProvider(name: str, login_provider: 'LoginProvider'):
+        """
+        Register an Instance of LoginProvider under given name.
+
+        Arguments:
+            name {str} -- Name of the LoginProvider
+            login_provider {LoginProvider} -- LoginProvider Instance
+
+        Raises:
+            KeyError -- If name is already registered with a different LoginProvider
+        """
+        if name in LoginProvider.__registered_providers__:
+            raise KeyError('Name already in use!')
+        LoginProvider.__registered_providers__[name] = login_provider
+
+    @staticmethod
+    def getLoginProvider(name: str) -> Union['LoginProvider', None]:
+        """
+        Get a registered LoginProvider by its name.
+
+        Arguments:
+            name {str} -- Name of the LoginProvider
+
+        Returns:
+            Union[LoginProvider, None] -- LoginProvider or None
+        """
+        return LoginProvider.__registered_providers__.get(name)
+
+    @staticmethod
+    def listLoginProviders() -> List[str]:
+        """
+        Get a list of Registered names of LoginProviders.
+
+        Returns:
+            List[str] -- All registered names of LoginProviders.
+        """
+
+        return list(LoginProvider.__registered_providers__.keys())
 
     @abstractmethod
     def init(self) -> None:
@@ -80,19 +124,19 @@ class LoginService():
 
     anonymous_user: bool
 
-    _login_provider: LoginProvider
+    _login_providers: List[LoginProvider]
 
-    def __init__(self, loginProvider: LoginProvider, anonymous_user: bool = True):
+    def __init__(self, login_providers: List[str], anonymous_user: bool = True):
         self.anonymous_user = anonymous_user
 
-        self._login_provider = loginProvider
-        self._login_provider.init()
+        self._login_providers = []
 
-    def get_login_provider(self) -> LoginProvider:
-        """
-        Getter function for the connected login provider
-        """
-        return self._login_provider
+        if login_providers:
+            for name in login_providers:
+                provider = LoginProvider.getLoginProvider(name)
+                if provider:
+                    provider.init()
+                    self._login_providers.append(provider)
 
     def get_anonymous_user(self) -> User:
         """
@@ -111,15 +155,15 @@ class LoginService():
 
         if self.anonymous_user and user_id == self.ANONYMOUS_IDENTITY:
             return self.get_anonymous_user()
-        if not self._login_provider.valid_user(user_id):
-            return None
-
-        user = User(user_id)
-        if self._login_provider.is_admin(user_id):
-            user.role = UserRole.ADMIN
-        elif self._login_provider.is_moderator(user_id):
-            user.role = UserRole.MODERATOR
-        return user
+        for provider in self._login_providers:
+            if provider.valid_user(user_id):
+                user = User(user_id, provider)
+                if provider.is_admin(user_id):
+                    user.role = UserRole.ADMIN
+                elif provider.is_moderator(user_id):
+                    user.role = UserRole.MODERATOR
+                return user
+        return None
 
     def check_password(self, user: User, password: str) -> bool:
         """
@@ -129,40 +173,8 @@ class LoginService():
         if self.anonymous_user and user.name == self.ANONYMOUS_IDENTITY and password == '':
             return True
 
-        return self._login_provider.valid_password(user.name, password)
+        provider = user._login_provider
+        if provider:
+            return provider.valid_password(user.name, password)
 
-
-class BasicAuthProvider(LoginProvider):
-    """
-    Example Login Provider with hardcoded insecure accounts.
-    """
-
-    ACCOUNTS: Dict[str, str] = {
-        'admin': 'admin',
-        'mod':   'mod',
-        'guest': 'guest'
-    }
-    ADMINS: List[str] = [
-        'admin'
-    ]
-    MODS: List[str] = [
-        'mod'
-    ]
-
-    def __init__(self):
-        pass
-
-    def init(self) -> None:
-        pass
-
-    def valid_user(self, user_id: str) -> bool:
-        return user_id in self.ACCOUNTS
-
-    def valid_password(self, user_id: str, password: str) -> bool:
-        return self.ACCOUNTS[user_id] == password
-
-    def is_admin(self, user_id: str) -> bool:
-        return user_id in self.ADMINS
-
-    def is_moderator(self, user_id: str) -> bool:
-        return user_id in self.MODS
+        return False
