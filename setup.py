@@ -10,6 +10,8 @@ setup(
         'flask_webpack',
         'flask_jwt_extended',
         'flask_bcrypt',
-        'flask_cors'
+        'flask_cors',
+        'celery',
+        'ldap3',
     ],
 )

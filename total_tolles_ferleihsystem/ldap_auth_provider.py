@@ -1,6 +1,8 @@
 from .login import LoginProvider
 from . import APP
 
+from ldap3 import Connection
+
 
 class LDAPAuthProvider(LoginProvider):
     """
