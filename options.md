@@ -30,8 +30,8 @@ Options are read from the following sources. Options in later sources overwrite 
 
 ## Third party options:
 
- *  [Flask options](flask.pocoo.org/docs/1.0/config/#builtin-configuration-values)
- *  [FlaskSQLAlchemy options](flask-sqlalchemy.pocoo.org/2.3/config/#configuration-keys)
- *  [Flask JWT-Extended options](flask-jwt-extended.readthedocs.io/en/latest/options.html)
- *  [Flask Restplus options](flask-restplus.readthedocs.io/en/latest/swagger.html?highlight=RESTPLUS_VALIDATE#the-api-expect-decorator)
- *  [Celery options](docs.celeryproject.org/en/latest/userguide/configuration.html)
+ *  [Flask options](https://flask.pocoo.org/docs/1.0/config/#builtin-configuration-values)
+ *  [FlaskSQLAlchemy options](http://flask-sqlalchemy.pocoo.org/2.3/config/#configuration-keys)
+ *  [Flask JWT-Extended options](https://flask-jwt-extended.readthedocs.io/en/latest/options.html)
+ *  [Flask Restplus options](https://flask-restplus.readthedocs.io/en/latest/swagger.html?highlight=RESTPLUS_VALIDATE#the-api-expect-decorator)
+ *  [Celery options](http://docs.celeryproject.org/en/latest/userguide/configuration.html)
