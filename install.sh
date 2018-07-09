@@ -82,7 +82,7 @@ if [ ! -f $WSGI_FILE ]; then
     echo "'" >> $WSGI_FILE
 
     echo "" >> $WSGI_FILE
-    echo "from $PACKAGE import app as application" >> $WSGI_FILE
+    echo "from $PACKAGE import APP as application" >> $WSGI_FILE
     echo "" >> $WSGI_FILE
 fi
 
@@ -119,15 +119,9 @@ if [ ! -f ${NAME}.conf ]; then
     echo "</VirtualHost>" >> ${NAME}.conf
 fi
 
+a2ensite ${NAME}
+
 popd
-
-if [ ! -d sites-enabled ]; then
-    mkdir sites-enabled
-fi
-
-if [ ! -f sites-enabled/${NAME}.conf ]; then
-    ln -s sites-available/${NAME}.conf sites-enabled/${NAME}.conf
-fi
 
 popd
 
