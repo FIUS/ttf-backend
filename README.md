@@ -131,7 +131,8 @@ Installation / Upgrade process:
      1. Make it executable
      2. update the variables at the top of the script
  4. execute `install.sh`
- 5. (Re-) Start Celery workers and scheduler
+ 5. check options: [documentation](options.md)
+ 6. (Re-) Start Celery workers and scheduler
 
 For use with MySql or other db engine:
 
