@@ -1,6 +1,15 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-SOURCE="/usr/src/Verleihsystem TTF"
+# +--------------------------------------------------------------------------+ #
+# |                                                                          | #
+# |                          --- Install Script ---                          | #
+# |                                                                          | #
+# +--------------------------------------------------------------------------+ #
+
+
+#
+# --- Setup ---
+#
 
 NAME=total-tolles-ferleihsystem
 PACKAGE=total_tolles_ferleihsystem
@@ -66,7 +75,7 @@ activate_this = '$LIB_PATH/bin/activate_this.py'
 with open(activate_this) as file_:
     exec(file_.read(), dict(__file__=activate_this))
 
-sys.path.insert(0, '$SOURCE')
+sys.path.insert(0, '$PWD')
 environ['MODE'] = 'production'
 environ['JWT_SECRET_KEY'] = '$(hexdump -n 32 -e '4/4 "%08X" 1 ""' /dev/urandom)'
 
@@ -81,7 +90,7 @@ fi
 if [ ! -f $CONFIG_FILE ]; then
     echo "[INFO] Create config file: $CONFIG_FILE"
     cat > $CONFIG_FILE << EOF
-WEBPACK_MANIFEST_PATH = '$SOURCE/$PACKAGE/build/manifest.json'
+WEBPACK_MANIFEST_PATH = '$PWD/$PACKAGE/build/manifest.json'
 SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/apache.db'
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_RESULT_BACKEND = 'rpc://'
@@ -115,9 +124,7 @@ fi
 #
 
 # run db migrations
-pushd $SOURCE
-    MODE=production FLASK_APP=$PACKAGE flask db upgrade
-popd
+MODE=production FLASK_APP=$PACKAGE flask db upgrade
 
 # deactivate venv
 deactivate
