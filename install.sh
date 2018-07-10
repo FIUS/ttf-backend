@@ -9,7 +9,7 @@ PIP_VENV="python -m pip"
 VENV="virtualenv --python=$PYTHON"
 VENV_DIR=/usr/lib/
 VENV_FOLDER=total-tolles-ferleihsystem
-NPM_BUILD_SCRIPT=build-docker
+NPM_BUILD_SCRIPT=production-build
 
 LOG_PATH=/var/log/$NAME
 APACHE_CONFIG_PATH=/etc/apache2
