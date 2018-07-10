@@ -12,6 +12,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WEBPACK_MANIFEST_PATH = './build/manifest.json'
+    LOG_PATH = '/tmp'
     LOG_FORMAT = '%(asctime)s [%(levelname)s] [%(name)-16s] %(message)s <%(module)s, \
                  %(funcName)s, %(lineno)s; %(pathname)s>'
     AUTH_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'

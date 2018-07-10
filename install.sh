@@ -76,7 +76,7 @@ sys.path.insert(0, '$SOURCE')
 environ['MODE'] = 'production'
 environ['JWT_SECRET_KEY'] = '$(hexdump -n 32 -e '4/4 "%08X" 1 ""' /dev/urandom)'
 
-from $PACKAGE import app as application
+from $PACKAGE import APP as application
 EOF
 else
     echo "[WARN] Can't create WSGI file: $WSGI_FILE; It already exists!"
@@ -119,15 +119,9 @@ if [ ! -f ${NAME}.conf ]; then
     echo "</VirtualHost>" >> ${NAME}.conf
 fi
 
+a2ensite ${NAME}
+
 popd
-
-if [ ! -d sites-enabled ]; then
-    mkdir sites-enabled
-fi
-
-if [ ! -f sites-enabled/${NAME}.conf ]; then
-    ln -s sites-available/${NAME}.conf sites-enabled/${NAME}.conf
-fi
 
 popd
 
