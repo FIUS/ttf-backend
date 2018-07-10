@@ -1,16 +1,16 @@
 #!/usr/bin/bash
 
 SOURCE="/usr/src/Verleihsystem TTF"
-PACKAGE=total_tolles_ferleihsystem
+
 NAME=total-tolles-ferleihsystem
+PACKAGE=total_tolles_ferleihsystem
+
 PYTHON=/usr/bin/python3
-PIP="$PYTHON -m pip"
 PIP_VENV="python -m pip"
 VENV="virtualenv --python=$PYTHON"
-VENV_DIR=/usr/lib/
-VENV_FOLDER=total-tolles-ferleihsystem
 NPM_BUILD_SCRIPT=production-build
 
+LIB_PATH=/usr/lib/$NAME
 LOG_PATH=/var/log/$NAME
 APACHE_CONFIG_PATH=/etc/apache2
 
@@ -19,45 +19,31 @@ WSGI_FILE=/var/www/$NAME.wsgi
 APACHE_CONFIG_FILE=$APACHE_CONFIG_PATH/sites-available/$NAME.conf
 
 
-if [ ! -d $VENV_DIR ]; then
-    mkdir $VENV_DIR
+#
+# --- Setup venv and activate it ---
+#
+
+# setup venv
+if [ ! -d $LIB_PATH ]; then
+    $VENV $LIB_PATH
 fi
 
-pushd $VENV_DIR
+# activate venv
+source $LIB_PATH/bin/activate
 
-if [ ! -d $VENV_FOLDER ]; then
-    $VENV $VENV_FOLDER
-fi
-
-pushd $VENV_FOLDER
-
-chmod a+x bin/activate
-
-source bin/activate
-
-popd
-popd
-
-
-pushd $SOURCE
-
+# install the ttf software and it's requirements into the venv
 $PIP_VENV install -r requirements.txt
-
 $PIP_VENV install -e .
 
+# select web directory
 pushd $PACKAGE
 
+# build webpage
 npm install -g node-gyp
-
 npm install --unsafe-perm
-
-if [ ! -d build ]; then
-    mkdir build
-fi
-
 npm run $NPM_BUILD_SCRIPT
 
-popd
+# deselect directory
 popd
 
 
@@ -76,7 +62,7 @@ if [ ! -f $WSGI_FILE ]; then
 import sys
 from os import environ
 
-activate_this = '$VENV_DIR$VENV_FOLDER/bin/activate_this.py'
+activate_this = '$LIB_PATH/bin/activate_this.py'
 with open(activate_this) as file_:
     exec(file_.read(), dict(__file__=activate_this))
 
@@ -132,6 +118,9 @@ fi
 pushd $SOURCE
     MODE=production FLASK_APP=$PACKAGE flask db upgrade
 popd
+
+# deactivate venv
+deactivate
 
 # reload apache
 service apache2 reload
