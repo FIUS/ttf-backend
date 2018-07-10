@@ -11,14 +11,13 @@ VENV_DIR=/usr/lib/
 VENV_FOLDER=total-tolles-ferleihsystem
 NPM_BUILD_SCRIPT=build-docker
 
-CONFIG_FILE=/etc/${NAME}.conf
-WSGI_FILE=/var/www/${NAME}.wsgi
-
 LOG_PATH=/var/log/$NAME
 APACHE_CONFIG_PATH=/etc/apache2
 
-#Asset deploy url
-DEPLOY_URL=./assets/
+CONFIG_FILE=/etc/$NAME.conf
+WSGI_FILE=/var/www/$NAME.wsgi
+APACHE_CONFIG_FILE=$APACHE_CONFIG_PATH/sites-available/$NAME.conf
+
 
 if [ ! -d $VENV_DIR ]; then
     mkdir $VENV_DIR
@@ -32,7 +31,7 @@ fi
 
 pushd $VENV_FOLDER
 
-chmod a+x bin/activate*
+chmod a+x bin/activate
 
 source bin/activate
 
@@ -62,6 +61,15 @@ popd
 popd
 
 
+#
+# --- Create files and folders ---
+#
+
+# create log folder
+mkdir -p $LOG_PATH
+
+
+# create wsgi file
 if [ ! -f $WSGI_FILE ]; then
     echo "[INFO] Create WSGI file: $WSGI_FILE"
     cat > $WSGI_FILE << EOF
@@ -83,6 +91,7 @@ else
 fi
 
 
+# create the ttf config file
 if [ ! -f $CONFIG_FILE ]; then
     echo "[INFO] Create config file: $CONFIG_FILE"
     cat > $CONFIG_FILE << EOF
@@ -97,33 +106,27 @@ else
 fi
 
 
-if [ ! -d $LOG_PATH ]; then
-    mkdir $LOG_PATH
+# create the apache configuration file and activate it
+if [ ! -f $APACHE_CONFIG_FILE ]; then
+    echo "[INFO] Create apache2 config file: $APACHE_CONFIG_FILE"
+    cat > $APACHE_CONFIG_FILE << EOF
+<VirtualHost *:80>
+    ServerName example.com
+    WSGIDaemonProcess $NAME processes=2 threads=15
+    WSGIProcessGroup $NAME
+    WSGIScriptAlias / $WSGI_FILE
+    WSGIPassAuthorization on
+</VirtualHost>
+EOF
+    a2ensite ${NAME}
+else
+    echo "[WARN] Can't create apache2 config file: $APACHE_CONFIG_FILE; It already exists!"
 fi
 
-pushd $APACHE_CONFIG_PATH
 
-if [ ! -d sites-available ]; then
-    mkdir sites-available
-fi
-
-pushd sites-available
-
-if [ ! -f ${NAME}.conf ]; then
-    echo "<VirtualHost *>" >> ${NAME}.conf
-    echo "    ServerName example.com" >> ${NAME}.conf
-    echo "    WSGIDaemonProcess $NAME processes=2 threads=15" >> ${NAME}.conf
-    echo "    WSGIProcessGroup $NAME" >> ${NAME}.conf
-    echo "    WSGIScriptAlias / $HTTP_ROOT/$WSGI_FILE" >> ${NAME}.conf
-    echo "    WSGIPassAuthorization on" >> ${NAME}.conf
-    echo "</VirtualHost>" >> ${NAME}.conf
-fi
-
-a2ensite ${NAME}
-
-popd
-
-popd
+#
+# --- Cleanup / Reload ---
+#
 
 # run db migrations
 pushd $SOURCE
@@ -131,4 +134,4 @@ pushd $SOURCE
 popd
 
 # reload apache
-touch $WSGI_FILE
+service apache2 reload
