@@ -15,17 +15,16 @@ NAME=total-tolles-ferleihsystem
 PACKAGE=total_tolles_ferleihsystem
 
 PYTHON=/usr/bin/python3
-PIP_VENV="python -m pip"
 VENV="virtualenv --python=$PYTHON"
+PIP_VENV="python -m pip"
 NPM_BUILD_SCRIPT=production-build
 
 LIB_PATH=/usr/lib/$NAME
 LOG_PATH=/var/log/$NAME
-APACHE_CONFIG_PATH=/etc/apache2
 
 CONFIG_FILE=/etc/$NAME.conf
 WSGI_FILE=/var/www/$NAME.wsgi
-APACHE_CONFIG_FILE=$APACHE_CONFIG_PATH/sites-available/$NAME.conf
+APACHE_CONFIG_FILE=/etc/apache2/sites-available/$NAME.conf
 
 
 #
@@ -57,7 +56,7 @@ popd
 
 
 #
-# --- Create files and folders ---
+# --- Create all other files and folders ---
 #
 
 # create log folder
@@ -113,7 +112,7 @@ if [ ! -f $APACHE_CONFIG_FILE ]; then
     WSGIPassAuthorization on
 </VirtualHost>
 EOF
-    a2ensite ${NAME}
+    a2ensite $NAME
 else
     echo "[WARN] Can't create apache2 config file: $APACHE_CONFIG_FILE; It already exists!"
 fi
