@@ -1,10 +1,14 @@
-from .login import LoginProvider
-from . import APP
+"""
+Auth Providers which provides LDAP login
+"""
+
+from ..login import LoginProvider
+from .. import APP
 
 from ldap3 import Connection
 
 
-class LDAPAuthProvider(LoginProvider):
+class LDAPAuthProvider(LoginProvider, name="LDAP"):
     """
     Example Login Provider with hardcoded insecure accounts.
     """
@@ -26,6 +30,3 @@ class LDAPAuthProvider(LoginProvider):
 
     def is_moderator(self, user_id: str) -> bool:
         return False
-
-
-LoginProvider.registerProvider('LDAP', LDAPAuthProvider())

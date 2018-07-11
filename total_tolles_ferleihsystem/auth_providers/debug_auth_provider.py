@@ -1,10 +1,11 @@
-from .login import LoginProvider
-from . import APP
+"""
+Auth Provider which provides three simple hardcoded logins for debugging purposes.
+"""
 
 from typing import Dict, List
+from ..login import LoginProvider
 
-
-class BasicAuthProvider(LoginProvider):
+class DebugAuthProvider(LoginProvider, name="Debug"):
     """
     Example Login Provider with hardcoded insecure accounts.
     """
@@ -38,7 +39,3 @@ class BasicAuthProvider(LoginProvider):
 
     def is_moderator(self, user_id: str) -> bool:
         return user_id in self.MODS
-
-
-if APP.config.get('DEBUG', False):
-    LoginProvider.registerProvider('BasicAuthProvider', BasicAuthProvider())

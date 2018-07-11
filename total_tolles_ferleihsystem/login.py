@@ -38,8 +38,14 @@ class LoginProvider(ABC):
 
     __registered_providers__: Dict[str, 'LoginProvider'] = {}
 
+    def __init_subclass__(cls, name: str = None):
+        if name is None:
+            LoginProvider.register_provider(cls.__name__, cls())
+        else:
+            LoginProvider.register_provider(name, cls())
+
     @staticmethod
-    def registerProvider(name: str, login_provider: 'LoginProvider'):
+    def register_provider(name: str, login_provider: 'LoginProvider'):
         """
         Register an Instance of LoginProvider under given name.
 
@@ -55,7 +61,7 @@ class LoginProvider(ABC):
         LoginProvider.__registered_providers__[name] = login_provider
 
     @staticmethod
-    def getLoginProvider(name: str) -> Union['LoginProvider', None]:
+    def get_login_provider(name: str) -> Union['LoginProvider', None]:
         """
         Get a registered LoginProvider by its name.
 
@@ -68,7 +74,7 @@ class LoginProvider(ABC):
         return LoginProvider.__registered_providers__.get(name)
 
     @staticmethod
-    def listLoginProviders() -> List[str]:
+    def list_login_providers() -> List[str]:
         """
         Get a list of Registered names of LoginProviders.
 
@@ -89,7 +95,7 @@ class LoginProvider(ABC):
     @abstractmethod
     def valid_user(self, user_id: str) -> bool:
         """
-        Check function to check if a user exists
+        Check function to check if a user name exists or possibly exists
         """
         pass
 
@@ -121,7 +127,6 @@ class LoginService():
     """
 
     ANONYMOUS_IDENTITY: str = 'anonymous'
-
     anonymous_user: bool
 
     _login_providers: List[LoginProvider]
@@ -133,7 +138,7 @@ class LoginService():
 
         if login_providers:
             for name in login_providers:
-                provider = LoginProvider.getLoginProvider(name)
+                provider = LoginProvider.get_login_provider(name)
                 if provider:
                     provider.init()
                     self._login_providers.append(provider)
@@ -148,21 +153,20 @@ class LoginService():
             return User(self.ANONYMOUS_IDENTITY)
         return None
 
-    def get_user_by_id(self, user_id: str) -> User:
+    def get_user(self, user: str, password: str) -> User:
         """
-        Getter for a user object by the user_id
+        Getter for a user object
         """
-
-        if self.anonymous_user and user_id == self.ANONYMOUS_IDENTITY:
+        if self.anonymous_user and user == self.ANONYMOUS_IDENTITY and password == '':
             return self.get_anonymous_user()
         for provider in self._login_providers:
-            if provider.valid_user(user_id):
-                user = User(user_id, provider)
-                if provider.is_admin(user_id):
+            if provider.valid_user(user) and provider.valid_password(user, password):
+                user_obj = User(user, provider)
+                if provider.is_admin(user):
                     user.role = UserRole.ADMIN
-                elif provider.is_moderator(user_id):
+                elif provider.is_moderator(user):
                     user.role = UserRole.MODERATOR
-                return user
+                return user_obj
         return None
 
     def check_password(self, user: User, password: str) -> bool:
