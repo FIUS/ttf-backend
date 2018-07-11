@@ -22,15 +22,16 @@ export class AttributeDefinitionCreateComponent {
     onDataChange(data) {
         if (data != null && data.type != null) {
             if (data.type === 'string') {
+                const maxLength = (window as any).maxDBStringLength - 2;
                 if (data.jsonschema == null || data.jsonschema === '') {
-                    data.jsonschema = JSON.stringify({maxLength: 253}, undefined, '\t');
+                    data.jsonschema = JSON.stringify({maxLength: maxLength}, undefined, '\t');
                 } else {
                     try {
                         const json = JSON.parse(data.jsonschema);
-                        if (json.maxLength == null || json.maxLength > 253) {
-                            json.maxLength = 253;
+                        if (json.maxLength == null || json.maxLength > maxLength) {
+                            json.maxLength = maxLength;
                         }
-                        data.jsonschema = JSON.stringify({maxLength: 253}, undefined, '\t');
+                        data.jsonschema = JSON.stringify({maxLength: maxLength}, undefined, '\t');
                     } catch (error) {}
                 }
             }
