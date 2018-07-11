@@ -20,7 +20,7 @@ class LDAPAuthProvider(LoginProvider, name="LDAP"):
         pass
 
     def valid_user(self, user_id: str) -> bool:
-        return None
+        return False
 
     def valid_password(self, user_id: str, password: str) -> bool:
         return False
