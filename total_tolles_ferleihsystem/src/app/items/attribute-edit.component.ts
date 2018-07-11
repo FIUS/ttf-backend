@@ -62,8 +62,9 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
         }
         schema.type = attribute.attribute_definition.type;
         if (attribute.attribute_definition.type === 'string') {
-            if (schema.maxLength == null || schema.maxLength > 253) {
-                schema.maxLength = 253;
+            const maxLength = (window as any).maxDBStringLength - 2;
+            if (schema.maxLength == null || schema.maxLength > maxLength) {
+                schema.maxLength = maxLength;
             }
         }
         this.qs.getQuestionsFromScheme({
