@@ -730,6 +730,22 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
+    getLentItems(): Observable<Array<ApiObject>> {
+        const resource = 'items?lent=true';
+        const params =  {lent: true};
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.getCatalog().subscribe((catalog) => {
+                this.rest.get(catalog._links.items, token, params).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET'));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
+    }
+
     getItem(id: number): Observable<ApiObject> {
         const baseResource = 'items';
         const resource = baseResource + '/' + id;
@@ -791,6 +807,7 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.delete(catalog._links.items.href + id + '/', token).subscribe(() => {
                     this.removeResource(baseResource, id);
+                    this.getItems(true);
                 }, error => this.errorHandler(error, resource, 'DELETE'));
             }, error => this.errorHandler(error, resource, 'DELETE'));
         });
@@ -1069,6 +1086,7 @@ export class ApiService implements OnInit {
                 return this.rest.post(root._links.lending, newData, token).flatMap(data => {
                     const stream = this.getStreamSource(resource + '/' + data.id);
                     this.updateResource(resource, data);
+                    this.getLentItems();
                     return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
                 })
                 .catch(error => {
@@ -1113,6 +1131,7 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.post(lending, data, token).subscribe(data => {
                 this.updateResource(baseResource, data as ApiObject);
+                this.getLentItems();
             }, error => this.errorHandler(error, resource, 'GET'));
         });
 

@@ -12,7 +12,7 @@ from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_
 from ... import DB
 from ...login import UserRole
 
-from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File
+from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, ItemToLending
 from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
@@ -29,6 +29,7 @@ class ItemList(Resource):
 
     @jwt_required
     @API.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
+    @API.param('lent', 'get all currently lent items', type=bool, required=False, default=False)
     @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self):
@@ -36,7 +37,13 @@ class ItemList(Resource):
         Get a list of all items currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        return Item.query.filter(Item.deleted == test_for).order_by(Item.name).all()
+
+        base_query = Item.query.filter(Item.deleted == test_for)
+
+        if request.args.get('lent', 'false') == 'true':
+            base_query = base_query.join(ItemToLending)
+
+        return base_query.order_by(Item.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)

@@ -1,3 +1,12 @@
+<div class="ma2" *ngIf="lentItems?.length > 0">
+    <p>Currently Lent Items:</p>
+    <ul>
+        <li class="flex flex-wrap" *ngFor="let item of lentItems">
+            <a class="min-w5" routerLink="/items/{{item.id}}">{{item.name}}</a>
+            <a routerLink="/lendings/{{item.lending_id}}">{{item.due | date:'short'}}</a>
+        </li>
+    </ul>
+</div>
 <div class="flex flex-wrap">
     <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
         <i class="f2 fa fa-folder"></i>

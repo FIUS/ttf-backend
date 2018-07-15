@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { JWTService } from '../shared/rest/jwt.service';
+import { ApiService } from '../shared/rest/api.service';
+import { ApiObject } from '../shared/rest/api-base.service';
 
 @Component({
   selector: 'ttf-home',
@@ -9,11 +11,16 @@ import { JWTService } from '../shared/rest/jwt.service';
 })
 export class HomeComponent implements OnInit {
 
-    constructor(private data: NavigationService, private jwt: JWTService) { }
+    lentItems: ApiObject[];
+
+    constructor(private data: NavigationService, private jwt: JWTService, private api: ApiService) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Home');
         this.data.changeBreadcrumbs([]);
+        this.api.getLentItems().subscribe(items => {
+            this.lentItems = items;
+        })
     }
 
 }
