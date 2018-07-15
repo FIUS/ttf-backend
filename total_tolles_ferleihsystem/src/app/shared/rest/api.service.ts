@@ -738,6 +738,23 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.items, token, params).subscribe(data => {
+                    (data as ApiObject[]).sort((a, b) => {
+                        if (a.due == null || a.due == '') {
+                            return -1;
+                        }
+                        if (b.due == null || b.due == '') {
+                            return 1;
+                        }
+                        const d_a = new Date(a.due);
+                        const d_b = new Date(b.due);
+                        if (d_a < d_b) {
+                            return -1;
+                        } else if (d_a > d_b) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    });
                     stream.next(data);
                 }, error => this.errorHandler(error, resource, 'GET'));
             }, error => this.errorHandler(error, resource, 'GET'));

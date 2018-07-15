@@ -1,13 +1,27 @@
-<div class="ma2" *ngIf="lentItems?.length > 0">
-    <p>Currently Lent Items:</p>
-    <ul>
-        <li class="flex flex-wrap" *ngFor="let item of lentItems">
-            <a class="min-w5" routerLink="/items/{{item.id}}">{{item.name}}</a>
-            <a routerLink="/lendings/{{item.lending_id}}">{{item.due | date:'short'}}</a>
-        </li>
-    </ul>
+<div class="mh2 mv3 br2 shadow-5 ba b--black-10" *ngIf="lentItems?.length > 0 && jwt.isModerator()">
+    <div class="min-h2 mv0 pv2 ph3 flex items-center justify-between f4 bg-near-white br2 br--top">
+        <p class="mv0">Currently lent Items:</p>
+    </div>
+    <div class="max-h5 overflow-y-auto bt b--black-10">
+        <table class="w-100 table collapse ph3 pv2" body>
+            <tbody>
+                <tr>
+                    <th class="ph3 pv2 tl ttu">Item</th>
+                    <th class="ph3 pv2 tl ttu">Due</th>
+                </tr>
+                <tr class="bt b--black-10" [ngClass]="{'bg-light-red': itemOverdue(item)}" *ngFor="let item of lentItems">
+                    <th class="ph3 pv2 tl link bg-animate pointer" [ngClass]="{'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}" routerLink="/items/{{item.id}}">
+                        <a class="min-w5 link">{{item.name}} ({{item.type?.name}})</a>
+                    </th>
+                    <th class="ph3 pv2 tl link bg-animate hover-bg-near-white pointer" [ngClass]="{'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}" routerLink="/lendings/{{item.lending_id}}">
+                        <a class="link">{{item.due | date:'short'}}</a>
+                    </th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
-<div class="flex flex-wrap">
+<div class="flex flex-wrap justify-between">
     <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
         <i class="f2 fa fa-folder"></i>
         <a class="f3 black">Item Types</a>
