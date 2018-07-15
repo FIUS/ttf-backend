@@ -1,11 +1,14 @@
 import { Injectable, OnInit, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
-import { Observable, } from 'rxjs/Rx';
+import { Observable, Subject, } from 'rxjs/Rx';
 
 
 @Injectable()
 export class JWTService implements OnInit {
+
+    private sessionExpirySource = new Subject<boolean>();
+    readonly sessionExpiry = this.sessionExpirySource.asObservable();
 
     readonly TOKEN = 'token';
     readonly REFRESH_TOKEN = 'refresh_token';
@@ -26,6 +29,9 @@ export class JWTService implements OnInit {
                 future = new Date(future.getTime() + (3 * 60 * 1000))
                 if (this.expiration(this.token()) < future) {
                     this.api.refreshLogin(this.refreshToken());
+                }
+                if (this.expiration(this.refreshToken()) < future) {
+                    this.sessionExpirySource.next(true);
                 }
             }
         }).bind(this));
@@ -49,6 +55,10 @@ export class JWTService implements OnInit {
         localStorage.removeItem(this.REFRESH_TOKEN);
         this.api.guestLogin();
         this.router.navigate(['/login']);
+    }
+
+    freshLogin(password: string) {
+        this.api.freshLogin(password);
     }
 
     token() {

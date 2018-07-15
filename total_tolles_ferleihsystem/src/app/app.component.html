@@ -13,4 +13,19 @@
         <router-outlet></router-outlet>
     </div>
 
+    <ttf-dialog [dialogType]="'ok-cancel'" [icon]="'info'" [okCallback]="renewLogin" #renewLoginDialog>
+        <h1 class="mv0" title>Your login expires soon:</h1>
+        <div class="w-100 ph3 pv2" body>
+            Please enter your password to renew your login:
+            <div class="mt2 flex flex-wrap">
+                <label class="f4 min-w4 mr2 ws-normal flex-grow" style="word-wrap: break-word">
+                    Password:
+                </label>
+                <div class="flex bb b--gray">
+                    <input class="input-reset bn pa1 flex-grow" type="password" name="password" placeholder="Password" [(ngModel)]="password" (keyup.enter)="renewLoginDialog.ok()">
+                </div>
+            </div>
+        </div>
+    </ttf-dialog>
+
 </div>

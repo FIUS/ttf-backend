@@ -203,6 +203,16 @@ export class ApiService implements OnInit {
         });
     }
 
+    freshLogin = (password: string) => {
+        this.currentJWT.subscribe(jwt => {
+            this.getAuthRoot().subscribe(auth => {
+                this.rest.post(auth._links.fresh_login, { username: jwt.username(), password: password }).subscribe(data => {
+                    jwt.updateTokens(data.access_token, data.refresh_token);
+                });
+            });
+        });
+    }
+
     search(search: string, type?: number, tags?: Set<number>,
            attributes?: Map<number, string>, deleted?: boolean, lent?: boolean): Observable<Array<ApiObject>> {
         const stream = new AsyncSubject<Array<ApiObject>>();
