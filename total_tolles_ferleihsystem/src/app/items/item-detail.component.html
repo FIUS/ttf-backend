@@ -33,6 +33,10 @@
                 <span class="b">Lending Duration:</span>
                 <ttf-lending-duration [duration]="item?.effective_lending_duration"></ttf-lending-duration>
             </p>
+            <p class="f4" *ngIf="item?.due" >
+                <span class="b">Due:</span>
+                <span>{{item?.due | date:'short'}}</span>
+            </p>
             <div [hidden]="attributes?.length === 0">
                 <p class="f4 b">Attributes:</p>
                 <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>

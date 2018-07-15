@@ -66,6 +66,15 @@ class Item(DB.Model):
         return lending_to_item.lending_id
 
     @property
+    def item_lending(self):
+        """
+        The lending this item is currently associated with.
+        """
+        if self._lending:
+            return self._lending[0]
+        return None
+
+    @property
     def is_currently_lent(self):
         """
         If the item is currently lent.

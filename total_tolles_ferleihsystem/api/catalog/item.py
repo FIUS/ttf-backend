@@ -102,14 +102,14 @@ class ItemDetail(Resource):
         item = Item.query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        
+
         code, msg, commit = item.delete()
 
         if commit:
             DB.session.commit
         if code == 204:
             return "", 204
-        
+
         abort(code, msg)
 
     @jwt_required
@@ -152,7 +152,7 @@ class ItemDetail(Resource):
             abort(400, 'Requested item type not found!')
 
         attributes_to_add, attributes_to_delete, attributes_to_undelete = item.get_attribute_changes_from_type_change(item.type_id, type_id)
-        
+
         try:
             item.update(**request.get_json())
             DB.session.add_all(attributes_to_add)

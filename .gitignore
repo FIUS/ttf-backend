@@ -12,7 +12,8 @@
 .vscode/*
 
 
-
+# Flask config
+instance/total-tolles-ferleihsystem.conf
 
 
 

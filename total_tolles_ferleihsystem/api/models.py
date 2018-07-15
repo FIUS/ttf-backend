@@ -168,9 +168,10 @@ ITEM_PUT = API.inherit('ItemPUT', ITEM_POST, {
 ITEM_GET = API.inherit('ItemGET', ITEM_PUT, ID, {
     'deleted': fields.Boolean(readonly=True),
     'type': fields.Nested(ITEM_TYPE_GET),
-    'is_currently_lent': fields.Boolean(),
-    'effective_lending_duration': fields.Integer(),
-    'lending_id': fields.Integer(),
+    'is_currently_lent': fields.Boolean(readonly=True),
+    'effective_lending_duration': fields.Integer(readonly=True),
+    'lending_id': fields.Integer(readonly=True),
+    'due': fields.DateTime(attribute='item_lending.due', readonly=True),
     '_links': NestedFields(ITEM_LINKS)
 })
 
