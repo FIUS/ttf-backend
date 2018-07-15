@@ -1,6 +1,6 @@
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -108,6 +108,7 @@ import { AppComponent } from './app.component';
         AppRoutingModule,
     ],
     providers: [
+        { provide: LOCALE_ID, useValue: 'de-DE' },
         NavigationService,
         StagingService,
     ],
