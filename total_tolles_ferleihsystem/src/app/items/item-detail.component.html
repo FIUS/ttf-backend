@@ -31,7 +31,7 @@
             </p>
             <p class="f4">
                 <span class="b">Lending Duration:</span>
-                <ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration>
+                <ttf-lending-duration [duration]="item?.effective_lending_duration"></ttf-lending-duration>
             </p>
             <div [hidden]="attributes?.length === 0">
                 <p class="f4 b">Attributes:</p>

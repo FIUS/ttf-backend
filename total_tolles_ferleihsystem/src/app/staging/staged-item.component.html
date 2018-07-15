@@ -21,7 +21,7 @@
             </span>
         </p>
         <p class="f4"><span class="b">Tags:</span> <span *ngFor="let tag of tags; let isLast=last" routerLink="/tags/{{tag.id}}"><span class="link underline-hover pointer">{{tag.name}}</span>{{isLast ? '' : ', '}}</span></p>
-        <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration></p>
+        <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="item?.effective_lending_duration"></ttf-lending-duration></p>
         <p class="f4 b">Attributes:</p>
         <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
     </div>

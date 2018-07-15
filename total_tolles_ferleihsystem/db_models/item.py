@@ -30,24 +30,23 @@ class Item(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True)
     name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
-    lending_duration = DB.Column(DB.Integer) #TODO add default value
+    lending_duration = DB.Column(DB.Integer, nullable=True) # in seconds
     deleted = DB.Column(DB.Boolean, default=False)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
 
-    def __init__(self, name: str, type_id: int, lending_duration: int = 0, visible_for: str = ''):
+    def __init__(self, name: str, type_id: int, lending_duration: int = -1, visible_for: str = ''):
         self.name = name
         self.type_id = type_id
 
-        if lending_duration != 0:
+        if lending_duration >= 0:
             self.lending_duration = lending_duration
-            #TODO fix time handling/conversion what ever
 
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
-    def update(self, name: str, type_id: int, lending_duration: int = 0, visible_for: str = ''):
+    def update(self, name: str, type_id: int, lending_duration: int = -1, visible_for: str = ''):
         """
         Function to update the objects data
         """
@@ -78,28 +77,24 @@ class Item(DB.Model):
         """
         The effective lending duration computed from item type, tags and item
         """
-        if(self.lending_duration != 0):
+        if self.lending_duration and (self.lending_duration >= 0):
             return self.lending_duration
 
-        tag_lending_duration = -1
+        tag_lending_duration = min((t.lending_duration for t in self._tags if t.lending_duration > 0), default=-1)
 
-        for itt in self._tags:
-            if(tag_lending_duration < 0 or itt.tag.lending_duration < tag_lending_duration) and itt.tag.lending_duration != 0:
-                tag_lending_duration = itt.tag.lending_duration
-
-        if(tag_lending_duration > 0):
+        if tag_lending_duration >= 0:
             return tag_lending_duration
 
-        return self.item_type.lending_duration
+        return self.type.lending_duration
 
     def delete(self):
         if self.is_currently_lent:
             return(400, "Requested item is currently lent!", False)
         self.deleted = True
-    
+
         for element in self._attributes:
             element.delete()
-    
+
     # Not intended -neumantm
     #    for element in self._contained_items:
     #        DB.session.delete(element)

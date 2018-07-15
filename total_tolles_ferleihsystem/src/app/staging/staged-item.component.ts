@@ -46,24 +46,4 @@ export class StagedItemComponent implements OnInit, OnDestroy {
         }
     }
 
-    get lendingDuration() {
-        if (this.item != null && this.item.lending_duration >= 0) {
-            return this.item.lending_duration;
-        }
-        if (this.tags != null) {
-            let duration;
-            this.tags.forEach(tag => {
-                if (tag.lending_duration >= 0 && (duration == null || duration > tag.lending_duration)) {
-                    duration = tag.lending_duration;
-                }
-            });
-            if (duration != null) {
-                return duration;
-            }
-        }
-        if (this.item != null && this.item.type != null) {
-            return this.item.type.lending_duration;
-        }
-    }
-
 }
