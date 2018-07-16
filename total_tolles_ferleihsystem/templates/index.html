@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <base href="{{angularBasePath}}" />
+    <base href="{{angularBasePath}}">
     <meta charset="utf-8">
     <title>{{ title }}</title>
     <base href="/">
@@ -12,7 +12,7 @@
 
 <body>
     <script>
-        window.apiBasePath = "{{angularBasePath}}";
+        window.apiBasePath = "{{url_for('index')}}";
         window.maxDBStringLength = "{{maxDBStringLength}}";
     </script>
     <ttf-root class="h-100 flex flex-column"></ttf-root>
