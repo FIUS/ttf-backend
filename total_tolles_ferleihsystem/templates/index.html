@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <base href="{{angularBasePath}}" />
     <meta charset="utf-8">
     <title>{{ title }}</title>
     <base href="/">
@@ -14,7 +15,6 @@
         window.apiBasePath = "{{angularBasePath}}";
         window.maxDBStringLength = "{{maxDBStringLength}}";
     </script>
-    <base href="{{angularBasePath}}">
     <ttf-root class="h-100 flex flex-column"></ttf-root>
     {{ javascript_tag('inline') | safe }}
     {{ javascript_tag('polyfills') | safe }}
