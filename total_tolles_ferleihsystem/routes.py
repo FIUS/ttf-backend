@@ -7,7 +7,7 @@ from . import api
 
 from .db_models import STD_STRING_SIZE
 
-if APP.config['DEBUG']:
+if APP.config.get('DEBUG', False):
     from . import debug_routes
 
 
@@ -15,6 +15,7 @@ if APP.config['DEBUG']:
 def index():
     return render_template('index.html',
                            title='Total Tolles Ferleihsystem',
+                           angularBasePath=APP.config.get('APPLICATION_ROOT', '/'),
                            maxDBStringLength=STD_STRING_SIZE)
 
 
