@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
+import { Location } from '@angular/common';
 
 export interface LinkObject {
     readonly href: string;
@@ -34,8 +35,7 @@ export class BaseApiService {
 
     private runningRequests: Map<string, Observable<ApiObject | ApiObject[]>> = new Map<string, Observable<ApiObject | ApiObject[]>>();
 
-    constructor(private http: Http) {
-    }
+    constructor(private http: Http, private location: Location) {}
 
     private extractUrl(url: string|LinkObject|ApiLinksObject|ApiObject): string {
         if (typeof url === 'string' || url instanceof String) {
@@ -50,7 +50,7 @@ export class BaseApiService {
         if (isLinkObject(url)) {
             url = url.href;
         }
-        return url;
+        return this.location.prepareExternalUrl(url);
     }
 
     private headers(token?: string, mimetypeJSON: boolean= true): RequestOptions {

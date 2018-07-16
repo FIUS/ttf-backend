@@ -14,7 +14,7 @@ if APP.config.get('DEBUG', False):
 @APP.route('/')
 def index():
     base_path = APP.config.get('APPLICATION_ROOT', '/')
-    api_base_path = base_path + url_for('api.default_root_resource').lstrip('/')
+    api_base_path = url_for('api.default_root_resource')
     return render_template('index.html',
                            title='Total Tolles Ferleihsystem',
                            angularBasePath=base_path,
