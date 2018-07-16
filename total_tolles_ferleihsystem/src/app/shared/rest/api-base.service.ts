@@ -40,7 +40,7 @@ export class BaseApiService {
 
     private extractUrl(url: string|LinkObject|ApiLinksObject|ApiObject): string {
         if (typeof url === 'string' || url instanceof String) {
-            return (url as string);
+            return this.prepareRelativeUrl(url as string);
         }
         if (isApiObject(url)) {
             url = url._links;
@@ -51,6 +51,10 @@ export class BaseApiService {
         if (isLinkObject(url)) {
             url = url.href;
         }
+        return this.prepareRelativeUrl(url);
+    }
+
+    private prepareRelativeUrl(url: string): string {
         if (url.startsWith('http')) {
             return url;
         }
