@@ -675,8 +675,11 @@ export class ApiService implements OnInit {
     }
 
     getLinkedAttributeDefinitions(linkedObject: ApiObject): Observable<ApiObject[]> {
-        const url = linkedObject._links.attributes.href;
-        const resource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');
+        let url: string = linkedObject._links.attributes.href;
+        if (url.startsWith('http')) {
+            url = new URL(url).pathname;
+        }
+        const resource = url.replace(/(^.*catalog\/)|(\/$)/, '');
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
@@ -689,8 +692,11 @@ export class ApiService implements OnInit {
     }
 
     linkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject): Observable<ApiObject[]> {
-        const url = linkedObject._links.attributes.href;
-        const resource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');
+        let url: string = linkedObject._links.attributes.href;
+        if (url.startsWith('http')) {
+            url = new URL(url).pathname;
+        }
+        const resource = url.replace(/(^.*catalog\/)|(\/$)/, '');
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
@@ -703,8 +709,11 @@ export class ApiService implements OnInit {
     }
 
     unlinkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject): Observable<ApiObject[]> {
-        const url = linkedObject._links.attributes.href;
-        const baseResource = new URL(url).pathname.replace(/(^.*catalog\/)|(\/$)/, '');
+        let url: string = linkedObject._links.attributes.href;
+        if (url.startsWith('http')) {
+            url = new URL(url).pathname;
+        }
+        const baseResource = url.replace(/(^.*catalog\/)|(\/$)/, '');
         const resource = baseResource + attributeDefinition.id;
         const stream = this.getStreamSource(baseResource);
 
