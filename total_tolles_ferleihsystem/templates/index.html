@@ -14,7 +14,7 @@
         window.apiBasePath = "{{angularBasePath}}";
         window.maxDBStringLength = "{{maxDBStringLength}}";
     </script>
-    <base href="{{url_for('index')}}">
+    <base href="{{angularBasePath}}">
     <ttf-root class="h-100 flex flex-column"></ttf-root>
     {{ javascript_tag('inline') | safe }}
     {{ javascript_tag('polyfills') | safe }}
