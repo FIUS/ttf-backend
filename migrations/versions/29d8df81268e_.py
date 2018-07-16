@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 8275d5eca077
+Revision ID: 29d8df81268e
 Revises: 
-Create Date: 2018-07-16 15:55:57.537470
+Create Date: 2018-07-16 16:11:00.902328
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8275d5eca077'
+revision = '29d8df81268e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -72,8 +72,8 @@ def upgrade():
     sa.Column('item_type_id', sa.Integer(), nullable=False),
     sa.Column('end_time', sa.DateTime(), nullable=True),
     sa.Column('reason', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_BlacklistToItemType_ItemType')),
-    sa.ForeignKeyConstraint(['user_id'], ['Blacklist.id'], name=op.f('fk_BlacklistToItemType_Blacklist')),
+    sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_BlacklistToItemType_item_type_id')),
+    sa.ForeignKeyConstraint(['user_id'], ['Blacklist.id'], name=op.f('fk_BlacklistToItemType_user_id')),
     sa.PrimaryKeyConstraint('user_id', 'item_type_id', name=op.f('pk_BlacklistToItemType'))
     )
     op.create_table('Item',
@@ -83,29 +83,29 @@ def upgrade():
     sa.Column('lending_duration', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.Column('visible_for', sa.String(length=190), nullable=True),
-    sa.ForeignKeyConstraint(['type_id'], ['ItemType.id'], name=op.f('fk_Item_ItemType')),
+    sa.ForeignKeyConstraint(['type_id'], ['ItemType.id'], name=op.f('fk_Item_type_id')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_Item')),
     sa.UniqueConstraint('name', name=op.f('uq_Item_name'))
     )
     op.create_table('ItemTypeToAttributeDefinition',
     sa.Column('item_type_id', sa.Integer(), nullable=False),
     sa.Column('attribute_definition_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_ItemTypeToAttributeDefinition_AttributeDefinition')),
-    sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_ItemTypeToAttributeDefinition_ItemType')),
+    sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_ItemTypeToAttributeDefinition_attribute_definition_id')),
+    sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_ItemTypeToAttributeDefinition_item_type_id')),
     sa.PrimaryKeyConstraint('item_type_id', 'attribute_definition_id', name=op.f('pk_ItemTypeToAttributeDefinition'))
     )
     op.create_table('ItemTypeToItemType',
     sa.Column('parent_id', sa.Integer(), nullable=False),
     sa.Column('item_type_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_ItemTypeToItemType_ItemType')),
-    sa.ForeignKeyConstraint(['parent_id'], ['ItemType.id'], name=op.f('fk_ItemTypeToItemType_ItemType'), ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_ItemTypeToItemType_item_type_id')),
+    sa.ForeignKeyConstraint(['parent_id'], ['ItemType.id'], name=op.f('fk_ItemTypeToItemType_parent_id'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('parent_id', 'item_type_id', name=op.f('pk_ItemTypeToItemType'))
     )
     op.create_table('TagToAttributeDefinition',
     sa.Column('tag_id', sa.Integer(), nullable=False),
     sa.Column('attribute_definition_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_TagToAttributeDefinition_AttributeDefinition')),
-    sa.ForeignKeyConstraint(['tag_id'], ['Tag.id'], name=op.f('fk_TagToAttributeDefinition_Tag')),
+    sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_TagToAttributeDefinition_attribute_definition_id')),
+    sa.ForeignKeyConstraint(['tag_id'], ['Tag.id'], name=op.f('fk_TagToAttributeDefinition_tag_id')),
     sa.PrimaryKeyConstraint('tag_id', 'attribute_definition_id', name=op.f('pk_TagToAttributeDefinition'))
     )
     op.create_table('File',
@@ -116,7 +116,7 @@ def upgrade():
     sa.Column('file_hash', sa.String(length=190), nullable=True),
     sa.Column('creation', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.Column('invalidation', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_File_Item')),
+    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_File_item_id')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_File'))
     )
     with op.batch_alter_table('File', schema=None) as batch_op:
@@ -127,30 +127,30 @@ def upgrade():
     sa.Column('attribute_definition_id', sa.Integer(), nullable=False),
     sa.Column('value', sa.String(length=190), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_ItemToAttributeDefinition_AttributeDefinition')),
-    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToAttributeDefinition_Item')),
+    sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_ItemToAttributeDefinition_attribute_definition_id')),
+    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToAttributeDefinition_item_id')),
     sa.PrimaryKeyConstraint('item_id', 'attribute_definition_id', name=op.f('pk_ItemToAttributeDefinition'))
     )
     op.create_table('ItemToItem',
     sa.Column('parent_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToItem_Item')),
-    sa.ForeignKeyConstraint(['parent_id'], ['Item.id'], name=op.f('fk_ItemToItem_Item')),
+    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToItem_item_id')),
+    sa.ForeignKeyConstraint(['parent_id'], ['Item.id'], name=op.f('fk_ItemToItem_parent_id')),
     sa.PrimaryKeyConstraint('parent_id', 'item_id', name=op.f('pk_ItemToItem'))
     )
     op.create_table('ItemToLending',
     sa.Column('item_id', sa.Integer(), nullable=False),
     sa.Column('lending_id', sa.Integer(), nullable=False),
     sa.Column('due', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToLending_Item')),
-    sa.ForeignKeyConstraint(['lending_id'], ['Lending.id'], name=op.f('fk_ItemToLending_Lending')),
+    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToLending_item_id')),
+    sa.ForeignKeyConstraint(['lending_id'], ['Lending.id'], name=op.f('fk_ItemToLending_lending_id')),
     sa.PrimaryKeyConstraint('item_id', 'lending_id', name=op.f('pk_ItemToLending'))
     )
     op.create_table('ItemToTag',
     sa.Column('item_id', sa.Integer(), nullable=False),
     sa.Column('tag_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToTag_Item')),
-    sa.ForeignKeyConstraint(['tag_id'], ['Tag.id'], name=op.f('fk_ItemToTag_Tag')),
+    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToTag_item_id')),
+    sa.ForeignKeyConstraint(['tag_id'], ['Tag.id'], name=op.f('fk_ItemToTag_tag_id')),
     sa.PrimaryKeyConstraint('item_id', 'tag_id', name=op.f('pk_ItemToTag'))
     )
     # ### end Alembic commands ###
