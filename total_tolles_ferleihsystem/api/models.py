@@ -8,7 +8,7 @@ from ..hal_field import HaLUrl, UrlData, NestedFields
 from ..db_models import STD_STRING_SIZE
 
 WITH_CURIES = API.model('WithCuries', {
-    'curies': HaLUrl(UrlData('api.doc', absolute=True, templated=True,
+    'curies': HaLUrl(UrlData('api.doc', templated=True,
                              hashtag='!{rel}', name='rel')),
 })
 
@@ -17,52 +17,52 @@ ID = API.model('Id', {
 })
 
 ROOT_LINKS = API.inherit('RootLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.default_root_resource', absolute=True)),
-    'auth': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
-    'catalog': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
-    'search': HaLUrl(UrlData('api.search_search', absolute=True)),
-    'doc': HaLUrl(UrlData('api.doc', absolute=True)),
-    'spec': HaLUrl(UrlData('api.specs', absolute=True)),
-    'lending': HaLUrl(UrlData('api.lending_lending_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.default_root_resource')),
+    'auth': HaLUrl(UrlData('api.auth_authentication_routes')),
+    'catalog': HaLUrl(UrlData('api.default_catalog_resource')),
+    'search': HaLUrl(UrlData('api.search_search')),
+    'doc': HaLUrl(UrlData('api.doc')),
+    'spec': HaLUrl(UrlData('api.specs')),
+    'lending': HaLUrl(UrlData('api.lending_lending_list')),
 })
 ROOT_MODEL = API.model('RootModel', {
     '_links': NestedFields(ROOT_LINKS),
 })
 
 AUTHENTICATION_ROUTES_LINKS = API.inherit('AuthenticationRoutesLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.auth_authentication_routes', absolute=True)),
-    'login': HaLUrl(UrlData('api.auth_login', absolute=True)),
-    'guest_login': HaLUrl(UrlData('api.auth_guest_login', absolute=True)),
-    'fresh_login': HaLUrl(UrlData('api.auth_fresh_login', absolute=True)),
-    'refresh': HaLUrl(UrlData('api.auth_refresh', absolute=True)),
-    'check': HaLUrl(UrlData('api.auth_check', absolute=True)),
+    'self': HaLUrl(UrlData('api.auth_authentication_routes')),
+    'login': HaLUrl(UrlData('api.auth_login')),
+    'guest_login': HaLUrl(UrlData('api.auth_guest_login')),
+    'fresh_login': HaLUrl(UrlData('api.auth_fresh_login')),
+    'refresh': HaLUrl(UrlData('api.auth_refresh')),
+    'check': HaLUrl(UrlData('api.auth_check')),
 })
 AUTHENTICATION_ROUTES_MODEL = API.model('AuthenticationRoutesModel', {
     '_links': NestedFields(AUTHENTICATION_ROUTES_LINKS),
 })
 
 CATALOG_LINKS = API.inherit('CatalogLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.default_catalog_resource', absolute=True)),
-    'items': HaLUrl(UrlData('api.item_item_list', absolute=True)),
-    'item_types': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
-    'item_tags': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
-    'files': HaLUrl(UrlData('api.file_file_list', absolute=True)),
-    'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.default_catalog_resource')),
+    'items': HaLUrl(UrlData('api.item_item_list')),
+    'item_types': HaLUrl(UrlData('api.item_type_item_type_list')),
+    'item_tags': HaLUrl(UrlData('api.item_tag_item_tag_list')),
+    'files': HaLUrl(UrlData('api.file_file_list')),
+    'attribute_definitions': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list')),
 })
 CATALOG_MODEL = API.model('CatalogModel', {
     '_links': NestedFields(CATALOG_LINKS),
 })
 
 ITEM_TYPE_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_type_item_type_detail', absolute=True, url_data={'type_id': 'id'}),
+    'self': HaLUrl(UrlData('api.item_type_item_type_detail', url_data={'type_id': 'id'}),
                    required=False),
-    'attributes': HaLUrl(UrlData('api.item_type_item_type_attributes', url_data={'type_id' : 'id'}, absolute=True)),
+    'attributes': HaLUrl(UrlData('api.item_type_item_type_attributes', url_data={'type_id' : 'id'})),
     'can_contain': HaLUrl(UrlData('api.item_type_item_type_can_contain_types',
-                                  url_data={'type_id' : 'id'}, absolute=True)),
+                                  url_data={'type_id' : 'id'})),
 })
 
 ITEM_TYPE_LIST_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_type_item_type_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.item_type_item_type_list')),
 })
 
 ITEM_TYPE_POST = API.model('ItemTypePOST', {
@@ -83,13 +83,13 @@ ITEM_TYPE_GET = API.inherit('ItemType', ITEM_TYPE_PUT, ID, {
 })
 
 ITEM_TAG_LINKS = API.inherit('ItemTagLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', absolute=True, url_data={'tag_id' : 'id'}),
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_detail', url_data={'tag_id' : 'id'}),
                    required=False),
-    'attributes': HaLUrl(UrlData('api.item_tag_item_tag_attributes', url_data={'tag_id' : 'id'}, absolute=True)),
+    'attributes': HaLUrl(UrlData('api.item_tag_item_tag_attributes', url_data={'tag_id' : 'id'})),
 })
 
 ITEM_TAG_LIST_LINKS = API.inherit('ItemTagLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_tag_item_tag_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.item_tag_item_tag_list')),
 })
 
 ITEM_TAG_POST = API.model('ItemTagPOST', {
@@ -107,14 +107,14 @@ ITEM_TAG_GET = API.inherit('ItemTagGET', ITEM_TAG_PUT, ID, {
 })
 
 ATTRIBUTE_DEFINITION_LINKS = API.inherit('AttributeDefinitionLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_detail', absolute=True,
+    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_detail',
                            url_data={'definition_id' : 'id'}), required=False),
-    'autocomplete': HaLUrl(UrlData('api.attribute_definition_attribute_definition_values', absolute=True,
+    'autocomplete': HaLUrl(UrlData('api.attribute_definition_attribute_definition_values',
                                    url_data={'definition_id' : 'id'}), required=False),
 })
 
 ATTRIBUTE_DEFINITION_LIST_LINKS = API.inherit('AttributeDefinitionLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.attribute_definition_attribute_definition_list')),
 })
 
 ATTRIBUTE_DEFINITION_POST = API.model('AttributeDefinitionPOST', {
@@ -144,15 +144,15 @@ ID_LIST = API.model('IdList', {
 })
 
 ITEM_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_item_detail', absolute=True, url_data={'item_id' : 'id'}), required=False),
-    'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'}, absolute=True)),
-    'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'}, absolute=True)),
-    'contained_items': HaLUrl(UrlData('api.item_item_contained_items', url_data={'item_id' : 'id'}, absolute=True)),
-    'files': HaLUrl(UrlData('api.item_item_file', url_data={'item_id' : 'id'}, absolute=True))
+    'self': HaLUrl(UrlData('api.item_item_detail', url_data={'item_id' : 'id'}), required=False),
+    'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'})),
+    'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'})),
+    'contained_items': HaLUrl(UrlData('api.item_item_contained_items', url_data={'item_id' : 'id'})),
+    'files': HaLUrl(UrlData('api.item_item_file', url_data={'item_id' : 'id'}))
 })
 
 ITEM_LIST_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_item_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.item_item_list')),
 })
 
 ITEM_POST = API.model('ItemPOST', {
@@ -176,13 +176,13 @@ ITEM_GET = API.inherit('ItemGET', ITEM_PUT, ID, {
 })
 
 ATTRIBUTE_LINKS = API.inherit('AttributeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_item_attribute_detail', absolute=True,
+    'self': HaLUrl(UrlData('api.item_item_attribute_detail',
                            url_data={'item_id': 'item_id', 'attribute_definition_id': 'attribute_definition_id'}),
                    required=False),
 })
 
 ATTRIBUTE_LIST_LINKS = API.inherit('AttributeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_item_attribute_list', absolute=True)),
+    'self': HaLUrl(UrlData('api.item_item_attribute_list')),
 })
 
 ATTRIBUTE_PUT = API.model('AttributePUT', {
@@ -196,9 +196,9 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_PUT, {
 })
 
 FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.file_file_detail', absolute=True,
+    'self': HaLUrl(UrlData('api.file_file_detail',
                            url_data={'file_id': 'id'}), required=False),
-    'download': HaLUrl(UrlData('api.file_file_data', absolute=True,
+    'download': HaLUrl(UrlData('api.file_file_data',
                                url_data={'file_hash': 'file_hash'}), required=False),
 })
 
@@ -221,7 +221,7 @@ FILE_PUT = API.inherit('FilePUT', FILE_BASIC, {
 })
 
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.lending_lending_detail', absolute=True,
+    'self': HaLUrl(UrlData('api.lending_lending_detail',
                            url_data={'lending_id' : 'id'}), required=False),
 })
 

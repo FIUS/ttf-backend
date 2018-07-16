@@ -11,10 +11,10 @@
 
 <body>
     <script>
-        window.apiBasePath = "{{url_for('api.default_root_resource', _external=True)}}";
+        window.appBasePath = '<f:uri.page pageUid="{{url_for("index")}}" />';
+        window.apiBasePath = "{{url_for('api.default_root_resource')}}";
         window.maxDBStringLength = "{{maxDBStringLength}}";
     </script>
-    <script>window.__theme = 'bs4';</script>
     <ttf-root class="h-100 flex flex-column"></ttf-root>
     {{ javascript_tag('inline') | safe }}
     {{ javascript_tag('polyfills') | safe }}
