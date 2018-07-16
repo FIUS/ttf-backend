@@ -137,10 +137,10 @@ Installation / Upgrade process:
 For use with MySql or other db engine:
 
  1. Setup Database User and scheme
-     1. For MySql/Mariadb use [utf8mb4 charset](dev.mysql.com/doc/refman/5.5/en/charset-unicode-utf8mb4.html)
- 2. Install a [driver](docs.sqlalchemy.org/en/latest/dialects/mysql.html) for your selected Database in the virtualenv
- 3. Update the [database url](docs.sqlalchemy.org/en/latest/core/engines.html#database-urls) in the config file
-     1. For MySql/Mariadb use [utf8mb4 charset](docs.sqlalchemy.org/en/latest/dialects/mysql.html?highlight=utf8mb4#charset-selection)
+     1. For MySql/Mariadb use [utf8mb4 charset](http://dev.mysql.com/doc/refman/5.5/en/charset-unicode-utf8mb4.html)
+ 2. Install a [driver](http://docs.sqlalchemy.org/en/latest/dialects/mysql.html) for your selected Database in the virtualenv
+ 3. Update the [database url](http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls) in the config file
+     1. For MySql/Mariadb use [utf8mb4 charset](http://docs.sqlalchemy.org/en/latest/dialects/mysql.html?highlight=utf8mb4#charset-selection)
  4. execute `install.sh` to generate database
 
 Troubleshooting:
