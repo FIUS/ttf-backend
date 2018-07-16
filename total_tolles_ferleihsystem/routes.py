@@ -13,9 +13,12 @@ if APP.config.get('DEBUG', False):
 
 @APP.route('/')
 def index():
+    base_path = APP.config.get('APPLICATION_ROOT', '/')
+    api_base_path = base_path + url_for('api.default_root_resource').lstrip('/')
     return render_template('index.html',
                            title='Total Tolles Ferleihsystem',
-                           angularBasePath=APP.config.get('APPLICATION_ROOT', '/'),
+                           angularBasePath=base_path,
+                           apiBasePath=api_base_path,
                            maxDBStringLength=STD_STRING_SIZE)
 
 

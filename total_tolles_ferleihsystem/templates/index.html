@@ -8,13 +8,13 @@
     <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        window.apiBasePath = "{{apiBasePath}}";
+        window.maxDBStringLength = "{{maxDBStringLength}}";
+    </script>
 </head>
 
 <body>
-    <script>
-        window.apiBasePath = "{{url_for('api.default_root_resource')}}";
-        window.maxDBStringLength = "{{maxDBStringLength}}";
-    </script>
     <ttf-root class="h-100 flex flex-column"></ttf-root>
     {{ javascript_tag('inline') | safe }}
     {{ javascript_tag('polyfills') | safe }}
