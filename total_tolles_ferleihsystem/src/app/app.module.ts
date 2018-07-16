@@ -1,7 +1,6 @@
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, LOCALE_ID } from '@angular/core';
-import { APP_BASE_HREF } from '@angular/common';
 import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -110,7 +109,6 @@ import { AppComponent } from './app.component';
     ],
     providers: [
         { provide: LOCALE_ID, useValue: 'de-DE' },
-        {provide: APP_BASE_HREF, useValue: (window as any).appBasePath},
         NavigationService,
         StagingService,
     ],
