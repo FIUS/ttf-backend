@@ -63,7 +63,9 @@ export class BaseApiService {
             url_string = url_string.slice(0, url_string.length - 1);
         }
         if (!url.endsWith('/')) {
-            url = url + '/';
+            if ((url.lastIndexOf('.') < 0) || (url.lastIndexOf('/') > url.lastIndexOf('.'))) {
+                url = url + '/';
+            }
         }
         if (url.startsWith('/')) {
             return  url_string + url;
