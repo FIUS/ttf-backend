@@ -68,13 +68,13 @@ ITEM_TYPE_LIST_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
 ITEM_TYPE_POST = API.model('ItemTypePOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'name_schema': fields.String(max_length=STD_STRING_SIZE),
+    'lending_duration': fields.Integer(),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
     'how_to': fields.String(nullable=True, max_length=STD_STRING_SIZE),
 })
 
 ITEM_TYPE_PUT = API.inherit('ItemTypePUT', ITEM_TYPE_POST, {
     'lendable': fields.Boolean(default=True),
-    'lending_duration': fields.Integer(),
 })
 
 ITEM_TYPE_GET = API.inherit('ItemType', ITEM_TYPE_PUT, ID, {

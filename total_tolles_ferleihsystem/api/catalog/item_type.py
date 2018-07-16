@@ -14,7 +14,7 @@ from ...login import UserRole
 
 from ...db_models.attributeDefinition import AttributeDefinition
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
-from ...db_models.item import Item 
+from ...db_models.item import Item
 
 PATH: str = '/catalog/item_types'
 ANS = API.namespace('item_type', description='ItemTypes', path=PATH)
@@ -101,7 +101,7 @@ class ItemTypeDetail(Resource):
         items = Item.query.filter(Item.type_id == type_id).all()
         for item in items:
             item.delete()
-        
+
         DB.session.commit()
         return "", 204
 
@@ -227,13 +227,13 @@ class ItemTypeAttributes(Resource):
             abort(404, 'Requested item type not found!')
 
         code, msg, commit = item_type.unassociate_attr_def(attribute_definition_id)
-      
+
         if commit:
             DB.session.commit()
 
         if code == 204:
             return '', 204
-        
+
         abort(code, msg)
 
 

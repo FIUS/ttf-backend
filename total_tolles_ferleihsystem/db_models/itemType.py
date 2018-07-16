@@ -3,7 +3,7 @@ from . import STD_STRING_SIZE
 from .attributeDefinition import AttributeDefinition
 from . import item
 
-__all__= [ 'ItemType', 'ItemTypeToItemType', 'ItemTypeToAttributeDefinition' ] 
+__all__= [ 'ItemType', 'ItemTypeToItemType', 'ItemTypeToAttributeDefinition' ]
 
 class ItemType (DB.Model):
 
@@ -18,9 +18,10 @@ class ItemType (DB.Model):
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     how_to = DB.Column(DB.Text, nullable=True)
 
-    def __init__(self, name: str, name_schema: str, visible_for: str = '', how_to: str = ''):
+    def __init__(self, name: str, name_schema: str, lending_duration: int, visible_for: str = '', how_to: str = ''):
         self.name = name
         self.name_schema = name_schema
+        self.lending_duration = lending_duration
 
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
@@ -56,7 +57,7 @@ class ItemType (DB.Model):
         items = [itad.item for itad in itads]
 
         DB.session.delete(association)
-        
+
         for i in items:
             _, attributes_to_delete, _ = i.get_attribute_changes([attribute_definition_id], True)
             for attr in attributes_to_delete:
