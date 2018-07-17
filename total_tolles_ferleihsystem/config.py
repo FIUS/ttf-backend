@@ -8,6 +8,7 @@ class Config(object):
     TESTING = False
     RESTPLUS_VALIDATE = True
     BCRYPT_HANDLE_LONG_PASSWORDS = True
+    JWT_CLAIMS_IN_REFRESH_TOKEN = True
     JWT_SECRET_KEY = ''.join(hex(randint(0, 255))[2:] for i in range(16))
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

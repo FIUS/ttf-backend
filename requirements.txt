@@ -4,7 +4,7 @@ Flask-SQLAlchemy==2.2
 Flask-Migrate==2.2.0
 Flask-Webpack==0.1.0
 flask-cors==3.0.2
-flask-jwt-extended==2.2.0
+flask-jwt-extended==3.11.0
 flask-bcrypt==0.7.1
 celery==4.1.1
 ldap3==2.5

@@ -12,9 +12,9 @@ class UserRole(IntEnum):
     This Enum describes the possible rights / access levels to the software.
     """
 
-    GUEST = 0
-    MODERATOR = 1
-    ADMIN = 2
+    GUEST = 1
+    MODERATOR = 2
+    ADMIN = 3
 
 # pylint: disable=R0903
 class User():

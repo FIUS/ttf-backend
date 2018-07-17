@@ -105,17 +105,17 @@ export class JWTService implements OnInit {
 
     isUser() {
         const token = this.token();
-        return (token != null) && (this.tokenToJson(token).user_claims === 0);
+        return (token != null) && (this.tokenToJson(token).user_claims === 1);
     }
 
     isModerator() {
         const token = this.token();
-        return (token != null) && (this.tokenToJson(token).user_claims > 0);
+        return (token != null) && (this.tokenToJson(token).user_claims > 1);
     }
 
     isAdmin() {
         const token = this.token();
-        return (token != null) && (this.tokenToJson(token).user_claims > 1);
+        return (token != null) && (this.tokenToJson(token).user_claims > 2);
     }
 
 }
