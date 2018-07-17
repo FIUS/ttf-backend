@@ -1,10 +1,10 @@
 <div class="z-2 w-100 f3 mt1 ph4 bb bw1 b--black-10 flex items-center ttf-breadcrumbs" (mouseenter)="hovered = true;" (mouseleave)="hovered = false; scrollToBottom();">
-    <a class="link dim mr2 pv1 black flex items-center" style="white-space: nowrap; min-height: 1.5em;" routerLink="/" title="Home" #home>
+    <a class="link dim mr2 pv1 black flex items-center ttf-breadcrumbs" style="white-space: nowrap; min-height: 1.5em;" routerLink="/" title="Home" #home>
         <i class="fa fa-home"></i>
         <i class="ml2 mb0 fa fa-chevron-right"></i>
     </a>
     <div class="overflow-y-hidden flex flex-wrap items-center" [ngStyle]="{'max-height': hovered ? null : breadcrumbHeight() + 'px'}" #bcContainer>
-        <a class="link dim mr2 pv1 black flex items-center" style="white-space: nowrap;" *ngFor="let breadcrumb of breadcrumbs" routerLink="{{breadcrumb.target}}" [attr.title]="breadcrumb.title">
+        <a class="link dim mr2 pv1 black flex items-center ttf-breadcrumbs" style="white-space: nowrap;" *ngFor="let breadcrumb of breadcrumbs" routerLink="{{breadcrumb.target}}" [attr.title]="breadcrumb.title">
             {{breadcrumb.title}}
             <i class="ml2 mb0 fa fa-chevron-right"></i>
         </a>

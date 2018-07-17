@@ -1,9 +1,6 @@
 <div class="fixed absolute--fill bg-black-a40 z-2 justify-around overflow-y-auto" [ngClass]="{dn: !isOpen, flex: isOpen}" (click)="close()">
     <div style="margin: auto" (click)="$event.stopPropagation()">
         <div class="relative mv4 mw5 mw6-ns br2 bg-white shadow-5 ba b--black-10">
-            <div class="absolute top-0 right-0 button h2 pv1 ph2 br2 grow pointer" *ngIf="closable" (click)="close()">
-                <i class="f3 fa fa-close mr2"></i>
-            </div>
             <div class="min-h3 mv0 pv2 ph3 flex items-center f4 ttf-dialog-header br2 br--top">
                 <ng-container [ngSwitch]="icon">
                     <i class="f3 mr2 fa fa-info-circle blue" *ngSwitchCase="'info'"></i>
@@ -14,6 +11,9 @@
                 </ng-container>
                 <div class="mr4 flex-grow">
                     <ng-content select="[title]"></ng-content>
+                </div>
+                <div class="absolute top-0 right-0 button h2 pv1 ph2 br2 grow pointer" *ngIf="closable" (click)="close()">
+                    <i class="f3 fa fa-close mr2"></i>
                 </div>
             </div>
 
