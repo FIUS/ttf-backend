@@ -11,6 +11,38 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.ttf-background {
+    background-color: $background-color;
+}
+
+.ttf-titlebar {
+    background-color: $titlebar-color;
+}
+
+.ttf-breadcrumbs {
+    background-color: $breadcrumbs-color;
+}
+
+.ttf-main-button {
+    background-color: $main-button-color;
+}
+
+.ttf-box-header {
+    background-color: $box-header-color;
+}
+
+.ttf-box-content {
+    background-color: $box-background-color;
+}
+
+.ttf-dialog-header {
+    background-color: $dialog-header-color;
+}
+
+.ttf-dialog-content {
+    background-color: $dialog-content-color;
+}
+
 .w6 {
     width: 32rem;
 }
