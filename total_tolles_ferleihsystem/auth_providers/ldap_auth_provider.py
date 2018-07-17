@@ -89,8 +89,6 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                 if all_users_filter:
                     user_filter = "(&" + all_users_filter + user_base_filter + ")"
 
-                print(user_filter)
-
                 if not conn.search(self.user_search_base,
                                    user_filter,
                                    search_scope=SUBTREE,
@@ -105,8 +103,6 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
 
                 if all_groups_filter:
                     group_filter = "(&" + all_groups_filter + group_base_filter + ")"
-
-                print(group_filter)
 
                 if not conn.search(self.group_search_base, group_filter, search_scope=SUBTREE):
                     return False
