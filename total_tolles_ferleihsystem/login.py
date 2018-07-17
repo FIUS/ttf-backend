@@ -38,11 +38,11 @@ class LoginProvider(ABC):
 
     __registered_providers__: Dict[str, 'LoginProvider'] = {}
 
-    def __init_subclass__(cls, name: str = None):
-        if name is None:
+    def __init_subclass__(cls, provider_name: str = None):
+        if provider_name is None:
             LoginProvider.register_provider(cls.__name__, cls())
         else:
-            LoginProvider.register_provider(name, cls())
+            LoginProvider.register_provider(provider_name, cls())
 
     @staticmethod
     def register_provider(name: str, login_provider: 'LoginProvider'):
@@ -163,9 +163,9 @@ class LoginService():
             if provider.valid_user(user) and provider.valid_password(user, password):
                 user_obj = User(user, provider)
                 if provider.is_admin(user):
-                    user.role = UserRole.ADMIN
+                    user_obj.role = UserRole.ADMIN
                 elif provider.is_moderator(user):
-                    user.role = UserRole.MODERATOR
+                    user_obj.role = UserRole.MODERATOR
                 return user_obj
         return None
 

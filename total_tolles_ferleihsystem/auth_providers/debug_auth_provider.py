@@ -4,8 +4,7 @@ Auth Provider which provides three simple hardcoded logins for debugging purpose
 
 from typing import Dict, List
 from ..login import LoginProvider
-
-class DebugAuthProvider(LoginProvider, name="Debug"):
+class DebugAuthProvider(LoginProvider, provider_name="Debug"):
     """
     Example Login Provider with hardcoded insecure accounts.
     """

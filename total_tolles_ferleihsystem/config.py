@@ -24,6 +24,19 @@ class Config(object):
     BASIC_AUTH_ADMIN_PASS = ''.join(hex(randint(0, 255))[2:] for i in range(8))
     BASIC_AUTH_MOD_PASS = ''.join(hex(randint(0, 255))[2:] for i in range(8))
 
+    LDAP_URI = ""
+    LDAP_PORT = 0
+    LDAP_SSL = False
+    LDAP_START_TLS = False
+    LDAP_USER_SEARCH_BASE = ""
+    LDAP_GROUP_SEARCH_BASE = ""
+    LDAP_USER_RDN = ""
+    LDAP_USER_UID_FIELD = ""
+    LDAP_GROUP_MEMBERSHIP_FIELD = ""
+    LDAP_MODERATOR_FILTER = ""
+    LDAP_ADMIN_FILTER = ""
+    LDAP_MODERATOR_GROUP_FILTER = ""
+    LDAP_ADMIN_GROUP_FILTER = ""
 
 class ProductionConfig(Config):
     pass

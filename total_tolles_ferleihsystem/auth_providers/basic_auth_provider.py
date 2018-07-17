@@ -6,7 +6,7 @@ from typing import Dict, List
 from ..login import LoginProvider
 from .. import APP
 
-class BasicAuthProvider(LoginProvider, name="Basic"):
+class BasicAuthProvider(LoginProvider, provider_name="Basic"):
     """
     Example Login Provider with hardcoded insecure accounts.
     """
