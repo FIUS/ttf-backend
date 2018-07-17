@@ -28,7 +28,7 @@ class BasicAuthProvider(LoginProvider, provider_name="Basic"):
 
     def init(self) -> None:
         print('Admin Pass: ' + APP.config['BASIC_AUTH_ADMIN_PASS'])
-        print('Mod Pass: ' + APP.config['BASIC_AUTH_Mod_PASS'])
+        print('Mod Pass: ' + APP.config['BASIC_AUTH_MOD_PASS'])
 
     def valid_user(self, user_id: str) -> bool:
         return user_id in self.ACCOUNTS
