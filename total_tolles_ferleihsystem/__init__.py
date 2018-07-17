@@ -79,6 +79,10 @@ WEBPACK.init_app(APP)
 from .tasks import make_celery
 celery = make_celery(APP)
 
+# Import LoginProviders
+# pylint: disable=C0413
+from . import auth_providers
+
 # pylint: disable=C0413
 from . import db_models
 # pylint: disable=C0413

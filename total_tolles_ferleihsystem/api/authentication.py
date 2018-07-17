@@ -11,17 +11,12 @@ from . import AUTH_LOGGER
 from .models import AUTHENTICATION_ROUTES_MODEL
 from .. import APP
 
-from ..login import LoginService, BasicAuthProvider
+from ..login import LoginService, UserRole
 
 
 ANS = API.namespace('auth', description='Authentication Resources:')
 
-LOGIN_SERVICE: LoginService
-if APP.config['DEBUG']:
-    LOGIN_SERVICE = LoginService(BasicAuthProvider())
-else:
-    #FIXME add LDAP auth provider here
-    LOGIN_SERVICE = LoginService(None)
+LOGIN_SERVICE: LoginService = LoginService(APP.config.get('LOGIN_PROVIDERS', []))
 
 USER_AUTH_MODEL = API.model('UserAuth', {
     'username': fields.String(required=True, example='admin'),
@@ -43,15 +38,16 @@ CHECK_RESPONSE = API.model('check', {
 
 
 def login_user():
-    """Login a user."""
+    """
+    Login a user.
+    """
+
     username = API.payload.get('username', None)
     password = API.payload.get('password', None)
-    user = LOGIN_SERVICE.get_user_by_id(username)
+    user = LOGIN_SERVICE.get_user(username, password)
+
     if not user:
-        AUTH_LOGGER.debug('Attempted login with unknown username "%s".', username)
-        abort(401, 'Wrong username or pasword.')
-    if not LOGIN_SERVICE.check_password(user, password):
-        AUTH_LOGGER.error('Attempted login with invalid password for user "%s"', username)
+        AUTH_LOGGER.debug('Attempted login with invalid credentials with username "%s".', username)
         abort(401, 'Wrong username or pasword.')
 
     AUTH_LOGGER.info('New login from user "%s"', username)
@@ -154,10 +150,11 @@ class Refresh(Resource):
     def post(self):
         """Create a new access token with a refresh token."""
         username = get_jwt_identity()
-        user = LOGIN_SERVICE.get_user_by_id(username)
-        if not user:
-            abort(401, "User doesn't exist.")
+        role = UserRole(get_jwt_claims())
         AUTH_LOGGER.debug('User "%s" asked for a new access token.', username)
-        new_token = create_access_token(identity=user, fresh=False)
+        new_token = create_access_token(identity={
+            'name': username,
+            'role': role
+        }, fresh=False)
         ret = {'access_token': new_token}
         return ret, 200
