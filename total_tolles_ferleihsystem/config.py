@@ -20,7 +20,9 @@ class Config(object):
     CELERY_RESULT_BACKEND = 'rpc://'
     TMP_DIRECTORY = '/tmp'
     DATA_DIRECTORY = '/tmp'
+
     LOGIN_PROVIDERS = ['Basic']
+
     BASIC_AUTH_ADMIN_PASS = ''.join(hex(randint(0, 255))[2:] for i in range(8))
     BASIC_AUTH_MOD_PASS = ''.join(hex(randint(0, 255))[2:] for i in range(8))
 
@@ -38,6 +40,7 @@ class Config(object):
     LDAP_MODERATOR_GROUP_FILTER = ""
     LDAP_ADMIN_GROUP_FILTER = ""
 
+
 class ProductionConfig(Config):
     pass
 
@@ -48,7 +51,7 @@ class DebugConfig(Config):
     JWT_SECRET_KEY = 'debug'
     LOG_PATH = '/tmp'
     SQLALCHEMY_ECHO = True
-    LOGIN_PROVIDERS = ['Debug', 'LDAP']
+    LOGIN_PROVIDERS = ['Debug']
 
 
 class TestingConfig(Config):
