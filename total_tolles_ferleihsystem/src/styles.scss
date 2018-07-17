@@ -4,9 +4,11 @@
 @import "./variables";
 @import '../node_modules/font-awesome/scss/font-awesome';
 @import "../node_modules/tachyons/css/tachyons";
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 
 body {
     height: 100vh;
+    font-family: 'Roboto', sans-serif;
 }
 
 .w6 {
