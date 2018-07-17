@@ -20,7 +20,9 @@ class Config(object):
     CELERY_RESULT_BACKEND = 'rpc://'
     TMP_DIRECTORY = '/tmp'
     DATA_DIRECTORY = '/tmp'
-    LOGIN_PROVIDERS = ['LDAP']
+    LOGIN_PROVIDERS = ['Basic']
+    BASIC_AUTH_ADMIN_PASS = ''.join(hex(randint(0, 255))[2:] for i in range(8))
+    BASIC_AUTH_MOD_PASS = ''.join(hex(randint(0, 255))[2:] for i in range(8))
 
 
 class ProductionConfig(Config):
