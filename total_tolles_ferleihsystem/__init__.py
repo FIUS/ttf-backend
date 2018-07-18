@@ -54,6 +54,8 @@ APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_UR
 
 AUTH_LOGGER = getLogger(APP.logger_name + '.auth')  # type: Logger
 AUTH_LOGGER.setLevel(DEBUG)
+AUTH_LOGGER.addHandler(RotatingFileHandler(path.join(APP.config['LOG_PATH'], 'ttf_auth.log'),
+                                           maxBytes=104857600, backupCount=10))
 
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy
