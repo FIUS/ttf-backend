@@ -40,8 +40,10 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
         self.user_search_base: str = APP.config["LDAP_USER_SEARCH_BASE"] #The search base for users.
         self.group_search_base: str = APP.config["LDAP_GROUP_SEARCH_BASE"]  #The search base for groups.
         self.user_rdn: str = APP.config["LDAP_USER_RDN"] #The RDN for users.
-        self.user_uid_field: str = APP.config["LDAP_USER_UID_FIELD"] # The field of a user, which is the name, that is i the group_membership_field
-        self.group_membership_field: str = APP.config["LDAP_GROUP_MEMBERSHIP_FIELD"] #The field of a group, which contains the username
+         # The field of a user, which is the name, that is i the group_membership_field
+        self.user_uid_field: str = APP.config["LDAP_USER_UID_FIELD"]
+        #The field of a group, which contains the username
+        self.group_membership_field: str = APP.config["LDAP_GROUP_MEMBERSHIP_FIELD"]
         self.moderator_filter: str = APP.config["LDAP_MODERATOR_FILTER"] #A moderator must match this filter
         self.admin_filter: str = APP.config["LDAP_ADMIN_FILTER"] #A admininstrator must match this filter
         # A moderator must be in at least one of the matched groups
@@ -92,7 +94,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                                    user_filter,
                                    search_scope=SUBTREE,
                                    attributes=[self.user_uid_field]):
-                    AUTH_LOGGER.info("LDAP: User %s is not in the user filter", user_id)
+                    AUTH_LOGGER.info("User %s is not in the user filter", user_id)
                     return False
 
                 user_uid = str(conn.entries.pop()[self.user_uid_field])
@@ -105,7 +107,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                     group_filter = "(&" + all_groups_filter + group_base_filter + ")"
 
                 if not conn.search(self.group_search_base, group_filter, search_scope=SUBTREE):
-                    AUTH_LOGGER.info("LDAP: User %s is not in any group of the group filter", user_id)
+                    AUTH_LOGGER.info("User %s is not in any group of the group filter", user_id)
                     return False
 
                 admin_user_filter = user_base_filter
@@ -121,15 +123,16 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                 in_admin_user_filter = conn.search(self.user_search_base,
                                                    admin_user_filter,
                                                    search_scope=SUBTREE)
-                in_admin_group_filter =  conn.search(self.group_search_base,
-                                                     admin_group_filter,
-                                                     search_scope=SUBTREE)
+                in_admin_group_filter = conn.search(self.group_search_base,
+                                                    admin_group_filter,
+                                                    search_scope=SUBTREE)
                 if (in_admin_user_filter and in_admin_group_filter):
                     self.known_users[user_id] = True
                 else:
                     self.known_users[user_id] = False
 
-                AUTH_LOGGER.debug("LDAP: Valid login from user %s. User in admin user filter: %s. User in admin group: %s", user_id, str(in_admin_user_filter), str(in_admin_group_filter))
+                AUTH_LOGGER.debug("Valid login from user %s. User in admin user filter: %s. User in admin group: %s", 
+                                  user_id, str(in_admin_user_filter), str(in_admin_group_filter))
 
                 return True
 

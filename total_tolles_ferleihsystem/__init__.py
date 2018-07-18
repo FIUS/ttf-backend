@@ -2,7 +2,7 @@
 TTF Module
 """
 from os import environ, path
-from logging import Formatter, getLogger
+from logging import Formatter, getLogger, DEBUG
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, logging
@@ -53,6 +53,7 @@ APP.logger.addHandler(FH)
 APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
 
 AUTH_LOGGER = getLogger(APP.logger_name + '.auth')  # type: Logger
+AUTH_LOGGER.setLevel(DEBUG)
 
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy
