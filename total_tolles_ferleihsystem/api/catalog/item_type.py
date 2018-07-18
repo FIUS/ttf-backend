@@ -4,7 +4,7 @@ This module contains all API endpoints for the namespace 'item_type'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
@@ -35,7 +35,16 @@ class ItemTypeList(Resource):
         Get a list of all item types currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        return ItemType.query.filter(ItemType.deleted == test_for).order_by(ItemType.name).all()
+        base_query = ItemType.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((ItemType.visible_for == 'all') | (ItemType.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(ItemType.visible_for == 'all')
+
+        return base_query.filter(ItemType.deleted == test_for).order_by(ItemType.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -72,7 +81,16 @@ class ItemTypeDetail(Resource):
         """
         Get a single item type object
         """
-        item_type = ItemType.query.filter(ItemType.id == type_id).first()
+        base_query = ItemType.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((ItemType.visible_for == 'all') | (ItemType.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(ItemType.visible_for == 'all')
+
+        item_type = base_query.filter(ItemType.id == type_id).first()
         if item_type is None:
             abort(404, 'Requested item type not found!')
         return item_type
@@ -251,7 +269,16 @@ class ItemTypeCanContainTypes(Resource):
         """
         Get all item types, this item_type may contain.
         """
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        base_query = ItemType.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((ItemType.visible_for == 'all') | (ItemType.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(ItemType.visible_for == 'all')
+
+        if base_query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
             abort(404, 'Requested item type not found!')
 
         associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
