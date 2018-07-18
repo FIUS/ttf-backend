@@ -4,11 +4,12 @@ This is the module containing the search endpoint.
 
 from flask import request
 from flask_restplus import Resource
-from flask_jwt_extended import jwt_optional
+from flask_jwt_extended import jwt_optional, get_jwt_claims
 from . import API
 from ..db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToLending
 from ..db_models.tag import Tag
 from .models import ITEM_GET
+from ..login import UserRole
 
 PATH: str = '/search'
 ANS = API.namespace('search', description='The search resource', path=PATH)
@@ -44,6 +45,13 @@ class Search(Resource):
 
         search_string = '%' + search + '%'
         search_result = Item.query
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                search_result = search_result.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                search_result = search_result.filter(Item.visible_for == 'all')
 
         if search:
             search_condition = Item.name.like(search_string)

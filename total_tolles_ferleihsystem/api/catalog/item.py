@@ -4,7 +4,7 @@ This module contains all API endpoints for the namespace 'item'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
@@ -40,13 +40,20 @@ class ItemList(Resource):
 
         base_query = Item.query.filter(Item.deleted == test_for)
 
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
         if request.args.get('lent', 'false') == 'true':
             base_query = base_query.join(ItemToLending)
 
         return base_query.order_by(Item.name).all()
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_GET, body=ITEM_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(400, 'Requested item type not found!')
@@ -90,14 +97,23 @@ class ItemDetail(Resource):
         """
         Get a single item object
         """
-        item = Item.query.filter(Item.id == item_id).first()
+        base_query = Item.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        item = base_query.filter(Item.id == item_id).first()
         if item is None:
             abort(404, 'Requested item not found!')
 
         return item
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item is currently lent!')
     @ANS.response(204, 'Success.')
@@ -120,7 +136,7 @@ class ItemDetail(Resource):
         abort(code, msg)
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'The type of this item does not currently exist!')
     @ANS.response(204, 'Success.')
@@ -139,7 +155,7 @@ class ItemDetail(Resource):
         return "", 204
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_GET, body=ITEM_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested item not found!')
@@ -189,14 +205,23 @@ class ItemItemTags(Resource):
         """
         Get all tags for this item.
         """
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        base_query = Item.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
         return [e.tag for e in associations if not e.tag.deleted]
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TAG_GET, body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
@@ -233,7 +258,7 @@ class ItemItemTags(Resource):
             abort(500)
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
@@ -285,7 +310,16 @@ class ItemAttributeList(Resource):
         """
         Get the attributes of this item.
         """
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        base_query = Item.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         return ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
@@ -305,8 +339,16 @@ class ItemAttributeDetail(Resource):
         """
         Get a single attribute of this item.
         """
+        base_query = Item.query;
 
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         attribute = (ItemToAttributeDefinition
@@ -322,7 +364,7 @@ class ItemAttributeDetail(Resource):
         return attribute
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
@@ -368,14 +410,23 @@ class ItemContainedItems(Resource):
         """
         Get all contained items of this item.
         """
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        base_query = Item.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
         return [e.item for e in associations if not e.item.deleted]
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_GET, body=ID)
     @ANS.response(404, 'Requested item (current) not found!')
     @ANS.response(400, 'Requested item (to be contained) not found!')
@@ -418,7 +469,7 @@ class ItemContainedItems(Resource):
             abort(500)
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item (current) not found!')
     @ANS.response(400, 'Requested item (to be contained) not found!')
@@ -464,7 +515,18 @@ class ItemFile(Resource):
         """
         Get all files for this item.
         """
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        base_query = Item.query;
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
+
+        # FIXME block users from accessing items without access
 
         return File.query.filter(File.item_id == item_id).all()
