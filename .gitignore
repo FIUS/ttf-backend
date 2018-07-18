@@ -9,7 +9,7 @@
 *.orig
 
 # IDE - VSCode
-.vscode/*
+*.vscode/*
 
 
 # Flask config
