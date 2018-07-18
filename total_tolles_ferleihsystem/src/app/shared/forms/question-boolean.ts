@@ -8,5 +8,6 @@ export class BooleanQuestion extends QuestionBase<boolean> {
         super(options);
         this.type = options['type'] || 'checkbox';
         this.nullValue = options.nullValue || false;
+        this.nullable = true;
     }
 }
