@@ -7,9 +7,8 @@ from flask_jwt_extended import jwt_required, create_access_token, \
                                get_jwt_claims, jwt_refresh_token_required
 
 from . import API
-from . import AUTH_LOGGER
 from .models import AUTHENTICATION_ROUTES_MODEL
-from .. import APP
+from .. import APP, AUTH_LOGGER
 
 from ..login import LoginService, UserRole
 

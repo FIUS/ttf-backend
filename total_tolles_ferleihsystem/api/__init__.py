@@ -1,7 +1,7 @@
 """
 Main API Module
 """
-from logging import Formatter, Logger, getLogger, DEBUG
+from logging import Formatter, Logger, DEBUG
 from logging.handlers import RotatingFileHandler
 from os import path
 from functools import wraps
@@ -10,7 +10,7 @@ from flask import Blueprint, logging
 from flask_restplus import Api, abort
 from flask_jwt_extended import get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
-from .. import APP, JWT
+from .. import APP, JWT, AUTH_LOGGER
 from ..login import User, UserRole
 
 
@@ -57,7 +57,7 @@ def satisfies_role(role: UserRole):
     return has_roles_decorator
 
 
-AUTH_LOGGER = getLogger(APP.logger_name + '.auth')  # type: Logger
+
 
 FORMATTER = Formatter(fmt=APP.config['AUTH_LOG_FORMAT'])
 

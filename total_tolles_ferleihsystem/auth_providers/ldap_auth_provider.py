@@ -7,7 +7,7 @@ from ldap3 import Connection, Server, AUTO_BIND_TLS_BEFORE_BIND, SUBTREE
 from ldap3.core.exceptions import LDAPSocketOpenError, LDAPBindError
 
 from ..login import LoginProvider
-from .. import APP
+from .. import APP, AUTH_LOGGER
 
 class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
     """
@@ -33,7 +33,6 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
     known_users: Dict[str, bool]
 
     def __init__(self):
-        #TODO: Load config
         self.ldap_uri: str = APP.config["LDAP_URI"] #The URL of the ldpa server
         self.port: int = APP.config["LDAP_PORT"] #The port of the ldap server. Use None for default.
         self.ssl: bool = APP.config["LDAP_SSL"] #Whether to use ssl for the connection.
@@ -93,6 +92,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                                    user_filter,
                                    search_scope=SUBTREE,
                                    attributes=[self.user_uid_field]):
+                    AUTH_LOGGER.info("User %s is not in the user filter", user_id)
                     return False
 
                 user_uid = str(conn.entries.pop()[self.user_uid_field])
@@ -105,6 +105,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                     group_filter = "(&" + all_groups_filter + group_base_filter + ")"
 
                 if not conn.search(self.group_search_base, group_filter, search_scope=SUBTREE):
+                    AUTH_LOGGER.info("User %s is not in any group of the group filter", user_id)
                     return False
 
                 admin_user_filter = user_base_filter
@@ -117,15 +118,18 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                 if all_admin_groups_filter:
                     admin_group_filter = "(&" + all_admin_groups_filter + group_base_filter + ")"
 
-                if (conn.search(self.user_search_base,
-                                admin_user_filter,
-                                search_scope=SUBTREE)
-                        and conn.search(self.group_search_base,
-                                        admin_group_filter,
-                                        search_scope=SUBTREE)):
+                in_admin_user_filter = conn.search(self.user_search_base,
+                                                   admin_user_filter,
+                                                   search_scope=SUBTREE)
+                in_admin_group_filter =  conn.search(self.group_search_base,
+                                                     admin_group_filter,
+                                                     search_scope=SUBTREE)
+                if (in_admin_user_filter and in_admin_group_filter):
                     self.known_users[user_id] = True
                 else:
                     self.known_users[user_id] = False
+
+                AUTH_LOGGER.debug("Valid login from user %s. User in admin user filter: %s. User in admin group: %s", user_id, str(in_admin_user_filter), str(in_admin_group_filter))
 
                 return True
 
