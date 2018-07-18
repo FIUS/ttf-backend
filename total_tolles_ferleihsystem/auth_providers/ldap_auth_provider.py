@@ -92,7 +92,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                                    user_filter,
                                    search_scope=SUBTREE,
                                    attributes=[self.user_uid_field]):
-                    AUTH_LOGGER.info("User %s is not in the user filter", user_id)
+                    AUTH_LOGGER.info("LDAP: User %s is not in the user filter", user_id)
                     return False
 
                 user_uid = str(conn.entries.pop()[self.user_uid_field])
@@ -105,7 +105,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                     group_filter = "(&" + all_groups_filter + group_base_filter + ")"
 
                 if not conn.search(self.group_search_base, group_filter, search_scope=SUBTREE):
-                    AUTH_LOGGER.info("User %s is not in any group of the group filter", user_id)
+                    AUTH_LOGGER.info("LDAP: User %s is not in any group of the group filter", user_id)
                     return False
 
                 admin_user_filter = user_base_filter
@@ -129,7 +129,7 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                 else:
                     self.known_users[user_id] = False
 
-                AUTH_LOGGER.debug("Valid login from user %s. User in admin user filter: %s. User in admin group: %s", user_id, str(in_admin_user_filter), str(in_admin_group_filter))
+                AUTH_LOGGER.debug("LDAP: Valid login from user %s. User in admin user filter: %s. User in admin group: %s", user_id, str(in_admin_user_filter), str(in_admin_group_filter))
 
                 return True
 

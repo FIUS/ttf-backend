@@ -150,7 +150,7 @@ class Refresh(Resource):
         """Create a new access token with a refresh token."""
         user = User(get_jwt_identity(), None)
         user.role = UserRole(get_jwt_claims())
-        AUTH_LOGGER.debug('User "%s" asked for a new access token.', username)
+        AUTH_LOGGER.debug('User "%s" asked for a new access token.', user.name)
         new_token = create_access_token(identity=user, fresh=False)
         ret = {'access_token': new_token}
         return ret, 200
