@@ -50,6 +50,11 @@ body {
     color: $dialog-content-text-color;
 }
 
+.ttf-header-button {
+    background-color: $header-button-color;
+    color: $header-button-text-color;
+}
+
 .w6 {
     width: 32rem;
 }
