@@ -11,7 +11,7 @@ from . import AUTH_LOGGER
 from .models import AUTHENTICATION_ROUTES_MODEL
 from .. import APP
 
-from ..login import LoginService, UserRole
+from ..login import LoginService, UserRole, User
 
 
 ANS = API.namespace('auth', description='Authentication Resources:')
@@ -149,12 +149,9 @@ class Refresh(Resource):
     # pylint: disable=R0201
     def post(self):
         """Create a new access token with a refresh token."""
-        username = get_jwt_identity()
-        role = UserRole(get_jwt_claims())
+        user = User(get_jwt_identity(), None)
+        user.role = UserRole(get_jwt_claims())
         AUTH_LOGGER.debug('User "%s" asked for a new access token.', username)
-        new_token = create_access_token(identity={
-            'name': username,
-            'role': role
-        }, fresh=False)
+        new_token = create_access_token(identity=user, fresh=False)
         ret = {'access_token': new_token}
         return ret, 200
