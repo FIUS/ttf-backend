@@ -1,8 +1,8 @@
 <div class="mh2 mv3 br2 shadow-5 ba b--black-10" *ngIf="lentItems?.length > 0 && jwt.isModerator()">
-    <div class="min-h2 mv0 pv2 ph3 flex items-center justify-between f4 bg-near-white br2 br--top">
+    <div class="ttf-box-header min-h2 mv0 pv2 ph3 flex items-center justify-between f4 br2 br--top">
         <p class="mv0">Currently lent Items:</p>
     </div>
-    <div class="max-h5 overflow-y-auto bt b--black-10">
+    <div class="max-h5 overflow-y-auto bt ged b--black-10">
         <table class="w-100 table collapse ph3 pv2" body>
             <tbody>
                 <tr>
@@ -22,28 +22,28 @@
     </div>
 </div>
 <div class="flex flex-wrap justify-between">
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
         <i class="f2 fa fa-folder"></i>
-        <a class="f3 black">Item Types</a>
+        <a class="f3 ttf-main-button">Item Types</a>
     </div>
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/tags">
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/tags">
         <i class="f2 fa fa-tags"></i>
-        <a class="f3 black">Tags</a>
+        <a class="f3 ttf-main-button">Tags</a>
     </div>
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/attribute-definitions">
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/attribute-definitions">
         <i class="f2 fa fa-clipboard"></i>
-        <a class="f3 black">Attribute Definitions</a>
+        <a class="f3 ttf-main-button">Attribute Definitions</a>
     </div>
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/items">
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" routerLink="/items">
         <i class="f2 fa fa-list"></i>
-        <a class="f3 black">Items</a>
+        <a class="f3 ttf-main-button">Items</a>
     </div>
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" routerLink="/search">
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" routerLink="/search">
         <i class="f2 fa fa-search"></i>
-        <a class="f3 black">Search</a>
+        <a class="f3 ttf-main-button">Search</a>
     </div>
-    <div class="h4 w5 ma2 br3 bg-near-white flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/lendings">
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/lendings">
         <i class="f2 fa fa-address-card"></i>
-        <a class="f3 black">Lendings</a>
+        <a class="f3 ttf-main-button">Lendings</a>
     </div>
 </div>

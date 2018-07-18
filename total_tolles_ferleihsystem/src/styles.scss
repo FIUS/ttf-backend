@@ -11,6 +11,50 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.ttf-background {
+    background-color: $background-color;
+}
+
+.ttf-titlebar {
+    background-color: $titlebar-color;
+    color: $titlebar-text-color;
+}
+
+.ttf-breadcrumbs {
+    background-color: $breadcrumbs-color;
+    color: $breadcrumbs-text-color
+}
+
+.ttf-main-button {
+    background-color: $main-button-color;
+    color: $main-button-text-color;
+}
+
+.ttf-box-header {
+    background-color: $box-header-color;
+    color: $box-header-text-color;
+}
+
+.ttf-box-content {
+    background-color: $box-content-color;
+    color: $box-content-text-color;
+}
+
+.ttf-dialog-header {
+    background-color: $dialog-header-color;
+    color: $dialog-header-text-color;
+}
+
+.ttf-dialog-content {
+    background-color: $dialog-content-color;
+    color: $dialog-content-text-color;
+}
+
+.ttf-header-button {
+    background-color: $header-button-color;
+    color: $header-button-text-color;
+}
+
 .w6 {
     width: 32rem;
 }
