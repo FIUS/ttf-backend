@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Home');
         this.data.changeBreadcrumbs([]);
-        this.api.getLentItems().subscribe(items => {
+        this.api.getLentItems('errors').subscribe(items => {
             this.lentItems = items;
         });
         Observable.timer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
