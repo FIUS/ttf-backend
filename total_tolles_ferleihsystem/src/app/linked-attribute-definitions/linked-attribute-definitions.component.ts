@@ -3,6 +3,7 @@ import { NavigationService, Breadcrumb } from '../navigation/navigation-service'
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
 import { ApiObject } from '../shared/rest/api-base.service';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-linked-attribute-definitions',
@@ -24,7 +25,7 @@ export class LinkedAttributeDefinitionComponent implements OnInit, OnDestroy, On
     private subscription: Subscription;
     private linkedAttrDefsSubscription: Subscription;
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.subscription = this.api.getAttributeDefinitions().subscribe(data => {
@@ -65,13 +66,13 @@ export class LinkedAttributeDefinitionComponent implements OnInit, OnDestroy, On
         }
     }
 
-    updateSelected = (attrDefinitions => {
+    updateSelected = attrDefinitions => {
         const selected = new Set<number>();
         attrDefinitions.forEach(attrDef => {
             selected.add(attrDef.id);
         });
         this.selected = selected;
-    }).bind(this);
+    }
 
     ngOnDestroy(): void {
         if (this.subscription != null) {
@@ -89,6 +90,9 @@ export class LinkedAttributeDefinitionComponent implements OnInit, OnDestroy, On
     }
 
     select(attrDef) {
+        if (!this.jwt.isAdmin()) {
+            return;
+        }
         if (this.linkedObject != null) {
             if (this.selected.has(attrDef.id)) {
                 this.api.unlinkAttributeDefinition(this.linkedObject, attrDef).subscribe(this.updateSelected);

@@ -3,6 +3,7 @@ import { NavigationService, Breadcrumb } from '../navigation/navigation-service'
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
 import { ApiObject } from '../shared/rest/api-base.service';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-tag-list',
@@ -21,7 +22,7 @@ export class TagListComponent implements OnInit, OnDestroy {
     private subscription: Subscription;
     private deletedSubscription: Subscription;
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.subscription = this.api.getTags().subscribe(data => {
@@ -51,9 +52,11 @@ export class TagListComponent implements OnInit, OnDestroy {
             });
             this.data = map;
         });
-        this.deletedSubscription = this.api.getTags(true).subscribe(data => {
-            this.deleted = data;
-        });
+        if (this.jwt.isAdmin()) {
+            this.deletedSubscription = this.api.getTags(true).subscribe(data => {
+                this.deleted = data;
+            });
+        }
     }
 
     ngOnDestroy(): void {

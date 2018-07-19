@@ -153,7 +153,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     }
 
     get canEdit() {
-        return this.jwt.isModerator() || this.jwt.isAdmin();
+        return this.jwt.isAdmin();
     }
 
     ngOnDestroy(): void {

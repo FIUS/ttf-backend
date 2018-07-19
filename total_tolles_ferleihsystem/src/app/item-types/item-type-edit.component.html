@@ -1,16 +1,16 @@
 <ttf-box>
     <h1 class="mv0" title>Edit: {{itemType?.name}}</h1>
-    <div class="tooltip tooltip-left button h2 pv1 ph2 br2 link bg-animate hover-bg-light-red pointer" data-tooltip="delete" (click)="confirm.open()" title-right>
+    <div class="tooltip tooltip-left button h2 pv1 ph2 br2 link bg-animate hover-bg-light-red pointer" data-tooltip="delete" (click)="confirm.open()" *ngIf="jwt.isAdmin()" title-right>
         <i class="fa fa-trash"></i>
     </div>
     <div class="w-100 ph3 pv2" body>
-        <dynamic-form [objectModel]="'ItemTypePUT'" [startValues]="itemType" [showSaveButton]="true" (save)="save($event)"></dynamic-form>
+        <dynamic-form [objectModel]="'ItemTypePUT'" [startValues]="itemType" [showSaveButton]="jwt.isAdmin()" (save)="save($event)"></dynamic-form>
         <div class="mt3 pv2 flex">
             <span class="f4 flex-grow-1">Can contain:</span>
             <div>
-                <p class="f4 mb2 mt0" *ngFor="let itemType of canContain">{{itemType.name}} <i class="ml1 fa fa-times grow pointer" (click)="removeCanContain(itemType.id)"></i></p>
-                <ttf-type-chooser [question]="typeQuestion" [allowDeselect]="true" [(ngModel)]="canContainTypeID"></ttf-type-chooser>
-                <div class="button h2 pv1 ph2 mt1 br2 bg-light-silver link bg-animate flex items-center justify-around" [ngClass]="{'hover-bg-silver': canContainTypeID >= 0, 'pointer': canContainTypeID >= 0, 'gray': canContainTypeID < 0}" (click)="addCanContain()" ><i class="fa fa-plus mr2"></i></div>
+                <p class="f4 mb2 mt0" *ngFor="let itemType of canContain">{{itemType.name}} <i class="ml1 fa fa-times grow pointer" (click)="removeCanContain(itemType.id)" *ngIf="jwt.isAdmin()"></i></p>
+                <ttf-type-chooser [question]="typeQuestion" [allowDeselect]="true" [(ngModel)]="canContainTypeID" *ngIf="jwt.isAdmin()"></ttf-type-chooser>
+                <div class="button h2 pv1 ph2 mt1 br2 bg-light-silver link bg-animate flex items-center justify-around" [ngClass]="{'hover-bg-silver': canContainTypeID >= 0, 'pointer': canContainTypeID >= 0, 'gray': canContainTypeID < 0}" (click)="addCanContain()" *ngIf="jwt.isAdmin()" ><i class="fa fa-plus mr2"></i></div>
             </div>
         </div>
     </div>

@@ -3,6 +3,7 @@ import { NavigationService, Breadcrumb } from '../navigation/navigation-service'
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
 import { ApiObject } from '../shared/rest/api-base.service';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-attribute-definition-list',
@@ -21,7 +22,7 @@ export class AttributeDefinitionListComponent implements OnInit, OnDestroy {
     private subscription: Subscription;
     private deletedSubscription: Subscription;
 
-    constructor(private api: ApiService) { }
+    constructor(private api: ApiService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.subscription = this.api.getAttributeDefinitions().subscribe(data => {
@@ -51,9 +52,11 @@ export class AttributeDefinitionListComponent implements OnInit, OnDestroy {
             });
             this.data = map;
         });
-        this.deletedSubscription = this.api.getAttributeDefinitions(true).subscribe(data => {
-            this.deleted = data;
-        });
+        if (this.jwt.isAdmin()) {
+            this.deletedSubscription = this.api.getAttributeDefinitions(true).subscribe(data => {
+                this.deleted = data;
+            });
+        }
     }
 
     ngOnDestroy(): void {

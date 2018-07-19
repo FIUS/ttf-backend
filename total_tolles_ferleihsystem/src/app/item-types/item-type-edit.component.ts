@@ -5,6 +5,7 @@ import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
 import { NumberQuestion } from '../shared/forms/question-number';
 import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-item-type-edit',
@@ -29,7 +30,7 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
     canContainTypeID: number;
     canContain: ApiObject[];
 
-    constructor(private api: ApiService, private router: Router) { }
+    constructor(private api: ApiService, private router: Router, private jwt: JWTService) { }
 
     ngOnChanges(): void {
         if (this.subscription != null) {

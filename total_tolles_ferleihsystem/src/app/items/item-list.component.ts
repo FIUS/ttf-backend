@@ -62,9 +62,11 @@ export class ItemListComponent implements OnInit, OnDestroy {
             });
             this.data = map;
         });
-        this.deletedSubscription = this.api.getItems(true).subscribe(data => {
-            this.deleted = data;
-        });
+        if (this.jwt.isAdmin()) {
+            this.deletedSubscription = this.api.getItems(true).subscribe(data => {
+                this.deleted = data;
+            });
+        }
     }
 
     ngOnDestroy(): void {
