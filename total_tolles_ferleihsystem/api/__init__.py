@@ -10,6 +10,7 @@ from flask import Blueprint, logging
 from flask_restplus import Api, abort
 from flask_jwt_extended import get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
+from jwt import ExpiredSignatureError, InvalidTokenError
 from .. import APP, JWT, AUTH_LOGGER
 from ..login import User, UserRole
 
@@ -93,8 +94,14 @@ def load_user_claims(user: User):
     """
     return user.role.value
 
+@JWT.claims_verification_loader
+def verify_claims(claims):
+    print('#'*100)
+    print(claims)
+    return True
 
 @JWT.expired_token_loader
+@API.errorhandler(ExpiredSignatureError)
 def expired_token():
     """
     Handler function for a expired token
@@ -105,6 +112,7 @@ def expired_token():
 
 
 @JWT.invalid_token_loader
+@API.errorhandler(InvalidTokenError)
 def invalid_token(message: str):
     """
     Handler function for a invalid token
