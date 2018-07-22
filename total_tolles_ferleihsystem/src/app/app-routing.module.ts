@@ -29,7 +29,7 @@ import { AdminGuard } from './shared/rest/guards/admin.guard';
 
 const routes: Routes = [
   { path: 'search', component: SearchOverviewComponent, canActivate: [LoginGuard] },
-  { path: 'staging', component: StagingComponent, canActivate: [ModGuard] },
+  { path: 'staging', component: StagingComponent, canActivate: [LoginGuard] },
   { path: 'lendings', component: LendingOverviewComponent, canActivate: [ModGuard] },
   { path: 'lendings/:id', component: LendingComponent, canActivate: [ModGuard] },
   { path: 'items', component: ItemsOverviewComponent, canActivate: [LoginGuard] },

@@ -129,7 +129,7 @@ class ItemDetail(Resource):
         code, msg, commit = item.delete()
 
         if commit:
-            DB.session.commit
+            DB.session.commit()
         if code == 204:
             return "", 204
 

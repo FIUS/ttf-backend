@@ -84,7 +84,7 @@ export class ApiService implements OnInit {
         this.getAuthRoot();
     }
 
-    private errorHandler(error, resource: string, method: string) {
+    private errorHandler(error, resource: string, method: string, showErrors: string= 'all') {
         let title;
         let message = 'Unknown Error.';
         switch (method) {
@@ -106,11 +106,11 @@ export class ApiService implements OnInit {
             message = error.message;
         }
 
-        if (this.errorSet.has(error.status)) {
+        if (this.errorSet.has(error.status) && showErrors !== 'none') {
             this.info.emitError(message, title);
-        } else if (this.warningSet.has(error.status)) {
+        } else if (this.warningSet.has(error.status) && (showErrors === 'warnings' || showErrors === 'all')) {
             this.info.emitWarning(message, title, 7000);
-        } else {
+        } else if (showErrors === 'all') {
             this.info.emitInfo(message, title, 5000);
         }
     }
@@ -302,7 +302,7 @@ export class ApiService implements OnInit {
 
 
     // Item Types //////////////////////////////////////////////////////////////
-    getItemTypes(deleted: boolean=false): Observable<Array<ApiObject>> {
+    getItemTypes(deleted: boolean=false, showErrors: string= 'all'): Observable<Array<ApiObject>> {
         let resource = 'item_types';
         let params = null;
         if (deleted) {
@@ -315,14 +315,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.item_types, token, params).subscribe(data => {
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getItemType(id: number): Observable<ApiObject> {
+    getItemType(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'item_types';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -331,14 +331,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.item_types.href + id, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    postItemType(newData): Observable<ApiObject> {
+    postItemType(newData, showErrors: string= 'all'): Observable<ApiObject> {
         const resource = 'item_types';
 
         return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
@@ -349,14 +349,14 @@ export class ApiService implements OnInit {
                     return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
                 })
                 .catch(error => {
-                    this.errorHandler(error, resource, 'POST');
+                    this.errorHandler(error, resource, 'POST', showErrors);
                     return Observable.throw(error);
                 });
             });
         });
     }
 
-    putItemType(id: number, newData): Observable<ApiObject> {
+    putItemType(id: number, newData, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'item_types';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -365,14 +365,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.put(catalog._links.item_types.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'PUT'));
-            }, error => this.errorHandler(error, resource, 'PUT'));
+                }, error => this.errorHandler(error, resource, 'PUT', showErrors));
+            }, error => this.errorHandler(error, resource, 'PUT', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    deleteItemType(id: number): Observable<ApiObject> {
+    deleteItemType(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'item_types';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -382,14 +382,14 @@ export class ApiService implements OnInit {
                 this.rest.delete(catalog._links.item_types.href + id + '/', token).subscribe(() => {
                     this.removeResource(baseResource, id);
                     this.getItemTypes(true);
-                }, error => this.errorHandler(error, resource, 'DELETE'));
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+                }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    undeleteItemType(id: number): Observable<ApiObject> {
+    undeleteItemType(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'item_types';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -399,47 +399,47 @@ export class ApiService implements OnInit {
                 this.rest.post(catalog._links.item_types.href + id + '/', undefined, token).subscribe(() => {
                     this.getItemType(id);
                     this.getItemTypes(true);
-                }, error => this.errorHandler(error, resource, 'POST'));
-            }, error => this.errorHandler(error, resource, 'POST'));
+                }, error => this.errorHandler(error, resource, 'POST', showErrors));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getCanContain(item_type: ApiObject): Observable<ApiObject[]> {
+    getCanContain(item_type: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'item-types/' + item_type.id + '/can-contain';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(item_type._links.can_contain, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>);
     }
 
-    postCanContain(item_type: ApiObject, itemTypeID): Observable<ApiObject[]> {
+    postCanContain(item_type: ApiObject, itemTypeID, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'item-types/' + item_type.id + '/can-contain';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.post(item_type._links.can_contain, {id: itemTypeID}, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>);
     }
 
-    deleteCanContain(item_type: ApiObject, itemTypeID): Observable<ApiObject[]> {
+    deleteCanContain(item_type: ApiObject, itemTypeID, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'item-types/' + item_type.id + '/can-contain';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.delete(item_type._links.can_contain, token, {id: itemTypeID}).subscribe(data => {
                 this.getCanContain(item_type);
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>);
@@ -448,7 +448,7 @@ export class ApiService implements OnInit {
 
 
     // Tags ////////////////////////////////////////////////////////////////////
-    getTags(deleted: boolean=false): Observable<Array<ApiObject>> {
+    getTags(deleted: boolean=false, showErrors: string= 'all'): Observable<Array<ApiObject>> {
         let resource = 'tags';
         let params = null;
         if (deleted) {
@@ -461,14 +461,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.item_tags, token, params).subscribe(data => {
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getTag(id: number): Observable<ApiObject> {
+    getTag(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'tags';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -477,14 +477,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.item_tags.href + id, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    postTag(newData): Observable<ApiObject> {
+    postTag(newData, showErrors: string= 'all'): Observable<ApiObject> {
         const resource = 'tags';
 
         return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
@@ -495,14 +495,14 @@ export class ApiService implements OnInit {
                     return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
                 })
                 .catch(error => {
-                    this.errorHandler(error, resource, 'POST');
+                    this.errorHandler(error, resource, 'POST', showErrors);
                     return Observable.throw(error);
                 });
             });
         });
     }
 
-    putTag(id: number, newData): Observable<ApiObject> {
+    putTag(id: number, newData, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'tags';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -511,14 +511,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.put(catalog._links.item_tags.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'PUT'));
-            }, error => this.errorHandler(error, resource, 'PUT'));
+                }, error => this.errorHandler(error, resource, 'PUT', showErrors));
+            }, error => this.errorHandler(error, resource, 'PUT', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    deleteTag(id: number): Observable<ApiObject> {
+    deleteTag(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'tags';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -527,14 +527,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.delete(catalog._links.item_tags.href + id + '/', token).subscribe(() => {
                     this.removeResource(baseResource, id);
-                }, error => this.errorHandler(error, resource, 'DELETE'));
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+                }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    undeleteTag(id: number): Observable<ApiObject> {
+    undeleteTag(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'tags';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -544,8 +544,8 @@ export class ApiService implements OnInit {
                 this.rest.post(catalog._links.item_tags.href + id + '/', undefined, token).subscribe(() => {
                     this.getTag(id);
                     this.getTags(true);
-                }, error => this.errorHandler(error, resource, 'POST'));
-            }, error => this.errorHandler(error, resource, 'POST'));
+                }, error => this.errorHandler(error, resource, 'POST', showErrors));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
@@ -554,7 +554,7 @@ export class ApiService implements OnInit {
 
 
     // Attribute Definitions ///////////////////////////////////////////////////
-    getAttributeDefinitions(deleted: boolean=false): Observable<Array<ApiObject>> {
+    getAttributeDefinitions(deleted: boolean=false, showErrors: string= 'all'): Observable<Array<ApiObject>> {
         let resource = 'attribute_definitions';
         let params = null;
         if (deleted) {
@@ -567,14 +567,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.attribute_definitions, token, params).subscribe(data => {
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getAttributeDefinition(id: number): Observable<ApiObject> {
+    getAttributeDefinition(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'attribute_definitions';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -583,14 +583,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.attribute_definitions.href + id, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    postAttributeDefinition(newData): Observable<ApiObject> {
+    postAttributeDefinition(newData, showErrors: string= 'all'): Observable<ApiObject> {
         const resource = 'attribute_definitions';
 
         return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
@@ -601,14 +601,14 @@ export class ApiService implements OnInit {
                     return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
                 })
                 .catch(error => {
-                    this.errorHandler(error, resource, 'POST');
+                    this.errorHandler(error, resource, 'POST', showErrors);
                     return Observable.throw(error);
                 });
             });
         });
     }
 
-    putAttributeDefinition(id: number, newData): Observable<ApiObject> {
+    putAttributeDefinition(id: number, newData, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'attribute_definitions';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -617,14 +617,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.put(catalog._links.attribute_definitions.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'PUT'));
-            }, error => this.errorHandler(error, resource, 'PUT'));
+                }, error => this.errorHandler(error, resource, 'PUT', showErrors));
+            }, error => this.errorHandler(error, resource, 'PUT', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    deleteAttributeDefinition(id: number): Observable<ApiObject> {
+    deleteAttributeDefinition(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'attribute_definitions';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -633,14 +633,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.delete(catalog._links.attribute_definitions.href + id + '/', token).subscribe(() => {
                     this.removeResource(baseResource, id);
-                }, error => this.errorHandler(error, resource, 'DELETE'));
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+                }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    undeleteAttributeDefinition(id: number): Observable<ApiObject> {
+    undeleteAttributeDefinition(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'attribute_definitions';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -650,14 +650,14 @@ export class ApiService implements OnInit {
                 this.rest.post(catalog._links.attribute_definitions.href + id + '/', undefined, token).subscribe(() => {
                     this.getAttributeDefinition(id);
                     this.getAttributeDefinitions(true);
-                }, error => this.errorHandler(error, resource, 'POST'));
-            }, error => this.errorHandler(error, resource, 'POST'));
+                }, error => this.errorHandler(error, resource, 'POST', showErrors));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getAttributeAutocomplete(attrDef: ApiObject): Observable<any[]> {
+    getAttributeAutocomplete(attrDef: ApiObject, showErrors: string= 'all'): Observable<any[]> {
         const resource = 'attribute_definitions/' + attrDef.id + '/autocomplete';
         const stream: BehaviorSubject<any[]> = this.getStreamSource(resource) as any;
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
@@ -674,7 +674,7 @@ export class ApiService implements OnInit {
         return stream.asObservable();
     }
 
-    getLinkedAttributeDefinitions(linkedObject: ApiObject): Observable<ApiObject[]> {
+    getLinkedAttributeDefinitions(linkedObject: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         let url: string = linkedObject._links.attributes.href;
         if (url.startsWith('http')) {
             url = new URL(url).pathname;
@@ -685,13 +685,13 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(url, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    linkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject): Observable<ApiObject[]> {
+    linkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         let url: string = linkedObject._links.attributes.href;
         if (url.startsWith('http')) {
             url = new URL(url).pathname;
@@ -702,13 +702,13 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.post(url, attributeDefinition, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    unlinkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject): Observable<ApiObject[]> {
+    unlinkAttributeDefinition(linkedObject: ApiObject, attributeDefinition: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         let url: string = linkedObject._links.attributes.href;
         if (url.startsWith('http')) {
             url = new URL(url).pathname;
@@ -720,7 +720,7 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.delete(url, token, attributeDefinition).subscribe(data => {
                 this.getLinkedAttributeDefinitions(linkedObject);
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
@@ -729,7 +729,7 @@ export class ApiService implements OnInit {
 
 
     // Items ///////////////////////////////////////////////////////////////////
-    getItems(deleted: boolean=false): Observable<Array<ApiObject>> {
+    getItems(deleted: boolean=false, showErrors: string= 'all'): Observable<Array<ApiObject>> {
         let resource = 'items';
         let params = null;
         if (deleted) {
@@ -742,14 +742,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.items, token, params).subscribe(data => {
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getLentItems(): Observable<Array<ApiObject>> {
+    getLentItems(showErrors: string= 'all'): Observable<Array<ApiObject>> {
         const resource = 'items?lent=true';
         const params =  {lent: true};
         const stream = this.getStreamSource(resource);
@@ -775,14 +775,14 @@ export class ApiService implements OnInit {
                         }
                     });
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getItem(id: number): Observable<ApiObject> {
+    getItem(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'items';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -791,14 +791,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.items.href + id, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    postItem(newData): Observable<ApiObject> {
+    postItem(newData, showErrors: string= 'all'): Observable<ApiObject> {
         const resource = 'items';
 
         return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
@@ -809,14 +809,14 @@ export class ApiService implements OnInit {
                     return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
                 })
                 .catch(error => {
-                    this.errorHandler(error, resource, 'POST');
+                    this.errorHandler(error, resource, 'POST', showErrors);
                     return Observable.throw(error);
                 });
             });
         });
     }
 
-    putItem(id: number, newData): Observable<ApiObject> {
+    putItem(id: number, newData, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'items';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -827,14 +827,14 @@ export class ApiService implements OnInit {
                 this.getStreamSource(resource + '/attributes').next([]);
                 this.rest.put(catalog._links.items.href + id + '/', newData, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'PUT'));
-            }, error => this.errorHandler(error, resource, 'PUT'));
+                }, error => this.errorHandler(error, resource, 'PUT', showErrors));
+            }, error => this.errorHandler(error, resource, 'PUT', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    deleteItem(id: number): Observable<ApiObject> {
+    deleteItem(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'items';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -844,14 +844,14 @@ export class ApiService implements OnInit {
                 this.rest.delete(catalog._links.items.href + id + '/', token).subscribe(() => {
                     this.removeResource(baseResource, id);
                     this.getItems(true);
-                }, error => this.errorHandler(error, resource, 'DELETE'));
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+                }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    undeleteItem(id: number): Observable<ApiObject> {
+    undeleteItem(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'items';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -861,27 +861,27 @@ export class ApiService implements OnInit {
                 this.rest.post(catalog._links.items.href + id + '/', undefined, token).subscribe(() => {
                     this.getItem(id);
                     this.getItems(true);
-                }, error => this.errorHandler(error, resource, 'POST'));
-            }, error => this.errorHandler(error, resource, 'POST'));
+                }, error => this.errorHandler(error, resource, 'POST', showErrors));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getTagsForItem(item: ApiObject): Observable<ApiObject[]> {
+    getTagsForItem(item: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(item._links.tags.href, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    addTagToItem(item: ApiObject, tag: ApiObject): Observable<ApiObject[]> {
+    addTagToItem(item: ApiObject, tag: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -889,13 +889,13 @@ export class ApiService implements OnInit {
             this.rest.post(item._links.tags.href, tag, token).subscribe(data => {
                 stream.next(data);
                 this.getAttributes(item);
-            }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    removeTagFromItem(item: ApiObject, tag: ApiObject): Observable<ApiObject[]> {
+    removeTagFromItem(item: ApiObject, tag: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
@@ -904,46 +904,46 @@ export class ApiService implements OnInit {
                 stream.next(data);
                 this.getTagsForItem(item);
                 this.getAttributes(item);
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getContainedItems(item: ApiObject): Observable<ApiObject[]> {
+    getContainedItems(item: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/contained-items';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(item._links.contained_items, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    postContainedItem(item: ApiObject, itemID): Observable<ApiObject[]> {
+    postContainedItem(item: ApiObject, itemID, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/contained-items';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.post(item._links.contained_items.href, {id: itemID}, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'POST'));
+            }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    deleteContainedItem(item: ApiObject, itemID): Observable<ApiObject[]> {
+    deleteContainedItem(item: ApiObject, itemID, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/contained-items';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.delete(item._links.contained_items.href, token, {id: itemID}).subscribe(data => {
                 this.getContainedItems(item);
-            }, error => this.errorHandler(error, resource, 'DELETE'));
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
@@ -952,7 +952,7 @@ export class ApiService implements OnInit {
 
 
     // Files ///////////////////////////////////////////////////////////////////
-    getFiles(item: ApiObject): Observable<Array<ApiObject>> {
+    getFiles(item: ApiObject, showErrors: string= 'all'): Observable<Array<ApiObject>> {
         let url;
         let resource = 'files';
 
@@ -967,13 +967,13 @@ export class ApiService implements OnInit {
             if (item != null) {
                 this.rest.get(url, token).subscribe(data => {
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
             } else {
                 this.getCatalog().subscribe(catalog => {
                     url = catalog._links.files;
                     this.rest.get(url, token).subscribe(data => {
                         stream.next(data);
-                    }, error => this.errorHandler(error, resource, 'GET'));
+                    }, error => this.errorHandler(error, resource, 'GET', showErrors));
                 })
             }
         });
@@ -981,7 +981,7 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getFile(fileID: number): Observable<ApiObject> {
+    getFile(fileID: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'files';
         const resource = baseResource + '/' + fileID;
 
@@ -991,14 +991,14 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe(catalog => {
                 this.rest.get(catalog._links.files.href + fileID, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
             })
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    uploadFile(item: ApiObject, file: File): Observable<ApiObject> {
+    uploadFile(item: ApiObject, file: File, showErrors: string= 'all'): Observable<ApiObject> {
         const resource = 'files';
         const stream = new AsyncSubject<ApiObject>();
 
@@ -1011,21 +1011,21 @@ export class ApiService implements OnInit {
                 this.rest.uploadFile(catalog._links.files, formData, token).subscribe(data => {
                     stream.next(data);
                     stream.complete();
-                }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
             });
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    downloadFile(file: ApiObject) {
+    downloadFile(file: ApiObject, showErrors: string= 'all') {
         const stream = new AsyncSubject<any>();
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.downloadFile(file._links.download, token).subscribe(data => {
                 stream.next(data);
                 stream.complete();
-            }, error => this.errorHandler(error, 'file-store/' + 'file.file_hash', 'GET'));
+            }, error => this.errorHandler(error, 'file-store/' + 'file.file_hash', 'GET', showErrors));
         });
 
         stream.subscribe(data => {
@@ -1036,7 +1036,7 @@ export class ApiService implements OnInit {
         })
     }
 
-    putFile(id: number, data): Observable<ApiObject> {
+    putFile(id: number, data, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'files';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -1045,7 +1045,7 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe(catalog => {
                 this.rest.put(catalog._links.files.href + id + '/', data, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
             });
         });
 
@@ -1055,20 +1055,20 @@ export class ApiService implements OnInit {
 
 
     // Attributes //////////////////////////////////////////////////////////////
-    getAttributes(item: ApiObject): Observable<Array<ApiObject>> {
+    getAttributes(item: ApiObject, showErrors: string= 'all'): Observable<Array<ApiObject>> {
         const resource = 'items/' + item.id + '/attributes';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(item._links.attributes, token).subscribe(data => {
                 stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getAttribute(item: ApiObject, id: number): Observable<ApiObject> {
+    getAttribute(item: ApiObject, id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'items/' + item.id + '/attributes';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -1076,13 +1076,13 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(item._links.attributes.href + id + '/', token).subscribe(data => {
                 this.updateResource(baseResource, data as ApiObject, 'attribute_definition_id');
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    putAttribute(item: ApiObject, id: number, value): Observable<ApiObject> {
+    putAttribute(item: ApiObject, id: number, value, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'items/' + item.id + '/attributes';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -1090,7 +1090,7 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.put(item._links.attributes.href + id + '/', {value: value}, token).subscribe(data => {
                 this.updateResource(baseResource, data as ApiObject, 'attribute_definition_id');
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
@@ -1099,7 +1099,7 @@ export class ApiService implements OnInit {
 
 
     // Lendings ////////////////////////////////////////////////////////////////
-    getLendings(): Observable<Array<ApiObject>> {
+    getLendings(showErrors: string= 'all'): Observable<Array<ApiObject>> {
         const resource = 'lendings';
         const stream = this.getStreamSource(resource);
 
@@ -1107,14 +1107,14 @@ export class ApiService implements OnInit {
             this.getRoot().subscribe((root) => {
                 this.rest.get(root._links.lending, token).subscribe(data => {
                     stream.next(data);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    postLending(newData): Observable<ApiObject> {
+    postLending(newData, showErrors: string= 'all'): Observable<ApiObject> {
         const resource = 'lendings';
 
         return this.currentJWT.map(jwt => jwt.token()).flatMap(token => {
@@ -1126,14 +1126,14 @@ export class ApiService implements OnInit {
                     return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
                 })
                 .catch(error => {
-                    this.errorHandler(error, resource, 'POST');
+                    this.errorHandler(error, resource, 'POST', showErrors);
                     return Observable.throw(error);
                 });
             });
         });
     }
 
-    getLending(id: number): Observable<ApiObject> {
+    getLending(id: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'lendings';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
@@ -1142,14 +1142,14 @@ export class ApiService implements OnInit {
             this.getRoot().subscribe((root) => {
                 this.rest.get(root._links.lending.href + id, token).subscribe(data => {
                     this.updateResource(baseResource, data as ApiObject);
-                }, error => this.errorHandler(error, resource, 'GET'));
-            }, error => this.errorHandler(error, resource, 'GET'));
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    returnLending(lending: ApiObject, id?: number): Observable<ApiObject> {
+    returnLending(lending: ApiObject, id?: number, showErrors: string= 'all'): Observable<ApiObject> {
         const baseResource = 'lendings';
         const resource = baseResource + '/' + lending.id;
         const stream = this.getStreamSource(resource);
@@ -1168,7 +1168,7 @@ export class ApiService implements OnInit {
             this.rest.post(lending, data, token).subscribe(data => {
                 this.updateResource(baseResource, data as ApiObject);
                 this.getLentItems();
-            }, error => this.errorHandler(error, resource, 'GET'));
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);

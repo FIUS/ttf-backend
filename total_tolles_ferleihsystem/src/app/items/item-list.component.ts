@@ -33,10 +33,10 @@ export class ItemListComponent implements OnInit, OnDestroy {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(item => {
-                this.api.getTagsForItem(item).take(1).subscribe(tags => {
+                this.api.getTagsForItem(item, 'errors').take(1).subscribe(tags => {
                     this.itemTags.set(item.id, tags);
                 });
-                this.api.getAttributes(item).take(1).subscribe(attributes => {
+                this.api.getAttributes(item, 'errors').take(1).subscribe(attributes => {
                     this.itemAttributes.set(item.id, attributes);
                 });
                 let letter: string = item.name.toUpperCase().substr(0, 1);
@@ -62,9 +62,11 @@ export class ItemListComponent implements OnInit, OnDestroy {
             });
             this.data = map;
         });
-        this.deletedSubscription = this.api.getItems(true).subscribe(data => {
-            this.deleted = data;
-        });
+        if (this.jwt.isAdmin()) {
+            this.deletedSubscription = this.api.getItems(true).subscribe(data => {
+                this.deleted = data;
+            });
+        }
     }
 
     ngOnDestroy(): void {

@@ -1,7 +1,7 @@
 <div class="mb3 flex flex-wrap justify-center">
     <div class="mr1 pointer" [ngClass]="{underline: filter == null}" (click)="setFilter(null)">ALL</div>
     <div class="mr1" (click)="setFilter(letter)" [ngClass]="{underline: filter === letter, pointer: data?.get(letter).length > 0, 'black-60': data?.get(letter).length <= 0}"  *ngFor="let letter of alphabet">{{letter}}</div>
-    <div class="mr1" [ngClass]="{red: filter === 'DELETED', 'pointer': deleted?.length > 0, 'black-60': deleted?.length <= 0}" (click)="setFilter('DELETED')"><i class="fa fa-trash"></i></div>
+    <div class="mr1" [ngClass]="{red: filter === 'DELETED', 'pointer': deleted?.length > 0, 'black-60': deleted?.length <= 0}" (click)="setFilter('DELETED')" *ngIf="jwt.isAdmin()"><i class="fa fa-trash"></i></div>
 </div>
 <ng-container *ngFor="let letter of alphabet">
     <div class="flex" [ngClass]="{flex: (filter == null || filter === letter), dn: true}">
@@ -14,7 +14,7 @@
     </div>
 </ng-container>
 
-<div class="flex" [ngClass]="{flex: (filter != null && filter === 'DELETED'), dn: true}">
+<div class="flex" [ngClass]="{flex: (filter != null && filter === 'DELETED'), dn: true}" *ngIf="jwt.isAdmin()">
     <div class="f3 gray"><i class="fa fa-trash"></i></div>
     <ul class="mt0 list">
         <li class="min-w2 mb1 hide-child" *ngFor="let tag of deleted">

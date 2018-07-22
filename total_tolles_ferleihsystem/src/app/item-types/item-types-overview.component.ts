@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { ApiService } from '../shared/rest/api.service';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-item-types-overview',
@@ -10,7 +11,7 @@ export class ItemTypesOverviewComponent implements OnInit {
 
     private newItemTypeData;
 
-    constructor(private data: NavigationService, private api: ApiService) { }
+    constructor(private data: NavigationService, private api: ApiService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – ItemTypes');

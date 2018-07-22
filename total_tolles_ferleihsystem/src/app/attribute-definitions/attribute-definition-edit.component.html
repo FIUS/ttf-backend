@@ -1,10 +1,10 @@
 <ttf-box>
     <h1 class="mv0" title>Edit: {{attrDef?.name}}</h1>
-    <div class="tooltip tooltip-left button h2 pv1 ph2 br2 link bg-animate hover-bg-light-red pointer" data-tooltip="delete" (click)="confirm.open()" title-right>
+    <div class="tooltip tooltip-left button h2 pv1 ph2 br2 link bg-animate hover-bg-light-red pointer" data-tooltip="delete" (click)="confirm.open()" *ngIf="jwt.isAdmin()" title-right>
         <i class="fa fa-trash"></i>
     </div>
     <div class="w-100 ph3 pv2" body>
-        <dynamic-form [objectModel]="'AttributeDefinitionPUT'" [startValues]="attrDef" [showSaveButton]="true" (save)="save($event)"></dynamic-form>
+        <dynamic-form [objectModel]="'AttributeDefinitionPUT'" [startValues]="attrDef" [showSaveButton]="jwt.isAdmin()" (save)="save($event)"></dynamic-form>
     </div>
 </ttf-box>
 

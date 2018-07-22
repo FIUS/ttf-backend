@@ -4,6 +4,9 @@ The database models of the item and all connected tables
 
 import datetime
 from sqlalchemy.sql import func
+import string
+from json import loads
+from datetime import date
 
 from .. import DB
 from . import STD_STRING_SIZE
@@ -95,6 +98,30 @@ class Item(DB.Model):
             return tag_lending_duration
 
         return self.type.lending_duration
+
+    @property
+    def name_schema_name(self):
+        template = string.Template(self.type.name_schema)
+        attributes = {}
+        for attr in self._attributes:
+            if attr.value:
+                try:
+                    attributes[attr.attribute_definition.name] = loads(attr.value)
+                except:
+                    attributes[attr.attribute_definition.name] = loads(attr.value)
+            else:
+                attr_def = loads(attr.attribute_definition.jsonschema)
+                attributes[attr.attribute_definition.name] = attr_def.get('default', '')
+
+        today = date.today()
+        times = {
+            'c_year': today.year,
+            'c_month': today.month,
+            'c_day': today.day,
+            'c_date': today.strftime('%d.%b.%Y'),
+            'c_date_iso': today.isoformat(),
+        }
+        return template.safe_substitute(attributes, type=self.type.name, **times)
 
     def delete(self):
         if self.is_currently_lent:

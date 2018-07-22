@@ -4,6 +4,7 @@ import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
 import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-tag-edit',
@@ -22,7 +23,7 @@ export class TagEditComponent implements OnChanges, OnDestroy {
         name: 'UNBEKANNT'
     };
 
-    constructor(private api: ApiService, private router: Router) { }
+    constructor(private api: ApiService, private router: Router, private jwt: JWTService) { }
 
     ngOnChanges(): void {
         if (this.subscription != null) {

@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { ApiService } from '../shared/rest/api.service';
 import { Subscription } from 'rxjs/Rx';
+import { JWTService } from '../shared/rest/jwt.service';
 
 @Component({
   selector: 'ttf-item-type-detail',
@@ -16,7 +17,7 @@ export class ItemTypeDetailComponent implements OnInit, OnDestroy {
     itemTypeID: number;
     itemType;
 
-    constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute) { }
+    constructor(private data: NavigationService, private api: ApiService, private route: ActivatedRoute, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – ItemType');
