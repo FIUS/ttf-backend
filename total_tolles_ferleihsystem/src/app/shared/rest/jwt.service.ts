@@ -1,7 +1,7 @@
 import { Injectable, OnInit, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
-import { Observable, Subject, } from 'rxjs/Rx';
+import { Observable, Subject, BehaviorSubject, } from 'rxjs/Rx';
 
 
 @Injectable()
@@ -9,6 +9,9 @@ export class JWTService implements OnInit {
 
     private sessionExpirySource = new Subject<boolean>();
     readonly sessionExpiry = this.sessionExpirySource.asObservable();
+
+    private userSource = new BehaviorSubject<string>(undefined);
+    readonly user = this.userSource.asObservable();
 
     readonly TOKEN = 'token';
     readonly REFRESH_TOKEN = 'refresh_token';
@@ -25,6 +28,7 @@ export class JWTService implements OnInit {
         this.api = this.injector.get(ApiService);
         Observable.timer(1, 60000).subscribe((() => {
             if (this.loggedIn()) {
+                this.userSource.next(this.username());
                 let future = new Date();
                 future = new Date(future.getTime() + (3 * 60 * 1000))
                 if (this.expiration(this.token()) < future) {
@@ -36,6 +40,7 @@ export class JWTService implements OnInit {
             }
         }).bind(this));
         if (!this.loggedIn()) {
+            this.userSource.next(undefined);
             this.api.guestLogin();
         }
     }
@@ -48,9 +53,13 @@ export class JWTService implements OnInit {
         if (this.router.url === '/login' && this.loggedIn()) {
             this.router.navigate(['/']);
         }
+        if (this.userSource.value !== this.username()) {
+            this.userSource.next(this.username());
+        }
     }
 
     logout() {
+        this.userSource.next(undefined);
         localStorage.removeItem(this.TOKEN);
         localStorage.removeItem(this.REFRESH_TOKEN);
         this.api.guestLogin();

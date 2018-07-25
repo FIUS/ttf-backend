@@ -213,6 +213,32 @@ export class ApiService implements OnInit {
         });
     }
 
+    getSettings(): Observable<string> {
+        const stream = new AsyncSubject<string>();
+        this.currentJWT.subscribe(jwt => {
+            this.getAuthRoot().subscribe(auth => {
+                this.rest.get(auth._links.settings, jwt.token()).subscribe(data => {
+                    stream.next((data as any).settings);
+                    stream.complete();
+                });
+            });
+        });
+        return stream.asObservable();
+    }
+
+    updateSettings(settings: string): Observable<string> {
+        const stream = new AsyncSubject<string>();
+        this.currentJWT.subscribe(jwt => {
+            this.getAuthRoot().subscribe(auth => {
+                this.rest.put(auth._links.settings, {'settings': settings}, jwt.token()).subscribe(data => {
+                    stream.next((data as any).settings);
+                    stream.complete();
+                });
+            });
+        });
+        return stream.asObservable();
+    }
+
     search(search: string, type?: number, tags?: Set<number>,
            attributes?: Map<number, string>, deleted?: boolean, lent?: boolean): Observable<Array<ApiObject>> {
         const stream = new AsyncSubject<Array<ApiObject>>();
