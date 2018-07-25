@@ -118,7 +118,9 @@ class ItemTypeDetail(Resource):
 
         items = Item.query.filter(Item.type_id == type_id).all()
         for item in items:
-            item.delete()
+            code, msg, commit = item.delete()
+            if not commit:
+                 abort(code, msg)
 
         DB.session.commit()
         return "", 204
