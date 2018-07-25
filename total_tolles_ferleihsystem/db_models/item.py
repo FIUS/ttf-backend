@@ -24,6 +24,7 @@ __all__ = [
     'ItemToAttributeDefinition'
 ]
 
+
 class Item(DB.Model):
     """
     This data model represents a single lendable item
@@ -32,6 +33,7 @@ class Item(DB.Model):
 
     id = DB.Column(DB.Integer, primary_key=True)
     name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
+    update_name_from_schema = DB.Column(DB.Boolean, default=True, nullable=False)
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
     lending_duration = DB.Column(DB.Integer, nullable=True) # in seconds
     deleted = DB.Column(DB.Boolean, default=False)
@@ -222,6 +224,7 @@ class Item(DB.Model):
                                      .all())
         return self.get_attribute_changes([ttad.attribute_definition_id for ttad in tag_attribute_definitions], remove)
 
+
 class File(DB.Model):
     """
     This data model represents a file attached to a item
@@ -257,6 +260,7 @@ class File(DB.Model):
         self.invalidation = invalidation
         self.item_id = item_id
 
+
 class Lending(DB.Model):
     """
     This data model represents a Lending
@@ -282,6 +286,7 @@ class Lending(DB.Model):
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
+
 
 class ItemToItem(DB.Model):
 

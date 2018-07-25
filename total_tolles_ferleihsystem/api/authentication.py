@@ -8,7 +8,9 @@ from flask_jwt_extended import jwt_required, create_access_token, \
 
 from . import API
 from .models import AUTHENTICATION_ROUTES_MODEL
-from .. import APP, AUTH_LOGGER
+from .. import APP, DB, AUTH_LOGGER
+
+from ..db_models.settings import Settings
 
 from ..login import LoginService, UserRole, User
 
@@ -33,6 +35,10 @@ JWT_RESPONSE_FULL = API.inherit('JWT_FULL', JWT_RESPONSE, {
 CHECK_RESPONSE = API.model('check', {
     'username': fields.String(required=True, readonly=True),
     'role': fields.Integer(required=True, readonly=True)
+})
+
+SETTINGS = API.model('settings', {
+    'settings': fields.String(required=True),
 })
 
 
@@ -135,6 +141,41 @@ class Check(Resource):
             'role': get_jwt_claims()
         }
         return ret
+
+
+@ANS.route('/settings/')
+class SettingsResource(Resource):
+    """Resource to manage settings from users."""
+
+    @jwt_required
+    @API.response(401, 'Not Authenticated')
+    @API.marshal_with(SETTINGS)
+    # pylint: disable=R0201
+    def get(self):
+        """Get settings for current user."""
+        username = get_jwt_identity()
+        user_settings: Settings = Settings.get_settings(username)
+        if user_settings:
+            return {'settings': user_settings.settings}
+        return {'settings': '{}'}
+
+    @jwt_required
+    @API.expect(SETTINGS)
+    @API.marshal_with(SETTINGS)
+    # pylint: disable=R0201
+    def put(self):
+        """Update Settings."""
+        username = get_jwt_identity()
+        settings = API.payload.get('settings', None)
+        user_settings: Settings = Settings.get_settings(username)
+        if not user_settings:
+            user_settings = Settings(username, settings)
+        else:
+            user_settings.settings = settings
+        DB.session.add(user_settings)
+        DB.session.commit()
+        return {'settings': user_settings.settings}
+
 
 
 @ANS.route('/refresh/')

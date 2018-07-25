@@ -23,7 +23,7 @@ DB_COMMAND_LOGGER.setLevel(DEBUG)
 STD_STRING_SIZE = 190  # Max size that allows Indices while using utf8mb4 in MySql DB
 
 
-from . import attributeDefinition, blacklist, item, itemType, tag
+from . import attributeDefinition, blacklist, item, itemType, tag, settings
 
 
 if APP.config.get('SQLALCHEMY_DATABASE_URI', '').startswith('sqlite://'):
