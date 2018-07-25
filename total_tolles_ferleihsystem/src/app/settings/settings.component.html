@@ -12,6 +12,9 @@
                 <i class="fa fa-square-o" [hidden]="navigateAfterCreation"></i>
                 <i class="fa fa-check-square-o" [hidden]="!navigateAfterCreation"></i>
             </p>
+            <p class="pointer" (click)="changeColor()">
+                Background Color: {{theme?.backgroundColor}}
+            </p>
         </div>
     </ttf-box>
 </div>
