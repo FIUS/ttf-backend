@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+import { SettingsComponent } from './settings/settings.component';
 
 import { SearchOverviewComponent } from './search/search-overview.component';
 
@@ -42,6 +43,7 @@ const routes: Routes = [
   { path: 'attribute-definitions/:id', component: AttributeDefinitionDetailComponent, canActivate: [ModGuard] },
   { path: '', pathMatch: 'full', component: HomeComponent, canActivate: [LoginGuard] },
   { path: 'login', pathMatch: 'full', component: LoginComponent},
+  { path: 'settings', component: SettingsComponent, canActivate: [ModGuard] },
   { path: '**', redirectTo: '' }
 ]
 

@@ -8,6 +8,7 @@ import { StagingService } from '../navigation/staging-service';
 import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { ApiObject } from '../shared/rest/api-base.service';
+import { SettingsService } from '../shared/settings/settings.service';
 
 @Component({
   selector: 'ttf-item-detail',
@@ -23,7 +24,9 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private containedItemsSubscription: Subscription;
     private filesSubscription: Subscription;
 
-    edit: boolean = false;
+    rememberEditMode: boolean = false;
+    editMode: boolean = false;
+    _edit: boolean = false;
 
     itemID: number;
     item: ApiObject;
@@ -45,12 +48,20 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     constructor(private data: NavigationService, private api: ApiService,
                 private jwt: JWTService, private staging: StagingService,
-                private route: ActivatedRoute) { }
+                private route: ActivatedRoute, private settings: SettingsService) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Item');
         this.paramSubscription = this.route.params.subscribe(params => {
             this.update(parseInt(params['id'], 10));
+        });
+        this.settings.getSetting('rememberEditMode').subscribe(rememberEditMode => {
+            this.rememberEditMode = rememberEditMode;
+        });
+        this.settings.getSetting('editMode').subscribe(editMode => {
+            if (this.rememberEditMode) {
+                this.editMode = editMode;
+            }
         });
     }
 
@@ -154,6 +165,20 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     get canEdit() {
         return this.jwt.isAdmin();
+    }
+
+    get edit() {
+        if (this.rememberEditMode) {
+            return this.editMode;
+        }
+        return this._edit;
+    }
+
+    set edit(value: boolean) {
+        this._edit = value;
+        if (this.rememberEditMode) {
+            this.settings.setSetting('editMode', value);
+        }
     }
 
     ngOnDestroy(): void {
