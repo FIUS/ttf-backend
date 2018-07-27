@@ -67,11 +67,11 @@ ITEM_TYPE_LIST_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
 })
 
 ITEM_TYPE_POST = API.model('ItemTypePOST', {
-    'name': fields.String(max_length=STD_STRING_SIZE),
-    'name_schema': fields.String(max_length=STD_STRING_SIZE),
-    'lending_duration': fields.Integer(),
-    'visible_for': fields.String(enum=('all', 'moderator', 'administrator')),
-    'how_to': fields.String(nullable=True, max_length=STD_STRING_SIZE),
+    'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),
+    'name_schema': fields.String(max_length=STD_STRING_SIZE, title='Name Schema'),
+    'lending_duration': fields.Integer(title='Lending Duration'),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), title='Access Rights'),
+    'how_to': fields.String(nullable=True, title='How to'),
 })
 
 ITEM_TYPE_PUT = API.inherit('ItemTypePUT', ITEM_TYPE_POST, {
@@ -94,9 +94,10 @@ ITEM_TAG_LIST_LINKS = API.inherit('ItemTagLinks', WITH_CURIES, {
 })
 
 ITEM_TAG_POST = API.model('ItemTagPOST', {
-    'name': fields.String(max_length=STD_STRING_SIZE),
-    'lending_duration': fields.Integer(nullable=True),
-    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
+    'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),
+    'lending_duration': fields.Integer(nullable=True, title='Lending Duration'),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE,
+            title='Access Rights'),
 })
 
 ITEM_TAG_PUT = API.inherit('ItemTagPUT', ITEM_TAG_POST, {
