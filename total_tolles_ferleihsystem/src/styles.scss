@@ -8,6 +8,22 @@
 
 :root {
     --background-color: #ffffff;
+    --titlebar-color : #f4f4f4;
+    --titlebar-text-color : #000000;
+    --breadcrumbs-color : #ffffff;
+    --breadcrumbs-text-color : #000000;
+    --main-button-color : #f4f4f4;
+    --main-button-text-color : #000000;
+    --box-header-color : #f4f4f4;
+    --box-header-text-color : #000000;
+    --box-content-color : #ffffff;
+    --box-content-text-color : #000000;
+    --dialog-header-color : #f4f4f4;
+    --dialog-header-text-color : #000000;
+    --dialog-content-color : #ffffff;
+    --dialog-content-text-color : #000000;
+    --header-button-color : #aaaaaa;
+    --header-button-text-color : #000000;
 }
 
 body {
@@ -20,43 +36,43 @@ body {
 }
 
 .ttf-titlebar {
-    background-color: $titlebar-color;
-    color: $titlebar-text-color;
+    background-color: var(--titlebar-color);
+    color: var(--titlebar-text-color);
 }
 
 .ttf-breadcrumbs {
-    background-color: $breadcrumbs-color;
-    color: $breadcrumbs-text-color
+    background-color: var(--breadcrumbs-color);
+    color: var(--breadcrumbs-text-color);
 }
 
 .ttf-main-button {
-    background-color: $main-button-color;
-    color: $main-button-text-color;
+    background-color: var(--main-button-color);
+    color: var(--main-button-text-color);
 }
 
 .ttf-box-header {
-    background-color: $box-header-color;
-    color: $box-header-text-color;
+    background-color: var(--box-header-color);
+    color: var(--box-header-text-color);
 }
 
 .ttf-box-content {
-    background-color: $box-content-color;
-    color: $box-content-text-color;
+    background-color: var(--box-content-color);
+    color: var(--box-content-text-color);
 }
 
 .ttf-dialog-header {
-    background-color: $dialog-header-color;
-    color: $dialog-header-text-color;
+    background-color: var(--dialog-header-color);
+    color: var(--dialog-header-text-color);
 }
 
 .ttf-dialog-content {
-    background-color: $dialog-content-color;
-    color: $dialog-content-text-color;
+    background-color: var(--dialog-content-color);
+    color: var(--dialog-content-text-color);
 }
 
 .ttf-header-button {
-    background-color: $header-button-color;
-    color: $header-button-text-color;
+    background-color: var(--header-button-color);
+    color: var(--header-button-text-color);
 }
 
 .w6 {

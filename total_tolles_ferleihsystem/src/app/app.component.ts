@@ -13,6 +13,8 @@ export class AppComponent implements OnInit {
     @ViewChild('renewLoginDialog') loginDialog: myDialogComponent;
     private password: string;
 
+    style: any;
+
     constructor(private jwt: JWTService, private settings: SettingsService) {}
 
     ngOnInit(): void {
@@ -20,8 +22,13 @@ export class AppComponent implements OnInit {
             this.loginDialog.open();
         });
         this.settings.getSetting('theme').subscribe(theme => {
+            this.style = theme;
             if (theme != null) {
-                this.setColor('background-color', theme.backgroundColor);
+                for (const   name in theme) {
+                    if (theme.hasOwnProperty(name)) {
+                        this.setColor(name, theme[name]);
+                    }
+                }
             }
         });
     }

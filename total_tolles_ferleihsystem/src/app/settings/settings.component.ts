@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { SettingsService } from '../shared/settings/settings.service';
 
+import * as themes from '../../assets/themes.json';
+
 @Component({
   selector: 'ttf-settings',
   templateUrl: './settings.component.html'
@@ -12,6 +14,7 @@ export class SettingsComponent implements OnInit {
     rememberEditMode: boolean;
     navigateAfterCreation: boolean;
     theme: any = {};
+    themeId: number = 0;
 
     constructor(private data: NavigationService, private settings: SettingsService) { }
 
@@ -28,21 +31,14 @@ export class SettingsComponent implements OnInit {
             if (theme != null) {
                 this.theme = theme;
             } else {
-                this.theme = new Object();
+                this.theme = themes['data'][0];
             }
         });
     }
 
     changeColor() {
-        if (this.theme.backgroundColor == null || this.theme.backgroundColor == 'white') {
-            this.theme.backgroundColor = 'red';
-        } else if (this.theme.backgroundColor == 'red') {
-            this.theme.backgroundColor = 'blue';
-        } else if (this.theme.backgroundColor == 'blue') {
-            this.theme.backgroundColor = 'green';
-        } else if (this.theme.backgroundColor == 'green') {
-            this.theme.backgroundColor = 'white';
-        }
+        this.themeId = (this.themeId + 1) % themes['count'];
+        this.theme = themes['data'][this.themeId];
         this.settings.setSetting('theme', this.theme);
     }
 
