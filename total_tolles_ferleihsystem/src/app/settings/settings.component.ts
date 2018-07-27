@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { SettingsService } from '../shared/settings/settings.service';
 
-import * as themes from '../../assets/themes.json';
+import { Themes } from './themes';
 
 @Component({
   selector: 'ttf-settings',
@@ -31,14 +31,14 @@ export class SettingsComponent implements OnInit {
             if (theme != null) {
                 this.theme = theme;
             } else {
-                this.theme = themes['data'][0];
+                this.theme = Themes[0];
             }
         });
     }
 
     changeColor() {
-        this.themeId = (this.themeId + 1) % themes['count'];
-        this.theme = themes['data'][this.themeId];
+        this.themeId = (this.themeId + 1) % Themes.length;
+        this.theme = Themes[this.themeId];
         this.settings.setSetting('theme', this.theme);
     }
 

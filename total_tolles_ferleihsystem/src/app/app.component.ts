@@ -25,6 +25,7 @@ export class AppComponent implements OnInit {
             this.style = theme;
             if (theme != null) {
                 for (const   name in theme) {
+                    if (name === 'name') { continue; }
                     if (theme.hasOwnProperty(name)) {
                         this.setColor(name, theme[name]);
                     }
