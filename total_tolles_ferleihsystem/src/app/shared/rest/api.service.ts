@@ -1116,6 +1116,7 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.put(item._links.attributes.href + id + '/', {value: value}, token).subscribe(data => {
                 this.updateResource(baseResource, data as ApiObject, 'attribute_definition_id');
+                this.getItem(item.id);
             }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
 
