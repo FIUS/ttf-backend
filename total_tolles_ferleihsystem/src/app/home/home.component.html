@@ -21,7 +21,7 @@
         </table>
     </div>
 </div>
-<div class="flex flex-wrap justify-between">
+<div #menuContainer class="flex flex-wrap" [ngClass]="{'justify-between': jwt.isModerator()}">
     <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
         <i class="f2 fa fa-folder"></i>
         <a class="f3 ttf-main-button">Item Types</a>

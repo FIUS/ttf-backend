@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { ApiService } from '../shared/rest/api.service';
@@ -14,6 +14,10 @@ export class HomeComponent implements OnInit {
 
     lentItems: ApiObject[];
 
+    justifyBetween: boolean = false;
+
+    @ViewChild('#menuContainer') menuContainer;
+
     constructor(private data: NavigationService, private jwt: JWTService, private api: ApiService) { }
 
     ngOnInit(): void {
@@ -23,6 +27,11 @@ export class HomeComponent implements OnInit {
             this.lentItems = items;
         });
         Observable.timer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
+        Observable.timer(1).subscribe(() => this.updateJustify());
+    }
+
+    updateJustify() {
+        console.log(this.menuContainer);
     }
 
     itemOverdue(item: ApiObject): boolean {
