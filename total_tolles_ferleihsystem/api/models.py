@@ -156,10 +156,12 @@ ITEM_LIST_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
 })
 
 ITEM_POST = API.model('ItemPOST', {
-    'name': fields.String(max_length=STD_STRING_SIZE),
-    'type_id': fields.Integer(min=1),
-    'lending_duration': fields.Integer(nullable=True),
-    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
+    'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),
+    'update_name_from_schema': fields.Boolean(default=True, title='Schema Name'),
+    'type_id': fields.Integer(min=1, title='Type'),
+    'lending_duration': fields.Integer(nullable=True, title='Lending Duration'),
+    'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE,
+            title='Access Rights'),
 })
 
 ITEM_PUT = API.inherit('ItemPUT', ITEM_POST, {

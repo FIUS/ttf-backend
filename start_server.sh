@@ -6,7 +6,7 @@ export FLASK_DEBUG=1  # to enable autoreload
 export MODE=debug
 
 # create debug db:
-flask create_db
+flask db upgrade
 
 # start server
 flask run

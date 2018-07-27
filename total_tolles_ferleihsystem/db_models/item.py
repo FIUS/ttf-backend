@@ -41,8 +41,15 @@ class Item(DB.Model):
 
     type = DB.relationship('ItemType', lazy='joined')
 
-    def __init__(self, name: str, type_id: int, lending_duration: int = -1, visible_for: str = ''):
-        self.name = name
+    def __init__(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
+            visible_for: str = ''):
+        self.update_name_from_schema = update_name_from_schema
+
+        if self.update_name_from_schema:
+            self.name = self.name_schema_name
+        else:
+            self.name = name
+
         self.type_id = type_id
 
         if lending_duration >= 0:
@@ -51,11 +58,18 @@ class Item(DB.Model):
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
-    def update(self, name: str, type_id: int, lending_duration: int = -1, visible_for: str = ''):
+    def update(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
+            visible_for: str = ''):
         """
         Function to update the objects data
         """
-        self.name = name
+        self.update_name_from_schema = update_name_from_schema
+
+        if self.update_name_from_schema:
+            self.name = self.name_schema_name
+        else:
+            self.name = name
+
         self.type_id = type_id
         self.lending_duration = lending_duration
         self.visible_for = visible_for
@@ -110,7 +124,7 @@ class Item(DB.Model):
                 try:
                     attributes[attr.attribute_definition.name] = loads(attr.value)
                 except:
-                    attributes[attr.attribute_definition.name] = loads(attr.value)
+                    pass
             else:
                 attr_def = loads(attr.attribute_definition.jsonschema)
                 attributes[attr.attribute_definition.name] = attr_def.get('default', '')
