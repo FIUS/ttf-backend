@@ -9,7 +9,7 @@
         </label>
 
         <div class="pl1 min-w5 flex-grow-1 flex items-center" >
-            <div [ngSwitch]="question.controlType" class="flex-grow-1">
+            <div [ngSwitch]="question.controlType" class="flex-grow-1 w5">
 
                 <div *ngSwitchCase="'string'" class="flex bb b--gray">
                     <input class="input-reset bn pa1 flex-grow-1" [formControlName]="question.key" [id]="question.key" [attr.list]="question.key + '-datalist'" [type]="question.type">
