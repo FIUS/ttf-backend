@@ -389,7 +389,8 @@ class ItemAttributeDetail(Resource):
         if attribute is None:
             abort(400, "This item doesn't have that type of attribute!")
 
-        attribute.value = value
+        attribute.update(value)
+
         try:
             DB.session.commit()
             return attribute
@@ -526,7 +527,5 @@ class ItemFile(Resource):
 
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
-
-        # FIXME block users from accessing items without access
 
         return File.query.filter(File.item_id == item_id).all()

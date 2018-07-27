@@ -371,22 +371,31 @@ class ItemToAttributeDefinition (DB.Model):
     def __init__(self, item_id: int, attribute_definition_id: int, value: str):
         self.item_id = item_id
         self.attribute_definition_id = attribute_definition_id
+        self.update(value);
+
+    def update(self, value: str) -> None:
+        """
+        Update the value
+        """
         self.value = value
 
-    def delete(self):
+        if self.item.update_name_from_schema:
+            self.item.name = self.item.name_schema_name
+
+    def delete(self) -> None:
         """
         Soft-deletes this association
         """
         self.deleted = True
 
-    def undelete(self):
+    def undelete(self) -> None:
         """
         Undeletes this association
         """
         self.deleted = False
 
     @property
-    def is_deleted(self):
+    def is_deleted(self) -> bool:
         """
         Checks whether this association is currently soft deleted
         """
