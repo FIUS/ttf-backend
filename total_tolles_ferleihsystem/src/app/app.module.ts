@@ -14,6 +14,7 @@ import { StagingService } from './navigation/staging-service';
 
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+import { SettingsComponent } from './settings/settings.component';
 
 import { SearchOverviewComponent } from './search/search-overview.component';
 import { SearchComponent } from './search/search.component';
@@ -63,6 +64,8 @@ import { AppComponent } from './app.component';
         LoginComponent,
 
         HomeComponent,
+
+        SettingsComponent,
 
         SearchOverviewComponent,
         SearchComponent,

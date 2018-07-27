@@ -6,7 +6,7 @@ import { JWTService } from '../rest/jwt.service';
 
 
 @Injectable()
-export class BaseApiService {
+export class SettingsService {
 
     private settingsSource = new BehaviorSubject<{[propName: string]: any}>(new Object());
 
@@ -26,7 +26,7 @@ export class BaseApiService {
     getSetting(key: string): Observable<any> {
         return this.settingsSource.map(settings => {
             if (settings != null) {
-                return settings['key'];
+                return settings[key];
             } else {
                 return undefined;
             }

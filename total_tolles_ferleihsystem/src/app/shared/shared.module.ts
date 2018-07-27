@@ -21,6 +21,8 @@ import { LoginGuard } from './rest/guards/login.guard';
 import { ModGuard } from './rest/guards/mod.guard';
 import { AdminGuard } from './rest/guards/admin.guard';
 
+import { SettingsService } from './settings/settings.service';
+
 
 import { InfoComponent } from './info/info.component';
 import { InfoService } from './info/info.service';
@@ -60,6 +62,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         ApiService,
         BaseApiService,
         JWTService,
+        SettingsService,
         LoginGuard,
         ModGuard,
         AdminGuard,

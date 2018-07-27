@@ -6,13 +6,17 @@
 @import "../node_modules/tachyons/css/tachyons";
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
+:root {
+    --background-color: #ffffff;
+}
+
 body {
     height: 100vh;
     font-family: 'Roboto', sans-serif;
 }
 
 .ttf-background {
-    background-color: $background-color;
+    background-color: var(--background-color);
 }
 
 .ttf-titlebar {

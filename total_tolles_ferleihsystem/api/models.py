@@ -36,6 +36,7 @@ AUTHENTICATION_ROUTES_LINKS = API.inherit('AuthenticationRoutesLinks', WITH_CURI
     'fresh_login': HaLUrl(UrlData('api.auth_fresh_login')),
     'refresh': HaLUrl(UrlData('api.auth_refresh')),
     'check': HaLUrl(UrlData('api.auth_check')),
+    'settings': HaLUrl(UrlData('api.auth_settings_resource')),
 })
 AUTHENTICATION_ROUTES_MODEL = API.model('AuthenticationRoutesModel', {
     '_links': NestedFields(AUTHENTICATION_ROUTES_LINKS),

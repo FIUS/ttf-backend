@@ -1,6 +1,6 @@
 from .. import DB
 from . import STD_STRING_SIZE
-from hashlib import sha512
+from hashlib import sha3_256
 
 
 __all__=['Settings', ]
@@ -18,7 +18,7 @@ class Settings (DB.Model):
 
     @staticmethod
     def _hash_user(user: str) -> str:
-        hash_string = sha512(user.encode()).hexdigest()
+        hash_string = sha3_256(user.encode()).hexdigest()
         if len(hash_string) > STD_STRING_SIZE:
             return hash_string[:STD_STRING_SIZE-1]
         return hash_string

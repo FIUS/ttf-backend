@@ -1,0 +1,20 @@
+<div class="flex flex-wrap">
+    <ttf-box>
+        <h1 class="mv0" title>User Settings:</h1>
+        <div class="w-100 ph3 pv2" body>
+            <p class="pointer" (click)="settings.setSetting('rememberEditMode', !rememberEditMode)">
+                Remember edit mode
+                <i class="fa fa-square-o" [hidden]="rememberEditMode"></i>
+                <i class="fa fa-check-square-o" [hidden]="!rememberEditMode"></i>
+            </p>
+            <p class="pointer" (click)="settings.setSetting('navigateAfterCreation', !navigateAfterCreation)">
+                Navigate after createing something
+                <i class="fa fa-square-o" [hidden]="navigateAfterCreation"></i>
+                <i class="fa fa-check-square-o" [hidden]="!navigateAfterCreation"></i>
+            </p>
+            <p class="pointer" (click)="changeColor()">
+                Background Color: {{theme?.backgroundColor}}
+            </p>
+        </div>
+    </ttf-box>
+</div>
