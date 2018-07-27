@@ -371,7 +371,7 @@ class ItemToAttributeDefinition (DB.Model):
     def __init__(self, item_id: int, attribute_definition_id: int, value: str):
         self.item_id = item_id
         self.attribute_definition_id = attribute_definition_id
-        self.update(value);
+        self.value = value
 
     def update(self, value: str) -> None:
         """

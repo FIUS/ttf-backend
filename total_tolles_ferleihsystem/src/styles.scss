@@ -24,6 +24,10 @@
     --dialog-content-text-color : #000000;
     --header-button-color : #aaaaaa;
     --header-button-text-color : #000000;
+    --header-success-button-hover-color: #9eebcf;
+    --header-success-button-text-hover-color: #000000;
+    --header-fail-button-hover-color: #ff725c;
+    --header-fail-button-text-hover-color: #000000;
 }
 
 body {
@@ -74,6 +78,17 @@ body {
     background-color: var(--header-button-color);
     color: var(--header-button-text-color);
 }
+
+.ttf-header-success-button:hover {
+    background-color: var(--header-success-button-hover-color);
+    color: var(--header-success-button-text-hover-color);
+}
+
+.ttf-header-fail-button:hover {
+    background-color: var(--header-fail-button-hover-color);
+    color: var(--header-fail-button-text-hover-color);
+}
+
 
 .w6 {
     width: 32rem;

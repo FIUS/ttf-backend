@@ -18,7 +18,11 @@ export const Themes = [
         'dialog-content-color': '#ffffff',
         'dialog-content-text-color': '#000000',
         'header-button-color': '#aaaaaa',
-        'header-button-text-color': '#000000'
+        'header-button-text-color': '#000000',
+        'header-success-button-hover-color': '#9eebcf',
+        'header-success-button-text-hover-color': '#000000',
+        'header-fail-button-hover-color': '#ff725c',
+        'header-fail-button-text-hover-color': '#000000'
     },
     {
         'name': 'blue',
@@ -39,6 +43,10 @@ export const Themes = [
         'dialog-content-color': '#ffffff',
         'dialog-content-text-color': '#000A1B',
         'header-button-color': '#ffffff',
-        'header-button-text-color': '#08215c'
+        'header-button-text-color': '#08215c',
+        'header-success-button-hover-color': '#377A00',
+        'header-success-button-text-hover-color': '#08215c',
+        'header-fail-button-hover-color': '#892100',
+        'header-fail-button-text-hover-color': '#08215c'
     }
 ];
