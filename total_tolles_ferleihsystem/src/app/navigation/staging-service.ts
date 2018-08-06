@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 @Injectable()
 export class StagingService {
 
-    readonly STAGED_KEY = 'staged-items';
+    readonly STAGED_KEY = 'ttf_staged_items';
 
     private staged: Set<number>;
 

@@ -13,8 +13,8 @@ export class JWTService implements OnInit {
     private userSource = new BehaviorSubject<string>(undefined);
     readonly user = this.userSource.asObservable();
 
-    readonly TOKEN = 'token';
-    readonly REFRESH_TOKEN = 'refresh_token';
+    readonly TOKEN = 'ttf_token';
+    readonly REFRESH_TOKEN = 'ttf_refresh_token';
 
     private api: ApiService;
 
