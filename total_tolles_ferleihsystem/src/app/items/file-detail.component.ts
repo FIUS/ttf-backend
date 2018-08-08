@@ -12,6 +12,8 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
 
     private fileSubscription: Subscription;
 
+    @Input() item?: ApiObject;
+
     @Input() fileID: number;
 
     @Input() uploadFileName: string;
@@ -46,6 +48,10 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
 
     save = () => {
         this.api.putFile(this.fileID, this.newFileData).take(1).subscribe();
+    }
+
+    delete = () => {
+        this.api.deleteFile(this.file, this.item).take(1).subscribe();
     }
 
 }

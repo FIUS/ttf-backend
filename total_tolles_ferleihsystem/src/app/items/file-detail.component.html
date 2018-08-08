@@ -21,6 +21,7 @@
         <p class="f4"><span class="b">Creation Date:</span> <span>{{file?.creation | date}}</span></p>
         <p class="f4" *ngIf="file?.invalidation != null" ><span class="b">Invaldidation Date:</span> <span>{{file?.invalidation | date}}</span></p>
         <p class="f4"><span class="b">Hash:</span> <span style="word-break: break-all">{{file?.file_hash}}</span></p>
+        <p class="f5 tr gray hover-red pointer" (click)="deleteFile.open()"><i class="fa fa-trash"></i> delete file</p>
     </div>
 </div>
 
@@ -28,5 +29,12 @@
     <h1 class="mv0" title>File "{{file?.name}}":</h1>
     <div class="w-100 ph3 pv2" body>
         <dynamic-form [objectModel]="'FilePUT'" [startValues]="file" (data)="onDataChange($event)" #form ></dynamic-form>
+    </div>
+</ttf-dialog>
+
+<ttf-dialog [dialogType]="'delete-cancel'" [icon]="'delete'" [okCallback]="delete" #deleteFile >
+    <h1 class="mv0" title>Delete file "{{file?.name}}":</h1>
+    <div class="w-100 ph3 pv2" body>
+        Do you really want to delete "{{file?.name}}"?
     </div>
 </ttf-dialog>

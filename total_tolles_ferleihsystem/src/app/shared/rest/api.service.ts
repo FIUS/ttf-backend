@@ -1078,6 +1078,21 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
+    deleteFile(file: ApiObject, item?: ApiObject,  showErrors: string= 'all'): Observable<ApiObject> {
+        const baseResource = 'files';
+        const resource = baseResource + '/' + file.id;
+        const stream = this.getStreamSource(resource);
+
+        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+            this.rest.delete(file, token).subscribe(data => {
+                stream.next(null);
+                this.getFiles(item, showErrors);
+            }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
+        });
+
+        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+    }
+
 
 
     // Attributes //////////////////////////////////////////////////////////////
