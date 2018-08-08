@@ -90,7 +90,7 @@ class AttributeDefinitionDetail(Resource):
         attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if attribute is None:
             abort(404, 'Requested attribute not found!')
-        
+
         ttads = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.attribute_definition_id == definition_id).all()
         ittads = ItemTypeToAttributeDefinition.query.filter(ItemTypeToAttributeDefinition.attribute_definition_id == definition_id).all()
 
@@ -103,11 +103,11 @@ class AttributeDefinitionDetail(Resource):
         for t in types:
             t.unassociate_attr_def(definition_id)
 
-        #Maybe it's better to not delete the associations like with all other objects. But here this would mean a 
+        #Maybe it's better to not delete the associations like with all other objects. But here this would mean a
         # lot of work on undelte. So for now, all associations of this attribute definition are deleted. -neumantm
         for ttad in ttads:
             DB.session.delete(ttad)
-        
+
         for ittad in ittads:
             DB.session.delete(ittad)
 
@@ -171,4 +171,4 @@ class AttributeDefinitionValues(Resource):
         if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
             abort(404, 'Requested attribute not found!')
 
-        return [item.value for item in ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).group_by(ItemToAttributeDefinition.value)]
+        return [item.value for item in DB.session.query(ItemToAttributeDefinition.value).filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).distinct()]
