@@ -11,7 +11,7 @@ from flask_restplus import Api, abort
 from flask_jwt_extended import get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt import ExpiredSignatureError, InvalidTokenError
-from .. import APP, JWT, AUTH_LOGGER
+from .. import APP, JWT, AUTH_LOGGER,
 from ..login import User, UserRole
 
 
@@ -157,6 +157,15 @@ def missing_header(error):
     """
     log_unauthorized(error.message)
     return {'message': error.message}, 401
+
+
+@API.errorhandler
+def default_errorhandler(error):
+    """
+    Handler function for a logging all errors
+    """
+    APP.logger.exception('Unhandled Exception in api call.')
+    return {'message': error.message}, 500
 
 
 def log_unauthorized(message):
