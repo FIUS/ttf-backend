@@ -96,8 +96,6 @@ def load_user_claims(user: User):
 
 @JWT.claims_verification_loader
 def verify_claims(claims):
-    print('#'*100)
-    print(claims)
     return True
 
 @JWT.expired_token_loader
@@ -164,7 +162,7 @@ def default_errorhandler(error):
     """
     Handler function for a logging all errors
     """
-    APP.logger.exception('Unhandled Exception in api call.')
+    APP.logger.exception()
     return {'message': error.message}, 500
 
 
