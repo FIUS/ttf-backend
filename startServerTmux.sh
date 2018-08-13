@@ -11,12 +11,19 @@ fi
 
 tmux new-session -d -s $SESSION
 tmux split-window -t :0
+tmux split-window -t :0
 
-tmux select-pane -t :.0
+tmux select-pane -t :.1
 tmux send-keys cd Space total_tolles_ferleihsystem Enter
 tmux send-keys npm Space run Space start Enter
 
-tmux select-pane -t :.1
+tmux select-pane -t :.2
+tmux send-keys . Space venv/bin/activate Enter
+tmux send-keys export Space FLASK_APP=total_tolles_ferleihsystem Enter
+tmux send-keys export Space MODE=debug Enter
+tmux send-keys celery Space -A space total_tolles_ferleihsystem.celery Space worker Space -B Space --loglevel=info Enter
+
+tmux select-pane -t :.0
 tmux send-keys . Space venv/bin/activate Enter
 tmux send-keys export Space FLASK_APP=total_tolles_ferleihsystem Enter
 tmux send-keys export Space FLASK_DEBUG=1 Enter
