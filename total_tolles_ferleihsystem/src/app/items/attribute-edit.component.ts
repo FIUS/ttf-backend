@@ -90,7 +90,7 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
             this.form.statusChanges.filter(status => status === 'VALID').map(status => {
                 this.saved = false;
                 return JSON.stringify(this.form.value[attribute.attribute_definition.name]);
-            }).debounceTime(3000).subscribe(value => {
+            }).debounceTime(700).subscribe(value => {
                 this.api.putAttribute(this.item, this.attributeID, value);
             })
         });
