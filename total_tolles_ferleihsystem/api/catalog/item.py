@@ -322,7 +322,9 @@ class ItemAttributeList(Resource):
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
-        return ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
+        attributes = ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
+        return attributes; # DON'T CHANGE THIS!!
+        # It is necessary because a Flask Bug prehibits log messages on return statements.
 
 @ANS.route('/<int:item_id>/attributes/<int:attribute_definition_id>/')
 class ItemAttributeDetail(Resource):
