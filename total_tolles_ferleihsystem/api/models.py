@@ -68,7 +68,7 @@ ITEM_TYPE_LIST_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
 
 ITEM_TYPE_POST = API.model('ItemTypePOST', {
     'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),
-    'name_schema': fields.String(max_length=STD_STRING_SIZE, title='Name Schema'),
+    'name_schema': fields.String(title='Name Schema'),
     'lending_duration': fields.Integer(title='Lending Duration'),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), title='Access Rights'),
     'how_to': fields.String(nullable=True, title='How to'),
