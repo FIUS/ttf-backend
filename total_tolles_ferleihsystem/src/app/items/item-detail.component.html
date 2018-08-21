@@ -61,7 +61,7 @@
     <ttf-box [hidden]="!edit || !canEdit || attributeIDs?.length == 0">
         <h1 class="mv0" title>Attributes:</h1>
         <div class="w-100 ph3 pv2" body>
-            <ttf-attribute-edit *ngFor="let attr of attributeIDs" [itemID]="itemID" [attributeID]="attr"></ttf-attribute-edit>
+            <ttf-attribute-edit *ngFor="let attr of attributes; trackBy:attributeTrackFn" [itemID]="itemID" [attributeID]="attr.attribute_definition_id"></ttf-attribute-edit>
         </div>
     </ttf-box>
 

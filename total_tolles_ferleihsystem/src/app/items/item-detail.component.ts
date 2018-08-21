@@ -32,7 +32,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     item: ApiObject;
     attributes: ApiObject[];
     tags: ApiObject[];
-    attributeIDs: number[] = [];
 
     canContain: ApiObject[];
     containedItems: ApiObject[];
@@ -85,19 +84,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             }
             this.attributesSubscription = this.api.getAttributes(item).subscribe(attributes => {
                 this.attributes = attributes;
-                const ids = [];
-                attributes.forEach(attr => {
-                    ids.push(attr.attribute_definition_id)
-                })
-                if (ids.length !== this.attributeIDs.length) {
-                    this.attributeIDs = ids;
-                } else {
-                    ids.forEach((id, index) => {
-                        if (this.attributeIDs[index] !== id) {
-                            this.attributeIDs[index] = id;
-                        }
-                    })
-                }
             });
             if (this.tagsSubscription != null) {
                 this.tagsSubscription.unsubscribe();
@@ -179,6 +165,10 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         if (this.rememberEditMode) {
             this.settings.setSetting('editMode', value);
         }
+    }
+
+    attributeTrackFn(index: any, attr: any) {
+        return attr.attribute_definition_id;
     }
 
     ngOnDestroy(): void {
