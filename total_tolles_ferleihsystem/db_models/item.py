@@ -45,10 +45,7 @@ class Item(DB.Model):
             visible_for: str = ''):
         self.update_name_from_schema = update_name_from_schema
 
-        if self.update_name_from_schema:
-            self.name = self.name_schema_name
-        else:
-            self.name = name
+        self.name = name
 
         self.type_id = type_id
 
