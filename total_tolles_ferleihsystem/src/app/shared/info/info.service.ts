@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Rx';
 import { list } from 'postcss';
+import { SettingsService } from '../settings/settings.service';
 
 export class Message {
 
@@ -30,18 +31,33 @@ export class InfoService {
 
     messages = this.messageSource.asObservable();
 
-    constructor() { }
+    constructor(private settings: SettingsService) {}
 
     emitInfo(message: string, title?: string, timeout?: number) {
-        this.messageSource.next(new Message('info', message, title, timeout));
+        this.settings.getSetting('infoTimeout').subscribe(defaultTimeout => {
+            if (defaultTimeout == null) {
+                defaultTimeout = 5000;
+            }
+            this.messageSource.next(new Message('info', message, title, timeout != null ? timeout : defaultTimeout));
+        });
     }
 
     emitWarning(message: string, title?: string, timeout?: number) {
-        this.messageSource.next(new Message('warning', message, title, timeout));
+        this.settings.getSetting('alertTimeout').subscribe(defaultTimeout => {
+            if (defaultTimeout == null) {
+                defaultTimeout = 15000;
+            }
+            this.messageSource.next(new Message('warning', message, title, timeout != null ? timeout : defaultTimeout));
+        });
     }
 
     emitError(message: string, title?: string, timeout?: number) {
-        this.messageSource.next(new Message('error', message, title, timeout));
+        this.settings.getSetting('alertTimeout').subscribe(defaultTimeout => {
+            if (defaultTimeout == null) {
+                defaultTimeout = -1;
+            }
+            this.messageSource.next(new Message('error', message, title, timeout != null ? timeout : defaultTimeout));
+        });
     }
 
 }

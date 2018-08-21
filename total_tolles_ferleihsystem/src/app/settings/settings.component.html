@@ -15,6 +15,30 @@
             <p class="pointer" (click)="changeColor()">
                 Theme: {{theme?.name}}
             </p>
+            <p>
+                Timeout for info dialogs:
+                <span class="pointer" *ngIf="infoTimeout == -1" (click)="settings.setSetting('infoTimeout', 3000)">No Timeout</span>
+                <span class="pointer" *ngIf="infoTimeout == 3000" (click)="settings.setSetting('infoTimeout', 5000)">3 seconds</span>
+                <span class="pointer" *ngIf="infoTimeout == 5000" (click)="settings.setSetting('infoTimeout', 15000)">5 seconds</span>
+                <span class="pointer" *ngIf="infoTimeout == 15000" (click)="settings.setSetting('infoTimeout', 60000)">15 seconds</span>
+                <span class="pointer" *ngIf="infoTimeout == 60000" (click)="settings.setSetting('infoTimeout', -1)">1 minute</span>
+            </p>
+            <p>
+                Timeout for alert dialogs:
+                <span class="pointer" *ngIf="alertTimeout == -1" (click)="settings.setSetting('alertTimeout', 3000)">No Timeout</span>
+                <span class="pointer" *ngIf="alertTimeout == 3000" (click)="settings.setSetting('alertTimeout', 5000)">3 seconds</span>
+                <span class="pointer" *ngIf="alertTimeout == 5000" (click)="settings.setSetting('alertTimeout', 15000)">5 seconds</span>
+                <span class="pointer" *ngIf="alertTimeout == 15000" (click)="settings.setSetting('alertTimeout', 60000)">15 seconds</span>
+                <span class="pointer" *ngIf="alertTimeout == 60000" (click)="settings.setSetting('alertTimeout', -1)">1 minute</span>
+            </p>
+            <p>
+                Timeout for error dialogs:
+                <span class="pointer" *ngIf="errorTimeout == -1" (click)="settings.setSetting('errorTimeout', 3000)">No Timeout</span>
+                <span class="pointer" *ngIf="errorTimeout == 3000" (click)="settings.setSetting('errorTimeout', 5000)">3 seconds</span>
+                <span class="pointer" *ngIf="errorTimeout == 5000" (click)="settings.setSetting('errorTimeout', 15000)">5 seconds</span>
+                <span class="pointer" *ngIf="errorTimeout == 15000" (click)="settings.setSetting('errorTimeout', 60000)">15 seconds</span>
+                <span class="pointer" *ngIf="errorTimeout == 60000" (click)="settings.setSetting('errorTimeout', -1)">1 minute</span>
+            </p>
         </div>
     </ttf-box>
 </div>

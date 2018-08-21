@@ -109,9 +109,9 @@ export class ApiService implements OnInit {
         if (this.errorSet.has(error.status) && showErrors !== 'none') {
             this.info.emitError(message, title);
         } else if (this.warningSet.has(error.status) && (showErrors === 'warnings' || showErrors === 'all')) {
-            this.info.emitWarning(message, title, 7000);
+            this.info.emitWarning(message, title);
         } else if (showErrors === 'all') {
-            this.info.emitInfo(message, title, 5000);
+            this.info.emitInfo(message, title);
         }
     }
 

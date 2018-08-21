@@ -15,6 +15,9 @@ export class SettingsComponent implements OnInit {
     navigateAfterCreation: boolean;
     theme: any = {};
     themeId: number = 0;
+    infoTimeout: -1;
+    alertTimeout: -1;
+    errorTimeout: -1;
 
     constructor(private data: NavigationService, private settings: SettingsService) { }
 
@@ -33,6 +36,24 @@ export class SettingsComponent implements OnInit {
             } else {
                 this.theme = Themes[0];
             }
+        });
+        this.settings.getSetting('infoTimeout').subscribe(timeout => {
+            if (timeout == null) {
+                timeout = 5000;
+            }
+            this.infoTimeout = timeout;
+        });
+        this.settings.getSetting('alertTimeout').subscribe(timeout => {
+            if (timeout == null) {
+                timeout = 15000;
+            }
+            this.alertTimeout = timeout;
+        });
+        this.settings.getSetting('errorTimeout').subscribe(timeout => {
+            if (timeout == null) {
+                timeout = -1;
+            }
+            this.errorTimeout = timeout;
         });
     }
 
