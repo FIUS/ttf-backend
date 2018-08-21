@@ -138,7 +138,7 @@ class Item(DB.Model):
             'c_date': today.strftime('%d.%b.%Y'),
             'c_date_iso': today.isoformat(),
         }
-        return template.safe_substitute(attributes, type=self.type.name parent=parent, **times)
+        return template.safe_substitute(attributes, type=self.type.name, parent=parent, **times)
 
     def delete(self):
         if self.is_currently_lent:
