@@ -12,7 +12,7 @@ export class AttributeDefinitionsOverviewComponent implements OnInit {
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – AttributeDefinitions');
-        this.data.changeBreadcrumbs([new Breadcrumb('AttributeDefinitions', '/attribute-definitions')]);
+        this.data.changeBreadcrumbs([new Breadcrumb('Attribute Definitions', '/attribute-definitions')]);
     }
 
 }
