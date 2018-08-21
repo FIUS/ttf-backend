@@ -1,3 +1,5 @@
+#!/bin/sh
+
 SESSION=TTF-DEPLOY
 
 tmux has-session -t $SESSION
