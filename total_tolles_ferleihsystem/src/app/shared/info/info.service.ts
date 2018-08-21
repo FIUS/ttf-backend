@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs/Rx';
+import { Injectable, Injector } from '@angular/core';
+import { Subject, Observable } from 'rxjs/Rx';
 import { list } from 'postcss';
 import { SettingsService } from '../settings/settings.service';
 
@@ -27,13 +27,26 @@ export class Message {
 @Injectable()
 export class InfoService {
 
+    private settings: SettingsService;
+
     private messageSource = new Subject<Message>();
 
     messages = this.messageSource.asObservable();
 
-    constructor(private settings: SettingsService) {}
+    constructor(private injector: Injector) {
+        Observable.timer(1000).take(1).subscribe((() => {
+            this.ngOnInit();
+        }).bind(this))
+    }
+
+    ngOnInit(): void {
+        //this.settings = this.injector.get(SettingsService);
+    }
 
     emitInfo(message: string, title?: string, timeout?: number) {
+        if (this.settings == null) {
+            this.messageSource.next(new Message('info', message, title, timeout != null ? timeout : 5000));
+        }
         this.settings.getSetting('infoTimeout').subscribe(defaultTimeout => {
             if (defaultTimeout == null) {
                 defaultTimeout = 5000;
@@ -43,6 +56,9 @@ export class InfoService {
     }
 
     emitWarning(message: string, title?: string, timeout?: number) {
+        if (this.settings == null) {
+            this.messageSource.next(new Message('info', message, title, timeout != null ? timeout : 15000));
+        }
         this.settings.getSetting('alertTimeout').subscribe(defaultTimeout => {
             if (defaultTimeout == null) {
                 defaultTimeout = 15000;
@@ -52,6 +68,9 @@ export class InfoService {
     }
 
     emitError(message: string, title?: string, timeout?: number) {
+        if (this.settings == null) {
+            this.messageSource.next(new Message('info', message, title, timeout != null ? timeout : -1));
+        }
         this.settings.getSetting('alertTimeout').subscribe(defaultTimeout => {
             if (defaultTimeout == null) {
                 defaultTimeout = -1;
