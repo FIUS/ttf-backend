@@ -126,9 +126,9 @@ class Item(DB.Model):
                 attr_def = loads(attr.attribute_definition.jsonschema)
                 attributes[attr.attribute_definition.name] = attr_def.get('default', '')
 
-        parent = ""
-        for item in ItemToItem.query.filter(ItemToItem.item_id == id).all():
-            parent += item.parent.name
+        parent_string = ""
+        for parent_item in ItemToItem.query.filter(ItemToItem.item_id == self.id).all():
+            parent_string += parent_item.parent.name
 
         today = date.today()
         times = {
@@ -138,7 +138,7 @@ class Item(DB.Model):
             'c_date': today.strftime('%d.%b.%Y'),
             'c_date_iso': today.isoformat(),
         }
-        return template.safe_substitute(attributes, type=self.type.name, parent=parent, **times)
+        return template.safe_substitute(attributes, type=self.type.name, parent=parent_string, **times)
 
     def delete(self):
         if self.is_currently_lent:
