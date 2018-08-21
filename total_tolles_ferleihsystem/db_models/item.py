@@ -127,8 +127,8 @@ class Item(DB.Model):
                 attributes[attr.attribute_definition.name] = attr_def.get('default', '')
 
         parent = ""
-        for item in ItemToItem.query.filter(ItemToItem.item_id == id).all();
-            parent += item.parent.name;
+        for item in ItemToItem.query.filter(ItemToItem.item_id == id).all():
+            parent += item.parent.name
 
         today = date.today()
         times = {
