@@ -14,6 +14,22 @@ function customNullValidator(customNull: any): ValidatorFn {
     };
 }
 
+
+function jsonValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} => {
+        if (control.value == '') {
+            return null;
+        }
+        try {
+            const json = JSON.parse(control.value);
+            return null;
+        } catch (error) {
+            return {'json': {'error': error}};
+        }
+    };
+}
+
+
 @Injectable()
 export class QuestionControlService {
     constructor() { }
@@ -39,6 +55,9 @@ export class QuestionControlService {
             }
             if (question.pattern != null) {
                 validators.push(Validators.pattern(question.pattern));
+            }
+            if (question.valueType === 'json') {
+                validators.push(jsonValidator());
             }
             if (question.min != undefined) {
                 if (question.controlType === 'number') {

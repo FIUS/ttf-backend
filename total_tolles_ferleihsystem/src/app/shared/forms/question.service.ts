@@ -142,6 +142,9 @@ export class QuestionService implements OnInit {
             }
         }
         options.valueType = prop.type;
+        if (prop['x-valueType'] != null) {
+            options.valueType = prop['x-valueType'];
+        }
         options.controlType = prop.type;
         if (prop.format != null) {
             options.controlType = prop.format;

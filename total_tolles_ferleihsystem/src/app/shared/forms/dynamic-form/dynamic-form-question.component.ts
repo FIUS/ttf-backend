@@ -21,16 +21,19 @@ export class DynamicFormQuestionComponent {
         const errors = this.form.controls[this.question.key].errors;
         if (errors) {
             if (errors.maxlength) {
-                return 'Nur '  + errors.maxlength.requiredLength + ' Zeichen erlaubt.';
+                return 'Only '  + errors.maxlength.requiredLength + ' characters allowed.';
             }
             if (errors.pattern) {
-                return 'Der Eingegebene Text hat nicht das erwartete Format.'
+                return 'Field dowsn\'t conform to required pattern "' + this.question.pattern + '".';
             }
             if (errors.required) {
-                return 'Dieses Feld muss noch ausgefüllt werden.';
+                return 'Field is empty.';
             }
             if (errors.null) {
-                return 'Dieses Feld muss noch ausgefüllt werden.';
+                return 'Field is empty.';
+            }
+            if (errors.json) {
+                return 'Syntax error in json.';
             }
             console.log(errors);
         }

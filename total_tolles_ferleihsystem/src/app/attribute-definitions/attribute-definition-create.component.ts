@@ -36,7 +36,7 @@ export class AttributeDefinitionCreateComponent {
                         if (json.maxLength == null || json.maxLength > maxLength) {
                             json.maxLength = maxLength;
                         }
-                        data.jsonschema = JSON.stringify({maxLength: maxLength}, undefined, '\t');
+                        data.jsonschema = JSON.stringify(json, undefined, '\t');
                     } catch (error) {}
                 }
             }
