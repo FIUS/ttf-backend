@@ -25,13 +25,19 @@ class LendingList(Resource):
     """
 
     @jwt_required
+    @API.param('active', 'get only active lendings', type=bool, required=False, default=True)
     @API.marshal_list_with(LENDING_GET)
     # pylint: disable=R0201
     def get(self):
         """
         Get a list of all lendings currently in the system
         """
-        return Lending.query.all()
+        active = request.args.get('active', 'true') == 'true'
+        base_query = Lending.query
+
+        if active:
+            base_query = base_query.join(ItemToLending).distinct()
+        return base_query.all()
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
