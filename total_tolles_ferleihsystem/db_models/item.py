@@ -4,6 +4,7 @@ The database models of the item and all connected tables
 
 import datetime
 from sqlalchemy.sql import func
+from sqlalchemy.schema import UniqueConstraint
 import string
 from json import loads
 from datetime import date
@@ -32,7 +33,7 @@ class Item(DB.Model):
     __tablename__ = 'Item'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
+    name = DB.Column(DB.String(STD_STRING_SIZE))
     update_name_from_schema = DB.Column(DB.Boolean, default=True, nullable=False)
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
     lending_duration = DB.Column(DB.Integer, nullable=True) # in seconds
@@ -40,6 +41,10 @@ class Item(DB.Model):
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
+
+    __table_args__ = (
+        UniqueConstraint('name', 'type_id', name='_name_type_id_uc'),
+    )
 
     def __init__(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
             visible_for: str = ''):
