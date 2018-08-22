@@ -103,7 +103,8 @@ export class BaseApiService {
                 this.runningRequests.delete(url as string);
                 if (error.status != null) {
                     return Observable.throw({status: error.status,
-                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                        message: (error._body.startsWith != null && error._body.startsWith('{')) ?
+                                JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error');
             }).publishReplay(1);
@@ -119,7 +120,8 @@ export class BaseApiService {
             .catch((error: any) => {
                 if (error.status != null) {
                     return Observable.throw({status: error.status,
-                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                        message: (error._body.startsWith != null && error._body.startsWith('{')) ?
+                                JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
             });
@@ -132,7 +134,8 @@ export class BaseApiService {
             .catch((error: any) => {
                 if (error.status != null) {
                     return Observable.throw({status: error.status,
-                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                        message: (error._body.startsWith != null && error._body.startsWith('{')) ?
+                                JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
             });
@@ -146,7 +149,8 @@ export class BaseApiService {
             .catch((error: any) => {
                 if (error.status != null) {
                     return Observable.throw({status: error.status,
-                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                        message: (error._body.startsWith != null && error._body.startsWith('{')) ?
+                                JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
             });
@@ -160,7 +164,8 @@ export class BaseApiService {
             .catch((error: any) => {
                 if (error.status != null) {
                     return Observable.throw({status: error.status,
-                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                        message: (error._body.startsWith != null && error._body.startsWith('{')) ?
+                                JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error || 'Server error')
             });
@@ -177,7 +182,8 @@ export class BaseApiService {
             .catch((error: any) => {
                 if (error.status != null) {
                     return Observable.throw({status: error.status,
-                        message: error._body.startsWith('{') ? JSON.parse(error._body).message : error.status + ' Server error'});
+                        message: (error._body.startsWith != null && error._body.startsWith('{')) ?
+                                JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return Observable.throw(error.json().error || 'Server error')
             });
