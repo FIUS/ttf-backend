@@ -19,7 +19,10 @@ export class myDialogComponent {
         this.isOpen = true;
     }
 
-    close() {
+    close(event?) {
+        if (event != null && event.defaultPrevented) {
+            return;
+        }
         if (this.closable || this.dialogType === 'info') {
             this.cancel();
         }

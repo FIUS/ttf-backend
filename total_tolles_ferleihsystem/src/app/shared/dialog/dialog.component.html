@@ -1,5 +1,5 @@
-<div class="fixed absolute--fill bg-black-a40 z-2 flex justify-around overflow-y-auto" *ngIf="isOpen" (click)="close()">
-    <div style="margin: auto" (click)="$event.stopPropagation()">
+<div class="fixed absolute--fill bg-black-a40 z-2 flex justify-around overflow-y-auto" *ngIf="isOpen" (click)="close($event)">
+    <div style="margin: auto" (click)="$event.preventDefault()">
         <div class="relative mv4 mw5 mw6-ns br2 bg-white shadow-5 ba b--black-10">
             <div class="min-h3 mv0 pv2 ph3 flex items-center f4 ttf-dialog-header br2 br--top" style="word-break: break-all;">
                 <ng-container [ngSwitch]="icon">
