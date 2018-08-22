@@ -24,7 +24,7 @@ export class DynamicFormQuestionComponent {
                 return 'Only '  + errors.maxlength.requiredLength + ' characters allowed.';
             }
             if (errors.pattern) {
-                return 'Field dowsn\'t conform to required pattern "' + this.question.pattern + '".';
+                return 'Field doesn\'t conform to required pattern "' + this.question.pattern + '".';
             }
             if (errors.required) {
                 return 'Field is empty.';
@@ -33,7 +33,7 @@ export class DynamicFormQuestionComponent {
                 return 'Field is empty.';
             }
             if (errors.json) {
-                return 'Syntax error in json.';
+                return 'Syntax error in json.\n' + errors.json.error;
             }
             console.log(errors);
         }

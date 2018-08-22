@@ -24,7 +24,7 @@ function jsonValidator(): ValidatorFn {
             const json = JSON.parse(control.value);
             return null;
         } catch (error) {
-            return {'json': {'error': error}};
+            return {'json': {'error': error.message}};
         }
     };
 }
