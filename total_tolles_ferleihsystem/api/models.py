@@ -68,7 +68,7 @@ ITEM_TYPE_LIST_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
 
 ITEM_TYPE_POST = API.model('ItemTypePOST', {
     'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),
-    'name_schema': fields.String(title='Name Schema'),
+    'name_schema': fields.String(max_length=STD_STRING_SIZE, title='Name Schema'),
     'lending_duration': fields.Integer(title='Lending Duration'),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), title='Access Rights'),
     'how_to': fields.String(nullable=True, title='How to'),
@@ -122,7 +122,7 @@ ATTRIBUTE_DEFINITION_LIST_LINKS = API.inherit('AttributeDefinitionLinks', WITH_C
 ATTRIBUTE_DEFINITION_POST = API.model('AttributeDefinitionPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'type': fields.String(enum=('string', 'integer', 'number', 'boolean'), max_length=STD_STRING_SIZE),
-    'jsonschema': fields.String(nullable=True, default='{\n    \n}', max_length=STD_STRING_SIZE),
+    'jsonschema': fields.String(nullable=True, default='{\n    \n}'),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
 })
 
