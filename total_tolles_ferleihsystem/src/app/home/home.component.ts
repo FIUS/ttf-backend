@@ -6,9 +6,15 @@ import { ApiObject } from '../shared/rest/api-base.service';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'ttf-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+    selector: 'ttf-home',
+    templateUrl: './home.component.html',
+    styles: [
+        `.ttf-button-grid {
+            display: -ms-grid;
+            display: grid;
+            grid-template-columns: 0px 17rem repeat(auto-fill, minmax(20px, 1fr) 17rem);
+        }`
+    ]
 })
 export class HomeComponent implements OnInit {
 
