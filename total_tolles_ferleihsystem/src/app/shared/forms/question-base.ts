@@ -5,6 +5,7 @@ export interface QuestionOptions {
     valueType?: string;
     key?: string,
     label?: string,
+    description?: string,
     required?: boolean,
     readOnly?: boolean,
     min?: number | string,
@@ -23,6 +24,7 @@ export class QuestionBase<T>{
     valueType: string;
     key: string;
     label: string;
+    description: string;
     required: boolean;
     readOnly: boolean;
     min: number | string | undefined;
@@ -42,6 +44,7 @@ export class QuestionBase<T>{
         this.valueType = options.valueType || 'any';
         this.key = options.key || '';
         this.label = options.label || '';
+        this.description = options.description || '';
         this.required = !!options.required;
         this.readOnly = !!options.readOnly;
         this.min = options.min;

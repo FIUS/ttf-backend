@@ -4,7 +4,7 @@
         <span class="tooltip tooltip-right" [attr.data-tooltip]="error" [hidden]="isValid" ><i class="red fa fa-exclamation"></i></span>
     </div>
     <div class="flex-grow-1 flex flex-wrap">
-        <label class="f4 min-w4 mr2 ws-normal flex-grow-1" style="word-wrap: break-word" [attr.for]="question.key">
+        <label class="f4 min-w4 mr2 ws-normal flex-grow-1 tooltip-bottom"  [ngClass]="{'tooltip': question.description}" style="word-wrap: break-word" [attr.for]="question.key" [attr.data-tooltip]="question.description">
             {{question.label}}
         </label>
 

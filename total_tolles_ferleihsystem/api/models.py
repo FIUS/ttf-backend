@@ -122,7 +122,11 @@ ATTRIBUTE_DEFINITION_LIST_LINKS = API.inherit('AttributeDefinitionLinks', WITH_C
 ATTRIBUTE_DEFINITION_POST = API.model('AttributeDefinitionPOST', {
     'name': fields.String(max_length=STD_STRING_SIZE),
     'type': fields.String(enum=('string', 'integer', 'number', 'boolean'), max_length=STD_STRING_SIZE),
-    'jsonschema': fields.String(nullable=True, default='{\n    \n}', valueType='json'),
+    'jsonschema': fields.String(nullable=True, default='{\n    \n}', valueType='json', description="""Hello World:
+{
+    "min":1,
+    "max":2
+}"""),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), max_length=STD_STRING_SIZE),
 })
 
