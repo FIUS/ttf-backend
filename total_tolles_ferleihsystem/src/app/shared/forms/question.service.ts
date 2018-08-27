@@ -154,7 +154,6 @@ export class QuestionService implements OnInit {
         }
         if (prop.description != null) {
             options.description = prop.description;
-            console.log(options.description)
         }
 
         options.readOnly = !!prop.readOnly;

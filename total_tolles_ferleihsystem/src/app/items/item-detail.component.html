@@ -58,7 +58,7 @@
 
     <ttf-item-edit [itemID]="itemID" [hidden]="!edit || !canEdit"></ttf-item-edit>
 
-    <ttf-box [hidden]="!edit || !canEdit || attributeIDs?.length == 0">
+    <ttf-box [hidden]="!edit || !canEdit || attributes?.length == 0">
         <h1 class="mv0" title>Attributes:</h1>
         <div class="w-100 ph3 pv2" body>
             <ttf-attribute-edit *ngFor="let attr of attributes; trackBy:attributeTrackFn" [itemID]="itemID" [attributeID]="attr.attribute_definition_id"></ttf-attribute-edit>
@@ -67,6 +67,9 @@
 
     <ttf-box [hidden]="!edit || !canEdit || canContain?.length == 0">
         <h1 class="mv0" title>Contained Items:</h1>
+        <div class="ml2 button h2 pv1 ph2 br2 ttf-header-button ttf-header-success-button link bg-animate pointer" (click)="newItem.open()" *ngIf="jwt.isAdmin()" title-right>
+            <i class="fa fa-plus mr2"></i>New
+        </div>
         <div class="w-100 ph3 pv2" body>
             <div class="br2 ba b--black-10 mb2" *ngFor="let itemType of canContain" >
                 <div class="min-h2 mv0 pv2 ph3 flex items-center justify-between f4 bg-near-white br2 br--top">
@@ -79,8 +82,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="ph2 bt b--black-10" [hidden]="containedItemsAsMap.get(itemType.id)?.length < 1">
-                    <p *ngFor="let item of containedItemsAsMap.get(itemType.id)">{{item.name}} <i class="ml1 fa fa-times grow pointer" (click)="removeItemFromContained(item)"></i></p>
+                <div class="ph3 bt b--black-10" [hidden]="containedItemsAsMap.get(itemType.id)?.length < 1">
+                    <p class="flex" *ngFor="let item of containedItemsAsMap.get(itemType.id)">
+                        <span class="flex-grow-1 link pointer underline-hover" routerLink="{{'/items/' + item?.id}}">{{item.name}}</span>
+                        <i class="ml3 fa fa-times grow pointer" (click)="removeItemFromContained(item)"></i>
+                    </p>
                 </div>
             </div>
         </div>
@@ -90,6 +96,13 @@
         <h1 class="mv0" title>Choose Item:</h1>
         <div class="w-100 ph3 pv2" body>
             <ttf-search [asSelector]="true" [restrictToType]="chooseItemType" (selectedChanged)="addItemToContained($event); chooseItem.close()" #search></ttf-search>
+        </div>
+    </ttf-dialog>
+
+    <ttf-dialog [dialogType]="'save-cancel'" [valid]="form?.valid | async" [icon]="'save'" [okCallback]="save" #newItem >
+        <h1 class="mv0" title>Item:</h1>
+        <div class="w-100 ph3 pv2" body>
+            <dynamic-form [objectModel]="'ItemPOST'" (data)="onDataChange($event)" #form ></dynamic-form>
         </div>
     </ttf-dialog>
 

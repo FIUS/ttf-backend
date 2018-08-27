@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Subscription } from 'rxjs/Rx';
 
@@ -45,9 +45,12 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     filesUploadingMap: Map<string, any> = new Map();
     filenameMap: Map<number, string> = new Map();
 
+    newItemData: any;
+
     constructor(private data: NavigationService, private api: ApiService,
                 private jwt: JWTService, private staging: StagingService,
-                private route: ActivatedRoute, private settings: SettingsService) { }
+                private route: ActivatedRoute, private settings: SettingsService,
+                private router: Router) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Item');
@@ -217,5 +220,20 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             this.api.getFiles(this.item);
         });
     }
+
+    onDataChange(data) {
+        this.newItemData = data;
+    }
+
+    save = () => {
+        this.api.postItem(this.newItemData).subscribe(data => {
+            this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
+                this.addItemToContained(data);
+                if (navigate) {
+                    this.router.navigate(['items', data.id]);
+                }
+            });
+        });
+    };
 
 }
