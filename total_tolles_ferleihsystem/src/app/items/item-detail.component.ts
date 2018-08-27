@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Subscription } from 'rxjs/Rx';
+import { Subscription, Observable } from 'rxjs/Rx';
 
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { StagingService } from '../navigation/staging-service';
@@ -9,6 +9,7 @@ import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { SettingsService } from '../shared/settings/settings.service';
+import { timeout } from 'rxjs/operator/timeout';
 
 @Component({
   selector: 'ttf-item-detail',
@@ -198,12 +199,18 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         }
     }
 
-    addItemToContained = (item: ApiObject) => {
-        this.api.postContainedItem(this.item, item.id);
+    addItemToContained = (item: ApiObject, parent?: ApiObject) => {
+        if (parent == null) {
+            parent = this.item;
+        }
+        this.api.postContainedItem(parent, item.id);
     }
 
-    removeItemFromContained(item: ApiObject) {
-        this.api.deleteContainedItem(this.item, item.id);
+    removeItemFromContained(item: ApiObject, parent?: ApiObject) {
+        if (parent == null) {
+            parent = this.item;
+        }
+        this.api.deleteContainedItem(parent, item.id);
     }
 
     upload(file: File) {
@@ -226,11 +233,13 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     }
 
     save = () => {
-        this.api.postItem(this.newItemData).subscribe(data => {
+        this.api.postItem(this.newItemData).take(1).subscribe(data => {
             this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
-                this.addItemToContained(data);
+                this.addItemToContained(data, this.item);
                 if (navigate) {
-                    this.router.navigate(['items', data.id]);
+                    Observable.timer(150).take(1).subscribe(() => {
+                        this.router.navigate(['items', data.id]);
+                    });
                 }
             });
         });
