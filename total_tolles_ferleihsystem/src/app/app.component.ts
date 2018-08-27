@@ -32,6 +32,15 @@ export class AppComponent implements OnInit {
                 }
             }
         });
+        this.settings.getSetting('infoTimeout').subscribe(timeout => {
+            (window as any).infoTimeout = timeout;
+        });
+        this.settings.getSetting('alertTimeout').subscribe(timeout => {
+            (window as any).alertTimeout = timeout;
+        });
+        this.settings.getSetting('infoTimeout').subscribe(timeout => {
+            (window as any).errorTimeout = timeout;
+        });
     }
 
     private setColor(name: string, color: string) {
