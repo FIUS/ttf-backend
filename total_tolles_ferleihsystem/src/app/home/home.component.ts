@@ -13,6 +13,14 @@ import { Observable } from 'rxjs';
             display: -ms-grid;
             display: grid;
             grid-template-columns: 0px 17rem repeat(auto-fill, minmax(20px, 1fr) 17rem);
+        }`,
+        `@-moz-document url-prefix() {
+            .spacer {
+                display: none;
+            }
+            .ttf-button-grid {
+                grid-template-columns: repeat(auto-fill, 17rem);
+            }
         }`
     ]
 })
