@@ -19,6 +19,9 @@ export class AttributeDefinitionListComponent implements OnInit, OnDestroy {
     data: Map<string, any>;
     deleted: any[];
 
+    titleMap: Map<number, string>;
+    descriptionMap: Map<number, string>;
+
     private subscription: Subscription;
     private deletedSubscription: Subscription;
 
@@ -27,8 +30,19 @@ export class AttributeDefinitionListComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.subscription = this.api.getAttributeDefinitions().subscribe(data => {
             const map = new Map<string, ApiObject[]>();
+            const titleMap = new Map<number, string>();
+            const descriptionMap = new Map<number, string>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(attrDef => {
+                try {
+                    const json = JSON.parse(attrDef.jsonschema);
+                    if (json.title) {
+                        titleMap.set(attrDef.id, json.title);
+                    }
+                    if (json.description) {
+                        descriptionMap.set(attrDef.id, json.description);
+                    }
+                } catch (error) {}
                 let letter: string = attrDef.name.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
@@ -51,6 +65,8 @@ export class AttributeDefinitionListComponent implements OnInit, OnDestroy {
                 }
             });
             this.data = map;
+            this.titleMap = titleMap;
+            this.descriptionMap = descriptionMap;
         });
         if (this.jwt.isAdmin()) {
             this.deletedSubscription = this.api.getAttributeDefinitions(true).subscribe(data => {

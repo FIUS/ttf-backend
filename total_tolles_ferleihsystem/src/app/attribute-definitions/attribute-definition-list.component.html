@@ -8,7 +8,15 @@
         <ng-container *ngIf="data?.get(letter).length > 0">
             <div class="f3 gray" style="width: 1em">{{letter}}</div>
             <ul class="mt0 list">
-                <li class="min-w2 mb1 link underline-hover pointer" *ngFor="let attrDef of data?.get(letter)" routerLink="/attribute-definitions/{{attrDef.id}}">{{attrDef.name}}</li>
+                <li class="mb1" *ngFor="let attrDef of data?.get(letter)">
+                    <p class="min-w2 mv0 b link underline-hover pointer" routerLink="/attribute-definitions/{{attrDef.id}}">
+                        {{titleMap.has(attrDef.id) ? titleMap.get(attrDef.id) : attrDef.name}}
+                        <span class="i gray" *ngIf="titleMap.has(attrDef.id)">{{attrDef.name}}</span>
+                    </p>
+                    <p class="mb0 mt1" *ngIf="descriptionMap.has(attrDef.id)">
+                        {{descriptionMap.get(attrDef.id)}}
+                    </p>
+                </li>
             </ul>
         </ng-container>
     </div>
