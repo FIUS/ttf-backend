@@ -11,7 +11,7 @@ export class AttributeDefinitionsOverviewComponent implements OnInit {
     constructor(private data: NavigationService, private jwt: JWTService) { }
 
     ngOnInit(): void {
-        this.data.changeTitle('Total Tolles Ferleihsystem – AttributeDefinitions');
+        this.data.changeTitle('Total Tolles Ferleihsystem – Attribute Definitions');
         this.data.changeBreadcrumbs([new Breadcrumb('Attribute Definitions', '/attribute-definitions')]);
     }
 
