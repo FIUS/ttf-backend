@@ -17,7 +17,7 @@
     <h1 class="mv0" title>Choose a file to upload:</h1>
     <div class="w-100 ph3 pv2 flex items-center" body>
         <span class="mr2 f4">Choose file:</span>
-        <div class="min-w5 flex-grow-1 flex bb b--gray">
+        <div class="min-w5 flex-grow-1 flex bb b--gray" (click)="$event.stopPropagation()">
             <input class="flex-grow-1 input-reset bn pa1 min-w5" [name]="'fileUpload'" [type]="'file'" [accept]="getAcceptedFiles()" (keyup.enter)="upload.ok()" multiple #fileInput >
         </div>
     </div>
