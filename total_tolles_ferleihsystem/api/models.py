@@ -237,6 +237,7 @@ LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {
 
 ITEM_LENDING = API.model('ItemLending', {
     'due': fields.DateTime(),
+    'returned': fields.DateTime(),
     'item': fields.Nested(ITEM_GET),
 })
 
