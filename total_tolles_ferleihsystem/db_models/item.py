@@ -330,6 +330,7 @@ class ItemToLending (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), primary_key=True)
     due = DB.Column(DB.DateTime)
+    returned = DB.Column(DB.DateTime, nullable=True)
 
     item = DB.relationship('Item', backref=DB.backref('_lending', lazy='joined',
                                                       single_parent=True, cascade="all, delete-orphan"))
