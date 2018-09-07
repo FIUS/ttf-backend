@@ -38,7 +38,9 @@ class LendingList(Resource):
         base_query = Lending.query
 
         if active:
-            base_query = base_query.join(ItemToLending).filter(ItemToLending.returned is None).distinct()
+            # pylint: disable=C0121
+            # SQL-Alchemy does on my system not work with 'is None' only '== None'
+            base_query = base_query.join(ItemToLending).filter(ItemToLending.returned == None).distinct()
         return base_query.all()
 
     @jwt_required

@@ -342,6 +342,7 @@ class ItemToLending (DB.Model):
         self.item = item
         self.lending = lending
         self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration)
+        self.returned = None
 
 
 class ItemToTag (DB.Model):
