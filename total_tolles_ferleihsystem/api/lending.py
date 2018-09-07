@@ -3,6 +3,8 @@ This module contains all API endpoints for the namespace 'lending'
 """
 
 
+from datetime import datetime
+
 from flask import request
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required
@@ -36,7 +38,7 @@ class LendingList(Resource):
         base_query = Lending.query
 
         if active:
-            base_query = base_query.join(ItemToLending).distinct()
+            base_query = base_query.join(ItemToLending).filter(ItemToLending.returned is None).distinct()
         return base_query.all()
 
     @jwt_required
@@ -180,10 +182,10 @@ class LendingDetail(Resource):
         ids = request.get_json()["ids"]
         try:
             for element in ids:
-                to_delete = ItemToLending.query.filter(ItemToLending.item_id == element).first()
-                if to_delete is None:
+                to_return = ItemToLending.query.filter(ItemToLending.item_id == element).first()
+                if to_return is None:
                     abort(400, "Requested item is not part of this lending:" + str(element))
-                DB.session.delete(to_delete)
+                to_return.returned = datetime.now()
             DB.session.commit()
             return lending
         except IntegrityError:
