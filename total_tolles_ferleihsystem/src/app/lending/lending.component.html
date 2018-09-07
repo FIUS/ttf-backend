@@ -5,8 +5,8 @@
             <i class="fa fa-reply-all"></i>
         </div>
         <div class="w-100 ph3 pv2" body>
-            <p class="f4"><span class="b">Moderator:</span> {{lending?.moderator}}</p>
-            <p class="f4"><span class="b">User:</span> {{lending?.user}}</p>
+            <p class="f4"><span class="b">Lender:</span> {{lending?.moderator}}</p>
+            <p class="f4"><span class="b">Borrower:</span> {{lending?.user}}</p>
             <p class="f4"><span class="b">Deposit:</span> {{lending?.deposit}}</p>
             <p class="f4"><span class="b">Date:</span> {{lending?.date | date:'short'}}</p>
             <ttf-item-lending *ngFor="let itemLending of lending?.itemLendings" [itemLending]="itemLending" (return)="return($event)"></ttf-item-lending>

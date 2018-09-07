@@ -3,7 +3,9 @@
         <div>
             <i class="f5 fa fa-chevron-right" [hidden]="open"></i>
             <i class="f5 fa fa-chevron-down" [hidden]="!open"></i>
-            {{itemLending?.item?.name}} (due: {{itemLending?.due | date:'short'}})
+            <span [ngClass]="{strike: itemLending?.returned != null}">{{itemLending?.item?.name}}</span>
+            <span *ngIf="itemLending?.returned == null">(due: {{itemLending?.due | date:'short'}})</span>
+            <span *ngIf="itemLending?.returned != null">(returned: {{itemLending?.returned | date:'short'}})</span>
         </div>
         <div>
             <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return" (click)="return.emit(itemLending?.item?.id)">

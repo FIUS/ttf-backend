@@ -15,7 +15,7 @@
                                 <p class="mv0 link underline-hover pointer" routerLink="/lendings/{{lending.id}}">
                                     <span class="i black-80">User:</span> {{lending.user}} <span class="ml2 i black-80">Moderator:</span> {{lending.moderator}}
                                 </p>
-                                <p class="mv0 pl3 black-80 link underline-hover pointer" *ngFor="let item_lending of lending.itemLendings" routerLink="/items/{{item_lending.item?.id}}">
+                                <p class="mv0 pl3 black-80 link underline-hover pointer" *ngFor="let item_lending of lending.itemLendings" routerLink="/items/{{item_lending.item?.id}}" [ngClass]="{strike: item_lending.returned != null}">
                                     {{item_lending.item?.name}} ({{item_lending.item?.type?.name}})
                                 </p>
                             </li>
