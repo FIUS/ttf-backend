@@ -4,7 +4,6 @@ import { NgModule, LOCALE_ID } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
-
 import { SharedModule } from './shared/shared.module';
 
 import { BreadcrumbsComponent } from './navigation/breadcrumbs.component';
@@ -21,6 +20,8 @@ import { SearchComponent } from './search/search.component';
 
 import { StagingComponent } from './staging/staging.component';
 import { StagedItemComponent } from './staging/staged-item.component';
+
+import { QrComponent } from './qr/qr.component';
 
 import { LendingOverviewComponent } from './lending/lending-overview.component';
 import { LendingComponent } from './lending/lending.component';
@@ -72,6 +73,8 @@ import { AppComponent } from './app.component';
 
         StagingComponent,
         StagedItemComponent,
+
+        QrComponent,
 
         LendingOverviewComponent,
         LendingComponent,

@@ -16,6 +16,8 @@ import { JWTService } from '../shared/rest/jwt.service';
 })
 export class StagingComponent implements OnInit {
 
+    qrScannerOpen: boolean = false;
+
     questions: QuestionBase<any>[] = [];
     form: FormGroup;
 
@@ -61,6 +63,10 @@ export class StagingComponent implements OnInit {
             this.form.statusChanges.subscribe(status => {
             });
         });
+    }
+
+    newScanResult(scanResult) {
+        console.log(scanResult);
     }
 
     updateStagedItems = staged => {

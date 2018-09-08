@@ -1,0 +1,11 @@
+
+<ttf-box>
+    <h1 class="mv0" title>Scan Items:</h1>
+    <div class="button h2 pv1 ph2 br2 link bg-animate pointer ttf-header-button tooltip tooltip-right" (click)="switchCamera()" data-tooltip="switch camera" *ngIf="cameras?.length > 1" title-right>
+        <i class="fa fa-video-camera"></i>
+    </div>
+    <div class="w-100 ph3 pv2 flex items-center justify-center" body>
+        <video class="max-h5" #video></video>
+    </div>
+</ttf-box>
+
