@@ -100,7 +100,7 @@ class FileDetail(Resource):
         DB.session.commit()
         return "", 204
 
-    @ANS.doc(model=FILE_GET, body=FILE_PUT)
+    @ANS.doc(body=FILE_PUT)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested file not found!')
     @ANS.marshal_with(FILE_GET)

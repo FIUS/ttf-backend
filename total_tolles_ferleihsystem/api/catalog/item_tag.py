@@ -120,7 +120,7 @@ class ItemTagDetail(Resource):
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
-       
+
         itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
         items = [itt.item for itt in itts]
 
@@ -186,7 +186,7 @@ class ItemTagAttributes(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
-    @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
+    @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item tag not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(409, 'Attribute definition is already associated with this tag!')
@@ -197,7 +197,7 @@ class ItemTagAttributes(Resource):
         Associate a new attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first() 
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
 
         if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
             abort(404, 'Requested item tag not found!')
@@ -245,5 +245,5 @@ class ItemTagAttributes(Resource):
 
         if code == 204:
             return '', 204
-        
+
         abort(code, msg)

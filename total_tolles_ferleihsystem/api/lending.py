@@ -164,7 +164,7 @@ class LendingDetail(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
-    @ANS.doc(model=LENDING_GET, body=ID_LIST)
+    @ANS.doc(body=ID_LIST)
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(400, 'Requested item is not part of this lending.')
     @API.marshal_with(LENDING_GET)

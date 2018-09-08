@@ -59,7 +59,7 @@ class NestedFields(Nested):
     def __init__(self, model, **kwargs):
         super().__init__(model=model, **kwargs)
 
-    def output(self, key, obj):
+    def output(self, key, obj, ordered=False):
 
         return marshal(obj, self.nested)
 
@@ -85,7 +85,7 @@ class EmbeddedFields(Raw):
     def nested_model(self, name):
         return self.embedded_models[name].nested
 
-    def output(self, key, obj):
+    def output(self, key, obj, orderes=False):
         data = {}
 
         for name in self.embedded_models:
@@ -174,7 +174,7 @@ class HaLUrl(StringMixin, Raw):
         self.url_data = url_data
         self.is_list = isinstance(url_data, list)
 
-    def output(self, key, obj):
+    def output(self, key, obj, ordered=False):
         output = {}
         if self.is_list:
             output = []

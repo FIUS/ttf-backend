@@ -8,7 +8,7 @@ from sqlalchemy import event
 
 from .. import APP, DB
 
-DB_COMMAND_LOGGER = getLogger(APP.logger_name + '.db')  # type: Logger
+DB_COMMAND_LOGGER = getLogger('flask.app.db')  # type: Logger
 
 formatter = Formatter(fmt='[%(levelname)s] [%(name)-16s] %(message)s')
 

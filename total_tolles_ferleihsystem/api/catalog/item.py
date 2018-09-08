@@ -222,7 +222,7 @@ class ItemItemTags(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
-    @ANS.doc(model=ITEM_TAG_GET, body=ID)
+    @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, 'Requested item tag not found!')
     @ANS.response(409, 'Tag is already associated with this item!')
@@ -367,7 +367,7 @@ class ItemAttributeDetail(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
-    @ANS.doc(model=ATTRIBUTE_PUT, body=ATTRIBUTE_GET)
+    @ANS.doc(body=ATTRIBUTE_GET)
     @ANS.response(404, 'Requested item not found!')
     @ANS.response(400, "This item doesn't have that type of attribute!")
     @API.marshal_with(ATTRIBUTE_GET)
@@ -430,7 +430,7 @@ class ItemContainedItems(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
-    @ANS.doc(model=ITEM_GET, body=ID)
+    @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item (current) not found!')
     @ANS.response(400, 'Requested item (to be contained) not found!')
     @ANS.response(400, 'This item can not contain that item.')

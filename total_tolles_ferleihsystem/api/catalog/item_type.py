@@ -190,7 +190,7 @@ class ItemTypeAttributes(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
-    @ANS.doc(model=ATTRIBUTE_DEFINITION_GET, body=ID)
+    @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested attribute definition not found!')
     @ANS.response(409, 'Attribute definition is already associated with this item type!')
@@ -288,7 +288,7 @@ class ItemTypeCanContainTypes(Resource):
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
-    @ANS.doc(model=ITEM_TYPE_GET, body=ID)
+    @ANS.doc(body=ID)
     @ANS.response(404, 'Requested item type not found!')
     @ANS.response(400, 'Requested child item type not found!')
     @ANS.response(409, 'Item type can already be contained in this item type.')

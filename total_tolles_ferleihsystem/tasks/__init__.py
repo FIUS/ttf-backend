@@ -5,7 +5,7 @@ from os import path
 
 from .. import APP
 
-TASK_LOGGER: Logger = getLogger(APP.logger_name + '.tasks')
+TASK_LOGGER: Logger = getLogger('flask.app.tasks')
 
 
 FORMATTER = Formatter(fmt=APP.config['LOG_FORMAT'])
