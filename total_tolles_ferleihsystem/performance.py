@@ -56,7 +56,7 @@ class RequestPerformance:
             duration_wo_queries = self.duration - tot_query_duration
             self.queries.sort(key=lambda q: q.duration)
             longest_query_duration = self.queries[0].duration
-            APP.logger.warning(f'performance report: duration {self.duration: 2.2f}s, duration without queries {duration_wo_queries: 2.2f}s, query-duration {tot_query_duration: 2.2f}s, {q_number: 2d} queries ({q_write_number: 2d} write), longest query {longest_query_duration: 2.2f}, url {method:6} {url}')
+            APP.logger.warning(f'performance report: duration {self.duration: 2.2f}s, duration without queries {duration_wo_queries: 2.2f}s, query-duration {tot_query_duration: 2.2f}s, {q_number: 2d} queries ({q_write_number: 2d} write), longest query {longest_query_duration: 2.2f}s, url {method:6} {url}')
             for q in self.queries:
                 if q.duration > 1:
                     APP.logger.warning(f'performance report: long query detected: duration {q.duration: 2.2f}s, statement "{q.statement}"')
