@@ -41,6 +41,9 @@ class Config(object):
     LDAP_MODERATOR_GROUP_FILTER = ""
     LDAP_ADMIN_GROUP_FILTER = ""
 
+    MONITOR_REQUEST_PERORMANCE = True
+    LONG_REQUEST_THRESHHOLD = 1
+
 
 class ProductionConfig(Config):
     pass

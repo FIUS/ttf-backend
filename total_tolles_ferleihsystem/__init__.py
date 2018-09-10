@@ -89,3 +89,8 @@ from . import auth_providers
 from . import db_models
 # pylint: disable=C0413
 from . import routes
+
+# setup performance logging
+if APP.config.get('MONITOR_REQUEST_PERFORMANCE', True):
+    # pylint: disable=C0413
+    from . import performance
