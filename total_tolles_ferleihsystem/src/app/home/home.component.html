@@ -9,7 +9,7 @@
                     <th class="ph3 pv2 tl ttu">Item</th>
                     <th class="ph3 pv2 tl ttu">Due</th>
                 </tr>
-                <tr class="bt b--black-10" [ngClass]="{'bg-light-red': itemOverdue(item)}" *ngFor="let item of lentItems">
+                <tr class="bt b--black-10" [ngClass]="{'bg-light-red': itemOverdue(item)}" *ngFor="let item of lentItems | activeLending">
                     <th class="ph3 pv2 tl link bg-animate pointer" [ngClass]="{'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}" routerLink="/items/{{item.id}}">
                         <a class="min-w5 link">{{item.name}} ({{item.type?.name}})</a>
                     </th>

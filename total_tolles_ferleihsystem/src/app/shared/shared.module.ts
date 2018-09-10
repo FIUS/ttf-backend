@@ -34,6 +34,7 @@ import { myTableComponent } from './table/table.component';
 import { FileSelectorComponent } from './file-selector/file-selector.component';
 
 import { ClickOutsideDirective } from './click-outside.directive';
+import { ActiveLendingPipe } from './active-lending.pipe';
 
 @NgModule({
     imports:      [ CommonModule, FormsModule, ReactiveFormsModule ],
@@ -53,6 +54,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         DateInputComponent,
         DateTimeInputComponent,
         DurationInputComponent,
+        ActiveLendingPipe,
         ClickOutsideDirective,
     ],
     providers: [
@@ -83,6 +85,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         DateInputComponent,
         DateTimeInputComponent,
         DurationInputComponent,
+        ActiveLendingPipe,
         ClickOutsideDirective,
 
         CommonModule,

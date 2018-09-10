@@ -53,6 +53,7 @@ import { AttributeDefinitionEditComponent } from './attribute-definitions/attrib
 import { LinkedAttributeDefinitionComponent } from './linked-attribute-definitions/linked-attribute-definitions.component';
 
 import { AppComponent } from './app.component';
+import { ActiveLendingPipe } from './shared/active-lending.pipe';
 
 
 @NgModule({
