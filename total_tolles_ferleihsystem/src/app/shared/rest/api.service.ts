@@ -894,15 +894,17 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getTagsForItem(item: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
+    getTagsForItem(item: ApiObject, showErrors: string= 'all', preferCache: boolean= false): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/tags';
         const stream = this.getStreamSource(resource);
 
-        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.get(item._links.tags.href, token).subscribe(data => {
-                stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET', showErrors));
-        });
+        if (!(preferCache && stream.value != null)) {
+            this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+                this.rest.get(item._links.tags.href, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            });
+        }
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
@@ -1096,15 +1098,17 @@ export class ApiService implements OnInit {
 
 
     // Attributes //////////////////////////////////////////////////////////////
-    getAttributes(item: ApiObject, showErrors: string= 'all'): Observable<Array<ApiObject>> {
+    getAttributes(item: ApiObject, showErrors: string= 'all', preferCache: boolean= false): Observable<Array<ApiObject>> {
         const resource = 'items/' + item.id + '/attributes';
         const stream = this.getStreamSource(resource);
 
-        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.get(item._links.attributes, token).subscribe(data => {
-                stream.next(data);
-            }, error => this.errorHandler(error, resource, 'GET', showErrors));
-        });
+        if (!(preferCache && stream.value != null)) {
+            this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+                this.rest.get(item._links.attributes, token).subscribe(data => {
+                    stream.next(data);
+                }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            });
+        }
 
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
