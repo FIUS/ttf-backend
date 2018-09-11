@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, forwardRef, Input, OnInit, OnDestroy, Output, EventEmitter, OnChanges } from '@angular/core';
 import { Subscription } from 'rxjs/Rx';
 
 import { myDropdownComponent } from '../shared/dropdown/dropdown.component';
@@ -12,7 +12,7 @@ import { ApiService } from '../shared/rest/api.service';
   selector: 'ttf-tags-chooser',
   templateUrl: 'tags-chooser.component.html',
 })
-export class TagsChooserComponent implements OnInit, OnDestroy {
+export class TagsChooserComponent implements OnInit, OnDestroy, OnChanges {
 
     private itemSubscription: Subscription;
     private tagsSubscription: Subscription;
@@ -43,6 +43,25 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
             this.tags = data;
             this.updateFilter();
         });
+        this.updateItemTags();
+    }
+
+    ngOnChanges(changes) {
+        if (changes.itemID != null) {
+            this.updateItemTags();
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.tagsSubscription != null) {
+            this.tagsSubscription.unsubscribe();
+        }
+        if (this.itemSubscription != null) {
+            this.itemSubscription.unsubscribe();
+        }
+    }
+
+    updateItemTags() {
         if (!this.offline) {
             this.itemSubscription = this.api.getItem(this.itemID).subscribe(item => {
                 if (item == null) {
@@ -58,15 +77,6 @@ export class TagsChooserComponent implements OnInit, OnDestroy {
                     this.selectedTags.emit(this.selected);
                 });
             });
-        }
-    }
-
-    ngOnDestroy(): void {
-        if (this.tagsSubscription != null) {
-            this.tagsSubscription.unsubscribe();
-        }
-        if (this.itemSubscription != null) {
-            this.itemSubscription.unsubscribe();
         }
     }
 

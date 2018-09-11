@@ -69,6 +69,24 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     }
 
     update(itemID: number) {
+        if (this.itemID !== itemID) { // cleanup values from previous item
+            this.item = null;
+            this.attributes = [];
+            this.tags= [];
+
+            this.canContain = [];
+            this.containedItems = [];
+            this.containedItemsAsMap = new Map<number, ApiObject[]>();
+            this.chooseItemType = -1;
+
+            this.fileIDs = [];
+
+            this.filesUploading = [];
+            this.filesUploadingMap = new Map();
+            this.filenameMap = new Map();
+
+            this.newItemData = new Object();
+        }
         this.itemID = itemID;
         if (this.itemSubscription != null) {
             this.itemSubscription.unsubscribe();
