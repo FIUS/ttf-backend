@@ -96,6 +96,10 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
         });
     }
 
+    questionTrackFn(index: any, question: any) {
+        return question.key;
+    }
+
     ngOnDestroy(): void {
         if (this.itemSubscription != null) {
             this.itemSubscription.unsubscribe();
