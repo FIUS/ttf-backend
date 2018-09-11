@@ -2,7 +2,7 @@
 
 
 ## Prerequesits
-- nodejs >8.0.0
+- nodejs >10.10.0
 - npm
 - python 3.6
 - pip [python 3.6]
