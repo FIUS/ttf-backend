@@ -30,6 +30,7 @@
     "font-awesome": "^4.7.0",
     "instascan": "^1.0.0",
     "jquery": "^3.3.1",
+    "named-regexp-groups": "^1.0.3",
     "ng2-file-upload": "^1.2.1",
     "ngx-bootstrap": "^1.7.1",
     "popper.js": "^1.12.9",
