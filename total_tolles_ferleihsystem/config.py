@@ -44,6 +44,10 @@ class Config(object):
     MONITOR_REQUEST_PERORMANCE = True
     LONG_REQUEST_THRESHHOLD = 1
 
+    JSON_SORT_KEYS = False
+    JSONIFY_PRETTYPRINT_REGULAR = False
+    RESTPLUS_JSON = {'indent': None}
+
 
 class ProductionConfig(Config):
     pass

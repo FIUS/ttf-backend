@@ -28,6 +28,8 @@ class RequestPerformance:
         self.req_start = t
         self.req_end = t
         self.query_start = t
+        self.view_start = t
+        self.view_end = t
         self.duration = 0
         self.queries = []
 
