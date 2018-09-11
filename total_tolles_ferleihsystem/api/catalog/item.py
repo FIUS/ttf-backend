@@ -11,6 +11,7 @@ from .. import API, satisfies_role
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET
 from ... import DB
 from ...login import UserRole
+from ...performance import record_view_performance
 
 from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, ItemToLending
 from ...db_models.itemType import ItemType, ItemTypeToItemType
@@ -31,6 +32,7 @@ class ItemList(Resource):
     @API.param('deleted', 'get all deleted elements (and only these)', type=bool, required=False, default=False)
     @API.param('lent', 'get all currently lent items', type=bool, required=False, default=False)
     @API.marshal_list_with(ITEM_GET)
+    @record_view_performance()
     # pylint: disable=R0201
     def get(self):
         """
