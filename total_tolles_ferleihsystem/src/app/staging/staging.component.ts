@@ -66,7 +66,7 @@ export class StagingComponent implements OnInit {
     }
 
     newScanResult(scanResult) {
-        console.log(scanResult);
+        this.staging.stage(scanResult);
     }
 
     updateStagedItems = staged => {

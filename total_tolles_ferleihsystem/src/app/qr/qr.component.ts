@@ -1,11 +1,6 @@
-import {Component, ViewChild, ViewEncapsulation, OnInit, Output, EventEmitter, OnDestroy} from '@angular/core';
+import {Component, ViewChild, ViewEncapsulation, OnInit, Output, EventEmitter, OnDestroy, NgZone} from '@angular/core';
 import {Scanner, Camera} from 'instascan';
 
-
-export interface ScanResult {
-    type: string;
-    id: number;
-}
 
 @Component({
     selector: 'ttf-qr',
@@ -14,16 +9,19 @@ export interface ScanResult {
 })
 export class QrComponent implements OnInit, OnDestroy {
 
-    @Output() scanResult: EventEmitter<ScanResult> = new EventEmitter<ScanResult>();
+    @Output() scanResult: EventEmitter<number> = new EventEmitter<number>();
 
     scanner: Scanner;
     cameras: any[];
     camera: number = -1;
 
+    lastScan;
+
     @ViewChild('video') preview;
 
+    constructor(private zone: NgZone) {}
+
     ngOnInit() {
-        console.log(this.preview);
         this.scanner = new Scanner({
             video: this.preview.nativeElement,
             backgroundScan: true,
@@ -36,7 +34,13 @@ export class QrComponent implements OnInit, OnDestroy {
             console.error(e);
         });
         this.scanner.addListener('scan', (content) => {
-            console.log(content);
+            this.zone.run(() => {
+                const result = content.match(/\/items\/(?<itemID>[0-9]+)\/?$/)
+                if (result != null && result.groups.itemID != null) {
+                    this.lastScan = result.groups.itemID;
+                    this.scanResult.next(parseInt(result.groups.itemID, 10));
+                }
+            });
         });
     }
 
