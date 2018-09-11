@@ -12,13 +12,11 @@ import { JWTService } from '../shared/rest/jwt.service';
 export class TitleBarComponent implements OnInit {
 
     title: string;
-    stagingEmpty: boolean;
 
-    constructor(private data: NavigationService, private staging: StagingService, private jwt: JWTService) { }
+    constructor(private data: NavigationService, private jwt: JWTService) { }
 
     ngOnInit(): void {
         this.data.currentTitle.subscribe(title => this.title = title);
-        this.staging.currentStaged.map(staged => staged.size === 0).subscribe(isEmpty => this.stagingEmpty = isEmpty);
     }
 
 }
