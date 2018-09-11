@@ -35,10 +35,10 @@ export class QrComponent implements OnInit, OnDestroy {
         });
         this.scanner.addListener('scan', (content) => {
             this.zone.run(() => {
-                const result = content.match(/\/items\/(?<itemID>[0-9]+)\/?$/);
-                if (result != null && result.groups.itemID != null) {
-                    this.lastScan = result.groups.itemID;
-                    this.scanResult.next(parseInt(result.groups.itemID, 10));
+                const result = content.match(/\/items\/([0-9]+)\/?$/);
+                if (result != null && result[1] != null) {
+                    this.lastScan = result[1];
+                    this.scanResult.next(parseInt(result[1], 10));
                 }
             });
         });
