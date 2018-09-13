@@ -298,13 +298,20 @@ export class ApiService implements OnInit {
         if (list_stream != null) {
             const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
             if (list != null) {
-                const index = list.findIndex(value => value[idField] === data[idField]);
-                if (index < 0) {
-                    list.push(data);
-                } else {
-                    list[index] = data;
+                const newlist = [];
+                let updated = false;
+                list.forEach((value) => {
+                    if (value[idField] === data[idField]) {
+                        updated = true;
+                        newlist.push(data);
+                    } else {
+                        newlist.push(value);
+                    }
+                });
+                if (!updated) {
+                    newlist.push(data);
                 }
-                list_stream.next(list);
+                list_stream.next(newlist);
             }
         }
     }
@@ -313,15 +320,24 @@ export class ApiService implements OnInit {
         const stream = this.getStreamSource(streamID + '/' + id);
         stream.next(null);
 
+        console.log('remove ' + streamID + '/' + id)
+
         const list_stream = this.getStreamSource(streamID, false);
         if (list_stream != null) {
             const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
             if (list != null) {
-                const index = list.findIndex(value => value.id === id);
-                if (index >= 0) {
-                    list.splice(index, 1);
+                const newlist = [];
+                let updated = false;
+                list.forEach((value) => {
+                    if (value.id === id) {
+                        updated = true;
+                    } else {
+                        newlist.push(value);
+                    }
+                });
+                if (updated) {
+                    list_stream.next(newlist);
                 }
-                list_stream.next(list);
             }
         }
     }
