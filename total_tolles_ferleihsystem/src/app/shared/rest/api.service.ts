@@ -1071,10 +1071,11 @@ export class ApiService implements OnInit {
         });
 
         stream.subscribe(data => {
+            const dispositonHeader = data.headers.get('content-disposition')
             console.log(data);
             const blob = new Blob([data.blob()], {type: 'application/pdf'}); //octet-stream
             console.log(blob);
-            saveAs(blob, file.name + file.file_type);
+            saveAs(blob, dispositonHeader.length > 25 ? dispositonHeader.substring(21) : file.name + file.file_type);
         })
     }
 
