@@ -213,3 +213,13 @@ body {
     border-width: 0 0.25rem 0.25rem 0.25rem;
     border-color: transparent transparent black transparent;
 }
+.tooltip-left:not(.tooltip)::after, .tooltip-left:not(.tooltip)::before {
+    display: none;
+}
+.tooltip-right:not(.tooltip)::after, .tooltip-right:not(.tooltip)::before {
+    display: none;
+}
+.tooltip-bottom:not(.tooltip)::after, .tooltip-bottom:not(.tooltip)::before {
+    display: none;
+}
+
