@@ -320,8 +320,6 @@ export class ApiService implements OnInit {
         const stream = this.getStreamSource(streamID + '/' + id);
         stream.next(null);
 
-        console.log('remove ' + streamID + '/' + id)
-
         const list_stream = this.getStreamSource(streamID, false);
         if (list_stream != null) {
             const list: ApiObject[] = (list_stream.getValue() as ApiObject[]);
