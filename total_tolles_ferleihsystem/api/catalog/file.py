@@ -4,6 +4,7 @@ This module contains all API endpoints for the namespace 'file'
 
 import os
 from typing import Tuple
+from hashlib import sha3_256
 from flask import request, make_response
 from flask_restplus import Resource, abort
 from sqlalchemy.exc import IntegrityError
@@ -15,7 +16,6 @@ from ...db_models.item import Item, File
 from .. import API
 from ... import DB
 
-from ...file_store import save_file, read_file
 
 
 PATH: str = '/catalog/files'
@@ -54,9 +54,16 @@ class FileList(Resource):
         if Item.query.filter(Item.id == item_id).first() is None:
             abort(400)
 
-        file_hash = save_file(file)
-        name, ext = os.path.splitext(file.filename)
-        new = File(item_id=item_id, name=name, file_type=ext, file_hash=file_hash)
+        # calculate the file hash and reset the file read pointer
+        file_hash = sha3_256(file.stream.read()).hexdigest()
+        file.stream.seek(0)
+
+        # generate the item object
+        __name, ext = os.path.splitext(file.filename)
+        new = File(item_id=item_id, name='', file_type=ext, file_hash=file_hash)
+
+        # read the file into the db
+        new.file_data = file.stream.read()
 
         try:
             DB.session.add(new)
@@ -137,6 +144,8 @@ class ArchiveHandler(Resource):
         """
         Create a Archive of files
         """
+        abort(501) # TODO fix archive endpoint
+
         file_name = request.args.get('name', default='archive', type=str)
         file_ids = request.args.getlist('file', type=int)
 
@@ -177,9 +186,10 @@ class FileData(Resource):
         """
         Get the actual file
         """
-        file = File.query.filter(File.file_hash == file_hash).first()
+        file = File.query.options(DB.undefer(File.file_data)).filter(File.file_hash == file_hash).first()
 
         headers = {
-            "Content-Disposition": "attachment; filename={}".format(file.name + file.file_type)
+            "Content-Disposition": "attachment; filename={}".format(file.item.name + file.name + file.file_type)
         }
-        return make_response((read_file(file_hash), headers))
+
+        return make_response(file.file_data, headers)

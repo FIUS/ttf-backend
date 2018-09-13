@@ -255,24 +255,29 @@ class File(DB.Model):
 
     id = DB.Column(DB.Integer, primary_key=True)
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), nullable=True)
-    name = DB.Column(DB.String(STD_STRING_SIZE))
+    name = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     file_type = DB.Column(DB.String(STD_STRING_SIZE))
     file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True, index=True)
     creation = DB.Column(DB.DateTime, server_default=func.now())
     invalidation = DB.Column(DB.DateTime, nullable=True)
+    visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
+    file_data = DB.deferred(DB.Column(DB.LargeBinary, nullable=True))
 
     item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='select',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int=None):
+    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int=None, visible_for: str = ''):
         if item_id is not None:
             self.item_id = item_id
         self.name = name
         self.file_type = file_type
         self.file_hash = file_hash
 
-    def update(self, name: str, file_type: str, invalidation, item_id: int) -> None:
+        if visible_for != '' and visible_for != None:
+            self.visible_for = visible_for
+
+    def update(self, name: str, file_type: str, invalidation, item_id: int, visible_for: str = '') -> None:
         """
         Function to update the objects data
         """
@@ -280,6 +285,7 @@ class File(DB.Model):
         self.file_type = file_type
         self.invalidation = invalidation
         self.item_id = item_id
+        self.visible_for = visible_for
 
 
 class Lending(DB.Model):
