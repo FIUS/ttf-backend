@@ -52,12 +52,13 @@ class Tag(DB.Model):
         items = [itad.item for itad in itads]
 
         DB.session.delete(association)
-        
+
         for i in items:
             _, attributes_to_delete, _ = i.get_attribute_changes([attribute_definition_id], True)
             for attr in attributes_to_delete:
                 attr.deleted = True
         return(204, '', True)
+
 
 class TagToAttributeDefinition (DB.Model):
 
@@ -66,8 +67,8 @@ class TagToAttributeDefinition (DB.Model):
     tag_id = DB.Column(DB.Integer, DB.ForeignKey('Tag.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
 
-    tag = DB.relationship(Tag, backref=DB.backref('_tag_to_attribute_definitions', lazy='joined'))
-    attribute_definition = DB.relationship('AttributeDefinition')
+    tag = DB.relationship(Tag, backref=DB.backref('_tag_to_attribute_definitions', lazy='select'))
+    attribute_definition = DB.relationship('AttributeDefinition', lazy='joined')
 
     def __init__(self, tag_id: int, attribute_definition_id: int):
         self.tag_id = tag_id

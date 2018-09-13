@@ -6,6 +6,7 @@ from flask import request
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import noload, joinedload
 
 from .. import API, satisfies_role
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET
@@ -40,7 +41,7 @@ class ItemList(Resource):
         """
         test_for = request.args.get('deleted', 'false') == 'true'
 
-        base_query = Item.query.filter(Item.deleted == test_for)
+        base_query = Item.query.options(joinedload(Item.type)).filter(Item.deleted == test_for)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

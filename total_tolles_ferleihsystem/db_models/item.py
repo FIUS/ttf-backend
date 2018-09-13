@@ -81,10 +81,9 @@ class Item(DB.Model):
         """
         The lending_id this item is currently associated with. -1 if not lent.
         """
-        lending_to_item = ItemToLending.query.filter(ItemToLending.item_id == self.id).first()
-        if lending_to_item is None:
-            return -1
-        return lending_to_item.lending_id
+        if self._lending:
+            return self._lending[0].lending_to_item.lending_id
+        return -1
 
     @property
     def item_lending(self):
@@ -101,6 +100,10 @@ class Item(DB.Model):
         If the item is currently lent.
         """
         return self.lending_id != -1
+
+    @property
+    def due(self):
+        return -1 if self.lending_id is not None else self.item_lending.due
 
     @property
     def effective_lending_duration(self):
@@ -258,7 +261,7 @@ class File(DB.Model):
     creation = DB.Column(DB.DateTime, server_default=func.now())
     invalidation = DB.Column(DB.DateTime, nullable=True)
 
-    item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='joined',
+    item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='select',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
@@ -314,7 +317,7 @@ class ItemToItem(DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
 
     parent = DB.relationship('Item', foreign_keys=[parent_id],
-                             backref=DB.backref('_contained_items', lazy='joined',
+                             backref=DB.backref('_contained_items', lazy='select',
                                                 single_parent=True, cascade="all, delete-orphan"))
     item = DB.relationship('Item', foreign_keys=[item_id], lazy='joined')
 
@@ -335,7 +338,7 @@ class ItemToLending (DB.Model):
                                                       single_parent=True, cascade="all, delete-orphan"))
     lending = DB.relationship('Lending', backref=DB.backref('itemLendings', lazy='joined',
                                                             single_parent=True,
-                                                            cascade="all, delete-orphan"), lazy='joined')
+                                                            cascade="all, delete-orphan"), lazy='select')
 
     def __init__(self, item: Item, lending: Lending):
         self.item = item
@@ -368,7 +371,7 @@ class ItemToAttributeDefinition (DB.Model):
     value = DB.Column(DB.String(STD_STRING_SIZE))
     deleted = DB.Column(DB.Boolean, default=False)
 
-    item = DB.relationship('Item', backref=DB.backref('_attributes', lazy='joined',
+    item = DB.relationship('Item', backref=DB.backref('_attributes', lazy='select',
                                                       single_parent=True, cascade="all, delete-orphan"))
     attribute_definition = DB.relationship('AttributeDefinition', backref=DB.backref('_item_to_attribute_definitions', lazy='joined'))
 
