@@ -212,18 +212,17 @@ FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
                                url_data={'file_hash': 'file_hash'}), required=False),
 })
 
-FILE_BASIC = API.inherit('FileBASIC', ID, {
+FILE_BASIC = API.model('FileBASIC', {
     'name': fields.String(max_length=STD_STRING_SIZE, nullable=True),
     'file_type': fields.String(max_length=20),
     'invalidation': fields.DateTime(nullable=True),
     'visible_for': fields.String(enum=('all', 'moderator', 'administrator'), title='Access Rights'),
 })
 
-FILE_GET = API.inherit('FileGET', FILE_BASIC, {
+FILE_GET = API.inherit('FileGET', FILE_BASIC, ID, {
     'item': fields.Nested(ITEM_GET),
     'file_hash': fields.String(max_length=STD_STRING_SIZE),
     'creation': fields.DateTime(),
-    'item_id': fields.Integer(min=1),
     '_links': NestedFields(FILE_LINKS)
 })
 
