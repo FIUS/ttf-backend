@@ -227,7 +227,6 @@ FILE_GET = API.inherit('FileGET', FILE_BASIC, ID, {
 })
 
 FILE_PUT = API.inherit('FilePUT', FILE_BASIC, {
-    'item_id': fields.Integer(min=1)
 })
 
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {
