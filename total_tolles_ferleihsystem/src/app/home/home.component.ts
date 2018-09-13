@@ -15,8 +15,10 @@ import { Observable } from 'rxjs';
             grid-template-rows: auto;
             grid-column-gap: 20px;
             grid-row-gap: 20px;
-            grid-template-columns: repeat(auto-fit, 17rem);
-            justify-content: space-evenly;	
+            grid-template-columns: repeat(auto-fill, 17rem);
+            justify-content: space-between;	
+            margin-left: .5rem;
+            margin-right: .5rem;
         }`
     ]
 })
