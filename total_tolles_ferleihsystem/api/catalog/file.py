@@ -4,16 +4,19 @@ This module contains all API endpoints for the namespace 'file'
 
 import os
 from typing import Tuple
+# pylint: disable=E0611
 from hashlib import sha3_256
 from flask import request, make_response
-from flask_restplus import Resource, abort
+from flask_restplus import Resource, abort, marshal
+from flask_jwt_extended import jwt_required, get_jwt_claims
 from sqlalchemy.exc import IntegrityError
 
 from total_tolles_ferleihsystem.tasks.file import create_archive
 from ..models import FILE_GET, FILE_PUT
+from ...login import UserRole
 from ...db_models.item import Item, File
 
-from .. import API
+from .. import API, satisfies_role
 from ... import DB
 
 
@@ -27,32 +30,47 @@ class FileList(Resource):
     Files root element
     """
 
+    @jwt_required
     @API.marshal_list_with(FILE_GET)
     def get(self):
         """
         Get a list of files
         """
-        return File.query.all()
+        base_query = File.query
 
-    @API.marshal_with(FILE_GET)
-    #TODO Add security and swagger doc
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        return base_query.all()
+
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
+    @ANS.doc(model=FILE_GET)
+    @ANS.response(201, 'File created.')
+    @ANS.response(400, 'Wrongly formated request! Missing file or item.')
+    @ANS.response(404, 'Requested item was not found!')
+    @ANS.response(500, 'SQL Error!')
     def post(self):
         """
         Create a file
         """
-        #FIXME Do better aborts and error checking
+        #FIXME Do better aborts and error checking and maybe logging
         if 'file' not in request.files:
-            abort(400)
+            abort(400, 'No file attached!')
         file = request.files['file']
         if not file:
-            abort(400)
-        if file.filename == '':
-            abort(400)
+            abort(400, 'File Empty!')
+        if file.filename == None or file.filename == '':
+            abort(400, 'No file name!')
         item_id = request.form['item_id']
         if item_id is None:
-            abort(400)
+            abort(400, 'No item specified!')
         if Item.query.filter(Item.id == item_id).first() is None:
-            abort(400)
+            abort(404, 'Requested item was not found!')
 
         # calculate the file hash and reset the file read pointer
         file_hash = sha3_256(file.stream.read()).hexdigest()
@@ -65,15 +83,13 @@ class FileList(Resource):
         # read the file into the db
         new.file_data = file.stream.read()
 
+        # add the file to the sql database
         try:
             DB.session.add(new)
             DB.session.commit()
-            return new
-        except IntegrityError as err:
-            message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Name is not unique!')
-            abort(500)
+            return marshal(new, FILE_GET), 201
+        except IntegrityError:
+            abort(500, 'SQL Error!')
 
 
 @ANS.route('/<int:file_id>/')
@@ -82,20 +98,32 @@ class FileDetail(Resource):
     Single file object
     """
 
+    @jwt_required
     @ANS.response(404, 'Requested file not found!')
     @API.marshal_with(FILE_GET)
     def get(self, file_id):
         """
         Get a single file object
         """
-        file = File.query.filter(File.id == file_id).first()
+        base_query = File.query
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        file = base_query.filter(File.id == file_id).first()
         if file is None:
             abort(404, 'Requested item not found!')
 
         return file
 
-    @ANS.response(404, 'Requested file not found!')
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.response(204, 'Success.')
+    @ANS.response(404, 'Requested file not found!')
     def delete(self, file_id):
         """
         Delete a file object
@@ -107,9 +135,11 @@ class FileDetail(Resource):
         DB.session.commit()
         return "", 204
 
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @ANS.doc(body=FILE_PUT)
-    @ANS.response(409, 'Name is not Unique.')
     @ANS.response(404, 'Requested file not found!')
+    @ANS.response(500, 'SQL Error!')
     @ANS.marshal_with(FILE_GET)
     def put(self, file_id):
         """
@@ -124,11 +154,8 @@ class FileDetail(Resource):
         try:
             DB.session.commit()
             return file
-        except IntegrityError as err:
-            message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Name is not unique!')
-            abort(500)
+        except IntegrityError:
+            abort(500, 'SQL Error!')
 
 
 @ANS.route('/archive')
@@ -137,14 +164,17 @@ class ArchiveHandler(Resource):
     Archive Endpoints
     """
 
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @API.param('name', 'The name of the archive file', type=str, required=False, default='archive')
     @API.param('file', 'The file_ids to be added to the archive', type=str, required=True)
-    @ANS.marshal_with(FILE_GET)
+    @ANS.response(202, 'Archive is currently generated.')
+    @ANS.response(500, 'SQL Error!')
     def post(self):
         """
         Create a Archive of files
         """
-        abort(501) # TODO fix archive endpoint
+        abort(501, 'Currently not implemented!!') # TODO fix archive endpoint
 
         file_name = request.args.get('name', default='archive', type=str)
         file_ids = request.args.getlist('file', type=int)
@@ -165,12 +195,9 @@ class ArchiveHandler(Resource):
             # Run task
             create_archive.delay(new.id, list(map(map_function, file_ids)))
 
-            return new
-        except IntegrityError as err:
-            message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Name is not unique!')
-            abort(500)
+            return marshal(new, FILE_GET), 202
+        except IntegrityError:
+            abort(500, 'SQL Error!')
 
 
 PATH2: str = '/file-store'
@@ -182,11 +209,17 @@ class FileData(Resource):
     The endpoints to get the actual stored file
     """
 
+    @jwt_required
+    @satisfies_role(UserRole.MODERATOR)
+    @ANS.response(404, 'Requested file not found!')
     def get(self, file_hash):
         """
         Get the actual file
         """
         file = File.query.options(DB.undefer(File.file_data)).filter(File.file_hash == file_hash).first()
+
+        if file is None:
+            abort(404, 'Requested file was not found!')
 
         headers = {
             "Content-Disposition": "attachment; filename={}".format(file.item.name + file.name + file.file_type)
