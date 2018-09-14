@@ -5,7 +5,7 @@
     (drop)="onDropFile($event); dragover=false" (dragover)="onDragOverFile($event)"
     (click)="upload.open()">
     <span [hidden]="hover && !dragover">
-        Dop file(s) here...
+        Drop file(s) here...
     </span>
     <span [hidden]="!hover || dragover">
         Click to upload file

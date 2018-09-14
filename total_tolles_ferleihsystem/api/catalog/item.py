@@ -208,7 +208,7 @@ class ItemItemTags(Resource):
         """
         Get all tags for this item.
         """
-        base_query = Item.query;
+        base_query = Item.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -313,7 +313,7 @@ class ItemAttributeList(Resource):
         """
         Get the attributes of this item.
         """
-        base_query = Item.query;
+        base_query = Item.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -344,7 +344,7 @@ class ItemAttributeDetail(Resource):
         """
         Get a single attribute of this item.
         """
-        base_query = Item.query;
+        base_query = Item.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -416,7 +416,7 @@ class ItemContainedItems(Resource):
         """
         Get all contained items of this item.
         """
-        base_query = Item.query;
+        base_query = Item.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -521,7 +521,7 @@ class ItemFile(Resource):
         """
         Get all files for this item.
         """
-        base_query = Item.query;
+        base_query = Item.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

@@ -35,7 +35,7 @@ class ItemTypeList(Resource):
         Get a list of all item types currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        base_query = ItemType.query;
+        base_query = ItemType.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -81,7 +81,7 @@ class ItemTypeDetail(Resource):
         """
         Get a single item type object
         """
-        base_query = ItemType.query;
+        base_query = ItemType.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -271,7 +271,7 @@ class ItemTypeCanContainTypes(Resource):
         """
         Get all item types, this item_type may contain.
         """
-        base_query = ItemType.query;
+        base_query = ItemType.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
