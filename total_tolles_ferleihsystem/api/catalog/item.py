@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import noload, joinedload
 
 from .. import API, satisfies_role
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET, ITEM_GET_WITH_PARENTS
 from ... import DB
 from ...login import UserRole
 from ...performance import record_view_performance
@@ -94,13 +94,13 @@ class ItemDetail(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @API.marshal_with(ITEM_GET)
+    @API.marshal_with(ITEM_GET_WITH_PARENTS)
     # pylint: disable=R0201
     def get(self, item_id):
         """
         Get a single item object
         """
-        base_query = Item.query;
+        base_query = Item.query
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

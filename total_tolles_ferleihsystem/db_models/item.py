@@ -319,7 +319,10 @@ class ItemToItem(DB.Model):
     parent = DB.relationship('Item', foreign_keys=[parent_id],
                              backref=DB.backref('_contained_items', lazy='select',
                                                 single_parent=True, cascade="all, delete-orphan"))
-    item = DB.relationship('Item', foreign_keys=[item_id], lazy='joined')
+    item = DB.relationship('Item', foreign_keys=[item_id], backref=DB.backref('_parents', lazy='select',
+                                                                              single_parent=True,
+                                                                              cascade="all, delete-orphan"),
+                           lazy='joined')
 
     def __init__(self, parent_id: int, item_id: int):
         self.parent_id = parent_id

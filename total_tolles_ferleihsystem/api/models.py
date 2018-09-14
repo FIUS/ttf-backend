@@ -185,6 +185,11 @@ ITEM_GET = API.inherit('ItemGET', ITEM_PUT, ID, {
     '_links': NestedFields(ITEM_LINKS)
 })
 
+ITEM_GET_WITH_PARENTS = API.inherit('ItemGET_PARENTS', ITEM_GET, {
+    'parents': fields.List(fields.Nested(ITEM_GET), attribute='_parents')
+})
+
+
 ATTRIBUTE_LINKS = API.inherit('AttributeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_attribute_detail',
                            url_data={'item_id': 'item_id', 'attribute_definition_id': 'attribute_definition_id'}),
