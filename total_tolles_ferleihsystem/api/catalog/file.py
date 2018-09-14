@@ -17,7 +17,7 @@ from ...login import UserRole
 from ...db_models.item import Item, File
 
 from .. import API, satisfies_role
-from ... import DB
+from ... import APP, DB
 
 
 
@@ -80,9 +80,9 @@ class FileList(Resource):
         __name, ext = os.path.splitext(file.filename)
         new = File(item_id=item_id, name='', file_type=ext, file_hash=file_hash)
 
-        # read the file into the db
-        #new.file_data = file.stream.read()
-        # FIXME write file somewhere
+        # save the file to disk
+        with open(os.path.join(APP.config['DATA_DIRECTORY'], file_hash), mode='wb') as file_on_disk:
+            file_on_disk.write(file.stream.read())
 
         # add the file to the sql database
         try:
@@ -213,6 +213,7 @@ class FileData(Resource):
     @jwt_required
     @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested file not found!')
+    @ANS.response(500, 'Something crashed while reading file!')
     def get(self, file_hash):
         """
         Get the actual file
@@ -226,4 +227,6 @@ class FileData(Resource):
             "Content-Disposition": "attachment; filename={}".format(file.item.name + file.name + file.file_type)
         }
 
-        return make_response('', headers) # FIXME load file
+        with open(os.path.join(APP.config['DATA_DIRECTORY'], file.file_hash), mode='rb') as file_on_disk:
+            return make_response(file_on_disk.read(), headers)
+        abort(500, 'Something crashed while reading file!')
