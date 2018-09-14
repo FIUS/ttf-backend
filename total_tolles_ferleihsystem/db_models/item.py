@@ -261,7 +261,6 @@ class File(DB.Model):
     creation = DB.Column(DB.DateTime, server_default=func.now())
     invalidation = DB.Column(DB.DateTime, nullable=True)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
-    file_data = DB.deferred(DB.Column(DB.LargeBinary, nullable=True))
 
     item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='select',
                                                                      single_parent=True,

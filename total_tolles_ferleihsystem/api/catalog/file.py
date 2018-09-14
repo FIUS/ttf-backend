@@ -81,7 +81,8 @@ class FileList(Resource):
         new = File(item_id=item_id, name='', file_type=ext, file_hash=file_hash)
 
         # read the file into the db
-        new.file_data = file.stream.read()
+        #new.file_data = file.stream.read()
+        # FIXME write file somewhere
 
         # add the file to the sql database
         try:
@@ -216,7 +217,7 @@ class FileData(Resource):
         """
         Get the actual file
         """
-        file = File.query.options(DB.undefer(File.file_data)).filter(File.file_hash == file_hash).first()
+        file = File.query.filter(File.file_hash == file_hash).first()
 
         if file is None:
             abort(404, 'Requested file was not found!')
@@ -225,4 +226,4 @@ class FileData(Resource):
             "Content-Disposition": "attachment; filename={}".format(file.item.name + file.name + file.file_type)
         }
 
-        return make_response(file.file_data, headers)
+        return make_response('', headers) # FIXME load file
