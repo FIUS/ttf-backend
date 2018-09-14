@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
     selector: 'ttf-home',
     templateUrl: './home.component.html',
     styles: [
-        `.ttf-button-grid[_ngcontent-c3] {
+        `.ttf-button-grid {
             display: -ms-grid;
             display: grid;
             grid-template-rows: auto;
