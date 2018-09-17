@@ -57,21 +57,6 @@ def satisfies_role(role: UserRole):
         return wrapper
     return has_roles_decorator
 
-
-
-
-FORMATTER = Formatter(fmt=APP.config['AUTH_LOG_FORMAT'])
-
-FH = RotatingFileHandler(path.join(APP.config['LOG_PATH'], 'ttf_auth.log'),
-                         maxBytes=104857600, backupCount=10)
-
-FH.setFormatter(FORMATTER)
-
-FH.setLevel(DEBUG)
-
-AUTH_LOGGER.addHandler(FH)
-
-
 API_BLUEPRINT = Blueprint('api', __name__)
 
 API = Api(API_BLUEPRINT, version='0.1', title='TTF API', doc='/doc/',

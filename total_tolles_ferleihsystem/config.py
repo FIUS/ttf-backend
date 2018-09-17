@@ -1,7 +1,7 @@
 """Module containing default config values."""
 
 from random import randint
-
+import logging
 
 class Config(object):
     DEBUG = False
@@ -13,10 +13,67 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WEBPACK_MANIFEST_PATH = './build/manifest.json'
-    LOG_PATH = '/tmp'
-    LOG_FORMAT = '%(asctime)s [%(levelname)s] [%(name)-16s] %(message)s <%(module)s, \
-                 %(funcName)s, %(lineno)s; %(pathname)s>'
-    AUTH_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+    LOG_LEVEL = logging.INFO
+    LOGGING = {
+        'version': 1,
+        'formatters': {
+            'default': {
+                'format': '%(asctime)s [%(levelname)s] [%(name)-16s] %(message)s <%(module)s, \
+                 %(funcName)s, %(lineno)s; %(pathname)s>',
+            },
+            'auth': {
+                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+            },
+            'lending': {
+                'format': '%(asctime)s [%(levelname)s] %(message)s',
+            }
+        },
+        'handlers': {
+            'default': {
+                'class' : 'logging.handlers.RotatingFileHandler',
+                'formatter' : 'default',
+                'filename': '/tmp/ttf-default.log',
+                'maxBytes' : 104857600,
+                'backupCount': 10,
+            },
+            'auth' : {
+                'class' : 'logging.handlers.RotatingFileHandler',
+                'formatter' : 'auth',
+                'filename': '/tmp/ttf-auth.log',
+                'maxBytes' : 104857600,
+                'backupCount': 10,
+            },
+            'lending' : {
+                'class' : 'logging.handlers.RotatingFileHandler',
+                'formatter' : 'lending',
+                'filename': '/tmp/ttf-lending.log',
+                'maxBytes' : 104857600,
+                'backupCount': 100,
+            },
+        },
+        'loggers': {
+            'auth': {
+                'level': LOG_LEVEL,
+                'propagate': False,
+                'handlers': ['auth'],
+            },
+            'lending': {
+                'level': LOG_LEVEL,
+                'propagate': False,
+                'handlers': ['lending'],
+            },
+            'task': {
+                'level': LOG_LEVEL,
+                'propagate': False,
+                'handlers': ['default'],
+            },
+        },
+        'root': {
+            'level': LOG_LEVEL,
+            'handlers': ['default'],
+        },
+        'disable_existing_loggers': True,
+    }
     CELERY_BROKER_URL = 'amqp://localhost',
     CELERY_RESULT_BACKEND = 'rpc://'
     TMP_DIRECTORY = '/tmp'
@@ -57,11 +114,10 @@ class DebugConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
     JWT_SECRET_KEY = 'debug'
-    LOG_PATH = '/tmp'
+    LOG_LEVEL = logging.DEBUG
     SQLALCHEMY_ECHO = True
     LOGIN_PROVIDERS = ['Debug']
 
 
 class TestingConfig(Config):
     TESTING = True
-    LOG_PATH = '/tmp'
