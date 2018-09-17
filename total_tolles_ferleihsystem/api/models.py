@@ -186,7 +186,7 @@ ITEM_GET = API.inherit('ItemGET', ITEM_PUT, ID, {
 })
 
 ITEM_GET_WITH_PARENTS = API.inherit('ItemGET_PARENTS', ITEM_GET, {
-    'parents': fields.List(fields.Nested(ITEM_GET), attribute='_parents')
+    'parent': fields.Nested(ITEM_GET, attribute='parent')
 })
 
 

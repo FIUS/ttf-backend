@@ -113,6 +113,7 @@ class ItemDetail(Resource):
         if item is None:
             abort(404, 'Requested item not found!')
 
+        print(item._parents[0].parent)
         return item
 
     @jwt_required

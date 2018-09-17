@@ -106,6 +106,12 @@ class Item(DB.Model):
         return -1 if self.lending_id is not None else self.item_lending.due
 
     @property
+    def parent(self):
+        if self._parents:
+            return self._parents[0].parent
+        return None
+
+    @property
     def effective_lending_duration(self):
         """
         The effective lending duration computed from item type, tags and item
