@@ -1,9 +1,11 @@
 """
 TTF Module
 """
+from sys import platform
+
 from os import environ, path
-from logging import Formatter, getLogger, DEBUG
-from logging.handlers import RotatingFileHandler
+from logging import getLogger
+from logging.config import dictConfig
 
 from flask import Flask, logging
 from flask_sqlalchemy import SQLAlchemy
@@ -16,8 +18,6 @@ from flask_cors import CORS, cross_origin
 
 
 WEBPACK = Webpack()  # type: Webpack
-
-
 # Setup Config
 
 APP = Flask(__name__, instance_relative_config=True)  # type: Flask
@@ -29,31 +29,21 @@ elif APP.config['MODE'] == 'DEBUG':
 elif APP.config['MODE'] == 'TEST':
     APP.config.from_object('total_tolles_ferleihsystem.config.TestingConfig')
 
-
 APP.config.from_pyfile('/etc/total-tolles-ferleihsystem.conf', silent=True)
 APP.config.from_pyfile('total-tolles-ferleihsystem.conf', silent=True)
 if ('CONFIG_FILE' in environ):
     APP.config.from_pyfile(environ.get('CONFIG_FILE', 'total-tolles-ferleihsystem.conf'), silent=True)
 
-
-CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY', 'LOG_PATH')
+CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY', 'LOG_LEVEL')
 for env_var in CONFIG_KEYS:
     APP.config[env_var] = environ.get(env_var, APP.config.get(env_var))
 
+dictConfig(APP.config['LOGGING'])
 
-FORMATTER = Formatter(fmt=APP.config['LOG_FORMAT'])
-
-FH = RotatingFileHandler(path.join(APP.config['LOG_PATH'], 'ttf.log'),
-                         maxBytes=104857600, backupCount=10)
-
-FH.setFormatter(FORMATTER)
-
-APP.logger.addHandler(FH)
-
+APP.logger.debug('Debug logging enabled')
 APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
 
 AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
-AUTH_LOGGER.setLevel(DEBUG)
 
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy

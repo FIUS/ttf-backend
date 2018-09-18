@@ -1,25 +1,11 @@
-from celery import Celery
 from logging import Logger, Formatter, DEBUG, INFO, getLogger
 from logging.handlers import RotatingFileHandler
 from os import path
+from celery import Celery
 
 from .. import APP
 
-TASK_LOGGER: Logger = getLogger('flask.app.tasks')
-
-
-FORMATTER = Formatter(fmt=APP.config['LOG_FORMAT'])
-
-FH = RotatingFileHandler(path.join(APP.config['LOG_PATH'], 'ttf_tasks.log'),
-                         maxBytes=104857600, backupCount=10)
-
-FH.setFormatter(FORMATTER)
-FH.setLevel(INFO)
-
-TASK_LOGGER.addHandler(FH)
-
-TASK_LOGGER.setLevel(DEBUG)
-
+TASK_LOGGER: Logger = getLogger('tasks')
 
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#new-lowercase-settings
 # Missing keys for automatic conversion:
