@@ -26,6 +26,9 @@ class Config(object):
             },
             'lending': {
                 'format': '%(asctime)s [%(levelname)s] %(message)s',
+            },
+            'query': {
+                'format': '[%(levelname)s] [%(name)-16s] %(message)s',
             }
         },
         'handlers': {
@@ -43,6 +46,13 @@ class Config(object):
                 'maxBytes' : 104857600,
                 'backupCount': 10,
             },
+            'query': {
+                'class' : 'logging.handlers.RotatingFileHandler',
+                'formatter' : 'query',
+                'filename': '/tmp/ttf-querys.log',
+                'maxBytes' : 104857600,
+                'backupCount': 10,
+            },
             'lending' : {
                 'class' : 'logging.handlers.RotatingFileHandler',
                 'formatter' : 'lending',
@@ -52,10 +62,15 @@ class Config(object):
             },
         },
         'loggers': {
-            'auth': {
+            'flask.app.auth': {
                 'level': LOG_LEVEL,
                 'propagate': False,
                 'handlers': ['auth'],
+            },
+            'flask.app.db': {
+                'level': LOG_LEVEL,
+                'propagate': False,
+                'handlers': ['query']
             },
             'lending': {
                 'level': LOG_LEVEL,

@@ -43,7 +43,7 @@ dictConfig(APP.config['LOGGING'])
 APP.logger.debug('Debug logging enabled')
 APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
 
-AUTH_LOGGER = getLogger('auth')  # type: Logger
+AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
 
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy

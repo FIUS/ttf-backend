@@ -10,16 +10,6 @@ from .. import APP, DB
 
 DB_COMMAND_LOGGER = getLogger('flask.app.db')  # type: Logger
 
-formatter = Formatter(fmt='[%(levelname)s] [%(name)-16s] %(message)s')
-
-handler = StreamHandler(stream=stdout)
-
-handler.setFormatter(formatter)
-
-DB_COMMAND_LOGGER.addHandler(handler)
-
-DB_COMMAND_LOGGER.setLevel(DEBUG)
-
 STD_STRING_SIZE = 190  # Max size that allows Indices while using utf8mb4 in MySql DB
 
 
