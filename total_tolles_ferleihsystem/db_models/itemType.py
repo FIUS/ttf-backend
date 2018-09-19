@@ -3,7 +3,8 @@ from . import STD_STRING_SIZE
 from .attributeDefinition import AttributeDefinition
 from . import item
 
-__all__= [ 'ItemType', 'ItemTypeToItemType', 'ItemTypeToAttributeDefinition' ]
+__all__ = ['ItemType', 'ItemTypeToItemType', 'ItemTypeToAttributeDefinition']
+
 
 class ItemType (DB.Model):
 
@@ -29,7 +30,7 @@ class ItemType (DB.Model):
         if how_to != '' and how_to != None:
             self.how_to = how_to
 
-    def update(self, name: str, name_schema: str, lendable: bool, lending_duration: int, visible_for: str, how_to:str):
+    def update(self, name: str, name_schema: str, lendable: bool, lending_duration: int, visible_for: str, how_to: str):
         self.name = name
         self.name_schema = name_schema
         self.lendable = lendable
@@ -52,7 +53,8 @@ class ItemType (DB.Model):
         if association is None:
             return(204, '', False)
 
-        itads = item.ItemToAttributeDefinition.query.filter(item.ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id).all()
+        itads = item.ItemToAttributeDefinition.query.filter(
+            item.ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id).all()
 
         items = [itad.item for itad in itads]
 
@@ -72,10 +74,12 @@ class ItemTypeToItemType (DB.Model):
     parent_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id', ondelete='CASCADE'), primary_key=True)
     item_type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'), primary_key=True)
 
-    parent = DB.relationship('ItemType', foreign_keys=[parent_id],
+    parent = DB.relationship('ItemType', foreign_keys=[parent_id], lazy='select',
                              backref=DB.backref('_contained_item_types', lazy='select',
                                                 single_parent=True, cascade="all, delete-orphan"))
-    item_type = DB.relationship('ItemType', foreign_keys=[item_type_id], lazy='joined')
+    item_type = DB.relationship('ItemType', foreign_keys=[item_type_id], lazy='select',
+                                backref=DB.backref('_possible_parent_item_types', lazy='select',
+                                                   single_parent=True, cascade="all, delete-orphan"))
 
     def __init__(self, parent_id: int, item_type_id: int):
         self.parent_id = parent_id
@@ -89,7 +93,8 @@ class ItemTypeToAttributeDefinition (DB.Model):
     item_type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
 
-    item_type = DB.relationship('ItemType', backref=DB.backref('_item_type_to_attribute_definitions', lazy='select'))
+    item_type = DB.relationship('ItemType', lazy='select', 
+                                backref=DB.backref('_item_type_to_attribute_definitions', lazy='select'))
     attribute_definition = DB.relationship('AttributeDefinition', lazy='joined')
 
     def __init__(self, item_type_id: int, attribute_definition_id: int):
