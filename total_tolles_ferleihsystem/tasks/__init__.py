@@ -5,7 +5,7 @@ from celery import Celery
 
 from .. import APP
 
-TASK_LOGGER: Logger = getLogger('tasks')
+TASK_LOGGER: Logger = getLogger('ttf.tasks')
 
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#new-lowercase-settings
 # Missing keys for automatic conversion:

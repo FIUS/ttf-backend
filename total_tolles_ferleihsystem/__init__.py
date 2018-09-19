@@ -4,7 +4,7 @@ TTF Module
 from sys import platform
 
 from os import environ, path
-from logging import getLogger
+from logging import getLogger, Logger
 from logging.config import dictConfig
 
 from flask import Flask, logging
@@ -34,7 +34,7 @@ APP.config.from_pyfile('total-tolles-ferleihsystem.conf', silent=True)
 if ('CONFIG_FILE' in environ):
     APP.config.from_pyfile(environ.get('CONFIG_FILE', 'total-tolles-ferleihsystem.conf'), silent=True)
 
-CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY', 'LOG_LEVEL')
+CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY')
 for env_var in CONFIG_KEYS:
     APP.config[env_var] = environ.get(env_var, APP.config.get(env_var))
 
@@ -54,6 +54,7 @@ DB = SQLAlchemy(APP, metadata=MetaData(naming_convention={
     'uq': 'uq_%(table_name)s_%(column_0_name)s',
     'ck': 'ck_%(table_name)s_%(column_0_name)s',
 }))
+
 MIGRATE: Migrate = Migrate(APP, DB)
 BCRYPT: Bcrypt = Bcrypt(APP)
 
