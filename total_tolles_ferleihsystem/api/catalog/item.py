@@ -19,6 +19,8 @@ from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
 
+import logging
+
 PATH: str = '/catalog/items'
 ANS = API.namespace('item', description='Items', path=PATH)
 
@@ -113,7 +115,6 @@ class ItemDetail(Resource):
         if item is None:
             abort(404, 'Requested item not found!')
 
-        print(item._parents[0].parent)
         return item
 
     @jwt_required
