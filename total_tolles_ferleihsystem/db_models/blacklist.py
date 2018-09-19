@@ -31,7 +31,7 @@ class BlacklistToItemType (DB.Model):
     end_time = DB.Column(DB.DateTime, nullable=True)
     reason = DB.Column(DB.Text, nullable=True)
 
-    user = DB.relationship('Blacklist', backref=DB.backref('_item_types', lazy='joined',
+    user = DB.relationship('Blacklist', lazy='select', backref=DB.backref('_item_types', lazy='select',
                                                            single_parent=True, cascade="all, delete-orphan"))
     item_type = DB.relationship('ItemType', lazy='joined')
 

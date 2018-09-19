@@ -3,6 +3,7 @@
 from random import randint
 import logging
 
+
 class Config(object):
     DEBUG = False
     TESTING = False
@@ -13,78 +14,92 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WEBPACK_MANIFEST_PATH = './build/manifest.json'
-    LOG_LEVEL = logging.INFO
     LOGGING = {
         'version': 1,
         'formatters': {
-            'default': {
+            'extended': {
                 'format': '%(asctime)s [%(levelname)s] [%(name)-16s] %(message)s <%(module)s, \
                  %(funcName)s, %(lineno)s; %(pathname)s>',
             },
-            'auth': {
-                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-            },
-            'lending': {
-                'format': '%(asctime)s [%(levelname)s] %(message)s',
-            },
-            'query': {
-                'format': '[%(levelname)s] [%(name)-16s] %(message)s',
+            'short': {
+                'format': '[%(asctime)s] [%(levelname)s] [%(name)-16s] %(message)s',
             }
         },
         'handlers': {
             'default': {
-                'class' : 'logging.handlers.RotatingFileHandler',
-                'formatter' : 'default',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'formatter': 'extended',
                 'filename': '/tmp/ttf-default.log',
-                'maxBytes' : 104857600,
+                'maxBytes': 104857600,
                 'backupCount': 10,
             },
-            'auth' : {
-                'class' : 'logging.handlers.RotatingFileHandler',
-                'formatter' : 'auth',
+            'auth': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'formatter': 'short',
                 'filename': '/tmp/ttf-auth.log',
-                'maxBytes' : 104857600,
+                'maxBytes': 104857600,
                 'backupCount': 10,
             },
             'query': {
-                'class' : 'logging.handlers.RotatingFileHandler',
-                'formatter' : 'query',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'formatter': 'short',
                 'filename': '/tmp/ttf-querys.log',
-                'maxBytes' : 104857600,
-                'backupCount': 10,
+                'maxBytes': 104857600,
+                'backupCount': 2,
             },
-            'lending' : {
-                'class' : 'logging.handlers.RotatingFileHandler',
-                'formatter' : 'lending',
+            'lending': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'formatter': 'short',
                 'filename': '/tmp/ttf-lending.log',
-                'maxBytes' : 104857600,
+                'maxBytes': 104857600,
                 'backupCount': 100,
             },
+            'performance': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'formatter': 'short',
+                'filename': '/tmp/ttf-performance.log',
+                'maxBytes': 104857600,
+                'backupCount': 2,
+            },
+            'console': {
+                'class' : 'logging.StreamHandler',
+                'formatter': 'extended',
+            }
         },
         'loggers': {
             'flask.app.auth': {
-                'level': LOG_LEVEL,
+                'level': logging.INFO,
                 'propagate': False,
                 'handlers': ['auth'],
             },
             'flask.app.db': {
-                'level': LOG_LEVEL,
+                'level': logging.WARNING,
                 'propagate': False,
-                'handlers': ['query']
+                'handlers': ['query'],
             },
-            'lending': {
-                'level': LOG_LEVEL,
+            'sqlalchemy': {
+                'level': logging.WARNING,
+                'propagate': False,
+                'handlers': ['query'],
+            },
+            'ttf.lending': {
+                'level': logging.INFO,
                 'propagate': False,
                 'handlers': ['lending'],
             },
-            'task': {
-                'level': LOG_LEVEL,
+            'ttf.tasks': {
+                'level': logging.WARNING,
                 'propagate': False,
                 'handlers': ['default'],
             },
+            'ttf.performance': {
+                'level': logging.WARNING,
+                'propagate': False,
+                'handlers': ['performance']
+            }
         },
         'root': {
-            'level': LOG_LEVEL,
+            'level': logging.WARNING,
             'handlers': ['default'],
         },
         'disable_existing_loggers': True,
@@ -129,9 +144,21 @@ class DebugConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
     JWT_SECRET_KEY = 'debug'
-    LOG_LEVEL = logging.DEBUG
-    SQLALCHEMY_ECHO = True
     LOGIN_PROVIDERS = ['Debug']
+    Config.LOGGING['loggers']['flask.app.auth']['level'] = logging.DEBUG
+    Config.LOGGING['loggers']['flask.app.db']['level'] = logging.DEBUG
+    Config.LOGGING['loggers']['sqlalchemy.engine'] = {
+        'level': logging.WARN,
+        'propagate': False,
+        'handlers': ['query'],
+    }
+    Config.LOGGING['loggers']['ttf.lending']['level'] = logging.DEBUG
+    Config.LOGGING['loggers']['ttf.tasks']['level'] = logging.DEBUG
+    Config.LOGGING['loggers']['ttf.performance']['level'] = logging.DEBUG
+    Config.LOGGING['loggers']['flask.app.auth']['level'] = logging.DEBUG
+
+    Config.LOGGING['root']['handlers'].append('console')
+    Config.LOGGING['loggers']['ttf.performance']['handlers'].append('console')
 
 
 class TestingConfig(Config):

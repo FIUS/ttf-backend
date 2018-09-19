@@ -4,6 +4,7 @@ from functools import wraps
 from collections import namedtuple
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
+from logging import getLogger, INFO
 
 from . import APP
 
@@ -36,8 +37,12 @@ class RequestPerformance:
     def end_request(self):
         self.req_end = time()
         self.duration = self.req_end - self.req_start
+        logger = getLogger("ttf.performance")
         if self.duration > APP.config.get('LONG_REQUEST_THRESHHOLD', 1):
-            self.log_performance_record()
+            self.log_performance_record(logger.warning)
+        elif logger.getEffectiveLevel() <= INFO :
+            self.log_performance_record(logger.info)
+            
 
     def start_query(self):
         self.query_start = time()
@@ -60,7 +65,7 @@ class RequestPerformance:
     def __repr__(self):
         return '<RequestPerformance duration={}s, {} queries>'.format(self.duration, len(self.queries))
 
-    def log_performance_record(self):
+    def log_performance_record(self, methodToLogWith):
         url = request.url
         method = request.method
         time_in_view = ''
@@ -75,12 +80,12 @@ class RequestPerformance:
             duration_wo_queries = self.duration - tot_query_duration
             self.queries.sort(key=lambda q: q.duration)
             longest_query_duration = self.queries[0].duration
-            APP.logger.warning(f'performance report: duration {self.duration: 2.2f}s, {time_in_view}duration without queries {duration_wo_queries: 2.2f}s, query-duration {tot_query_duration: 2.2f}s, {q_number: 2d} queries ({q_write_number: 2d} write), longest query {longest_query_duration: 2.2f}s, url {method:6} {url}')
+            methodToLogWith(f'performance report: duration {self.duration: 2.2f}s, {time_in_view}duration without queries {duration_wo_queries: 2.2f}s, query-duration {tot_query_duration: 2.2f}s, {q_number: 2d} queries ({q_write_number: 2d} write), longest query {longest_query_duration: 2.2f}s, url {method:6} {url}')
             for q in self.queries:
                 if q.duration > 1:
-                    APP.logger.warning(f'performance report: long query detected: duration {q.duration: 2.2f}s, statement "{q.statement}"')
+                    methodToLogWith(f'performance report: long query detected: duration {q.duration: 2.2f}s, statement "{q.statement}"')
         else:
-            APP.logger.warning(f'performance report: duration {self.duration: 2.2f}s, {time_in_view}url {method} {url}')
+            methodToLogWith(f'performance report: duration {self.duration: 2.2f}s, {time_in_view}url {method} {url}')
 
 
 def before_request(*args, **kwargs):

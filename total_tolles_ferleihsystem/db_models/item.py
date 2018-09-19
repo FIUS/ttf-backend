@@ -36,7 +36,7 @@ class Item(DB.Model):
     name = DB.Column(DB.String(STD_STRING_SIZE))
     update_name_from_schema = DB.Column(DB.Boolean, default=True, nullable=False)
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
-    lending_duration = DB.Column(DB.Integer, nullable=True) # in seconds
+    lending_duration = DB.Column(DB.Integer, nullable=True)  # in seconds
     deleted = DB.Column(DB.Boolean, default=False)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
@@ -47,7 +47,7 @@ class Item(DB.Model):
     )
 
     def __init__(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
-            visible_for: str = ''):
+                 visible_for: str = ''):
         self.update_name_from_schema = update_name_from_schema
 
         self.name = name
@@ -61,7 +61,7 @@ class Item(DB.Model):
             self.visible_for = visible_for
 
     def update(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
-            visible_for: str = ''):
+               visible_for: str = ''):
         """
         Function to update the objects data
         """
@@ -184,20 +184,20 @@ class Item(DB.Model):
                     if(remove):
                         # Check if multiple sources bring it, if yes don't delete it.
                         sources = 0
-                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions if not ittad.attribute_definition.deleted ]):
+                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions if not ittad.attribute_definition.deleted]):
                             sources += 1
                         for tag in [itt.tag for itt in self._tags]:
                             if(def_id in [ttad.attribute_definition_id for ttad in tag._tag_to_attribute_definitions if not ttad.attribute_definition.deleted]):
                                 sources += 1
-                        if sources == 1 :
+                        if sources == 1:
                             attributes_to_delete.append(itad)
                     elif(itad.deleted):
                         attributes_to_undelete.append(itad)
 
             if not exists and not remove:
                 attributes_to_add.append(ItemToAttributeDefinition(self.id,
-                                                        def_id,
-                                                        "")) #TODO: Get default if possible.
+                                                                   def_id,
+                                                                   ""))  # TODO: Get default if possible.
         return attributes_to_add, attributes_to_delete, attributes_to_undelete
 
     def get_new_attributes_from_type(self, type_id: int):
@@ -209,7 +209,8 @@ class Item(DB.Model):
                                            .query
                                            .filter(itemType.ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
-        attributes_to_add, _, _ = self.get_attribute_changes([ittad.attribute_definition_id for ittad in item_type_attribute_definitions if not ittad.item_type.deleted], False)
+        attributes_to_add, _, _ = self.get_attribute_changes(
+            [ittad.attribute_definition_id for ittad in item_type_attribute_definitions if not ittad.item_type.deleted], False)
 
         return attributes_to_add
 
@@ -268,11 +269,11 @@ class File(DB.Model):
     invalidation = DB.Column(DB.DateTime, nullable=True)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
-    item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='select',
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_files', lazy='select',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int=None, visible_for: str = ''):
+    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int = None, visible_for: str = ''):
         if item_id is not None:
             self.item_id = item_id
         self.name = name
@@ -327,13 +328,12 @@ class ItemToItem(DB.Model):
     parent_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
 
-    parent = DB.relationship('Item', foreign_keys=[parent_id],
+    parent = DB.relationship('Item', foreign_keys=[parent_id], lazy='select',
                              backref=DB.backref('_contained_items', lazy='select',
                                                 single_parent=True, cascade="all, delete-orphan"))
-    item = DB.relationship('Item', foreign_keys=[item_id], backref=DB.backref('_parents', lazy='select',
-                                                                              single_parent=True,
-                                                                              cascade="all, delete-orphan"),
-                           lazy='joined')
+    item = DB.relationship('Item', foreign_keys=[item_id], lazy='select',
+                           backref=DB.backref('_parents', lazy='select',
+                                              single_parent=True, cascade="all, delete-orphan"))
 
     def __init__(self, parent_id: int, item_id: int):
         self.parent_id = parent_id
@@ -348,11 +348,11 @@ class ItemToLending (DB.Model):
     lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), primary_key=True)
     due = DB.Column(DB.DateTime)
 
-    item = DB.relationship('Item', backref=DB.backref('_lending', lazy='joined',
-                                                      single_parent=True, cascade="all, delete-orphan"))
-    lending = DB.relationship('Lending', backref=DB.backref('itemLendings', lazy='joined',
-                                                            single_parent=True,
-                                                            cascade="all, delete-orphan"), lazy='select')
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_lending', lazy='select',
+                                                                     single_parent=True, cascade="all, delete-orphan"))
+    lending = DB.relationship('Lending', lazy='select', backref=DB.backref('itemLendings', lazy='select',
+                                                                           single_parent=True,
+                                                                           cascade="all, delete-orphan"))
 
     def __init__(self, item: Item, lending: Lending):
         self.item = item
@@ -367,8 +367,8 @@ class ItemToTag (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     tag_id = DB.Column(DB.Integer, DB.ForeignKey('Tag.id'), primary_key=True)
 
-    item = DB.relationship('Item', backref=DB.backref('_tags', lazy='joined',
-                                                      single_parent=True, cascade="all, delete-orphan"))
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_tags', lazy='select',
+                                                                     single_parent=True, cascade="all, delete-orphan"))
     tag = DB.relationship('Tag', lazy='joined')
 
     def __init__(self, item_id: int, tag_id: int):
@@ -385,9 +385,10 @@ class ItemToAttributeDefinition (DB.Model):
     value = DB.Column(DB.String(STD_STRING_SIZE))
     deleted = DB.Column(DB.Boolean, default=False)
 
-    item = DB.relationship('Item', backref=DB.backref('_attributes', lazy='select',
-                                                      single_parent=True, cascade="all, delete-orphan"))
-    attribute_definition = DB.relationship('AttributeDefinition', backref=DB.backref('_item_to_attribute_definitions', lazy='joined'))
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_attributes', lazy='select',
+                                                                     single_parent=True, cascade="all, delete-orphan"))
+    attribute_definition = DB.relationship('AttributeDefinition', lazy='select',
+                                           backref=DB.backref('_item_to_attribute_definitions', lazy='select'))
 
     def __init__(self, item_id: int, attribute_definition_id: int, value: str):
         self.item_id = item_id
