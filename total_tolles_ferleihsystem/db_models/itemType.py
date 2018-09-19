@@ -19,7 +19,7 @@ class ItemType (DB.Model):
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     how_to = DB.Column(DB.Text, nullable=True)
 
-    def __init__(self, name: str, name_schema: str, lending_duration: int, visible_for: str = '', how_to: str = ''):
+    def __init__(self, name: str, name_schema: str, lendable: bool, lending_duration: int, visible_for: str = '', how_to: str = ''):
         self.name = name
         self.name_schema = name_schema
         self.lending_duration = lending_duration
