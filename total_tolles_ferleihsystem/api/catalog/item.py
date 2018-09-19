@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import noload, joinedload
 
 from .. import API, satisfies_role
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET, ITEM_GET_WITH_PARENTS
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET
 from ... import DB
 from ...login import UserRole
 from ...performance import record_view_performance
@@ -94,7 +94,7 @@ class ItemDetail(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @API.marshal_with(ITEM_GET_WITH_PARENTS)
+    @API.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -403,6 +403,37 @@ class ItemAttributeDetail(Resource):
         except IntegrityError:
             abort(500)
 
+
+@ANS.route('/<int:item_id>/parent/')
+class ItemParentItems(Resource):
+    """
+    The parent items of this item object
+    """
+
+    @jwt_required
+    @ANS.response(404, 'Requested item not found!')
+    @API.marshal_list_with(ITEM_GET)
+    # pylint: disable=R0201
+    def get(self, item_id):
+        """
+        Get all contained items of this item.
+        """
+        base_query = Item.query
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+            abort(404, 'Requested item not found!')
+
+        associations = ItemToItem.query.filter(ItemToItem.item_id == item_id).all()
+        return [e.parent for e in associations if not e.item.deleted]
+
+
 @ANS.route('/<int:item_id>/contained/')
 class ItemContainedItems(Resource):
     """
@@ -411,7 +442,7 @@ class ItemContainedItems(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @API.marshal_with(ITEM_GET)
+    @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
