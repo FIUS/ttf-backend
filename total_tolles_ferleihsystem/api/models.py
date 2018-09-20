@@ -275,7 +275,7 @@ LENDING_PUT = API.inherit('LendingPUT', LENDING_POST, {})
 LENDING_GET = API.inherit('LendingGET', LENDING_BASIC, ID, {
     '_links': NestedFields(LENDING_LINKS),
     'date': fields.DateTime(),
-    'itemLendings': fields.Nested(LENDING_ITEM),
+    'item_lendings': fields.Nested(LENDING_ITEM),
 })
 
 
@@ -288,13 +288,12 @@ BLACKLIST_BASIC = API.model('BlacklistBasic', {
     'system_wide': fields.Boolean(default=False),
     'reason': fields.String(),
 })
-BLACKLIST_ITEM_TYPE_BASIC = API.model('BlacklistItemTypeBasic', {
+BLACKLIST_ITEM_TYPE = API.model('BlacklistItemType', {
     'end_time': fields.DateTime(),
     'reason': fields.String(),
 })
 BLACKLIST_LINKS = API.inherit('BlacklistLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('', url_data={'id' : 'id'})),
-    'blockedItemTypes': HaLUrl(UrlData('', url_data={'id' : 'id'}))
 })
 
 BLACKLIST_POST = API.inherit('BlacklistPOST', BLACKLIST_ITEM_TYPE_BASIC, {
@@ -303,9 +302,5 @@ BLACKLIST_POST = API.inherit('BlacklistPOST', BLACKLIST_ITEM_TYPE_BASIC, {
 BLACKLIST_PUT = API.inherit('BlacklistPUT', BLACKLIST_BASIC, {})
 BLACKLIST_GET = API.inherit('BlacklistGET', BLACKLIST_BASIC, ID, {
     '_links': NestedFields(BLACKLIST_LINKS),
-    'blocked_types': HaLUrl(UrlData('', url_data={'id' : 'id'})),
-})
-
-BLACKLIST_ITEM_TYPE_GET = API.inherit('BlacklistItemTypeGet', BLACKLIST_ITEM_TYPE_BASIC, {
-    'item_type': NestedFields(ITEM_TYPE_GET),
+    'blocked_types': fields.Nested(BLACKLIST_ITEM_TYPE)
 })
