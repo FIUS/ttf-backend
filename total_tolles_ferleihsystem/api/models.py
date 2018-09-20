@@ -188,7 +188,8 @@ ITEM_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
     'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'})),
     'parent_items': HaLUrl(UrlData('api.item_item_parent_items', url_data={'item_id' : 'id'})),
     'contained_items': HaLUrl(UrlData('api.item_item_contained_items', url_data={'item_id' : 'id'})),
-    'files': HaLUrl(UrlData('api.item_item_file', url_data={'item_id' : 'id'}))
+    'files': HaLUrl(UrlData('api.item_item_file', url_data={'item_id' : 'id'})),
+    'lendings': HaLUrl(UrlData('', url_data={'item_id' : 'id'})),
 })
 
 ITEM_POST = API.inherit('ItemPOST', ITEM_BASIC, {})
@@ -198,7 +199,6 @@ ITEM_GET = API.inherit('ItemGET', ITEM_BASIC, ID, {
     'type': fields.Nested(ITEM_TYPE_GET),
     'is_currently_lent': fields.Boolean(readonly=True),
     'effective_lending_duration': fields.Integer(readonly=True),
-    'lending_id': fields.Integer(readonly=True),
     'due': fields.DateTime(attribute='item_lending.due', readonly=True),
     '_links': NestedFields(ITEM_LINKS)
 })

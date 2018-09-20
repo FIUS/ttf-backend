@@ -2,24 +2,24 @@
 This module contains all API endpoints for the namespace 'item'
 """
 
+import logging
+
 from flask import request
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import noload, joinedload
+from sqlalchemy.orm import joinedload
 
 from .. import API, satisfies_role
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_GET, FILE_GET, LENDING_GET
 from ... import DB
 from ...login import UserRole
 from ...performance import record_view_performance
 
-from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, ItemToLending
+from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, ItemToLending, Lending
 from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
-
-import logging
 
 PATH: str = '/catalog/items'
 ANS = API.namespace('item', description='Items', path=PATH)
@@ -567,3 +567,31 @@ class ItemFile(Resource):
             abort(404, 'Requested item not found!')
 
         return File.query.filter(File.item_id == item_id).all()
+
+
+@ANS.route('/<int:item_id>/lendings/')
+class ItemLendings(Resource):
+    """
+    Current and past lendings of a single item.
+    """
+
+    @jwt_required
+    @ANS.response(404, 'Requested item not found!')
+    @API.marshal_list_with(LENDING_GET)
+    def get(self, item_id):
+        """
+        Get the lendings concerning the specific item.
+        """
+        base_query = Item.query
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+            abort(404, 'Requested item not found!')
+
+        return Lending.query.join(ItemToLending).filter(ItemToLending.item_id == item_id).all()
