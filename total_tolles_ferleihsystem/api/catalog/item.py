@@ -219,6 +219,7 @@ class ItemItemTags(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
@@ -238,9 +239,11 @@ class ItemItemTags(Resource):
         Associate a new tag with the item.
         """
         tag_id = request.get_json()["id"]
+        # pylint: disable=C0121
         item = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
         if item is None:
             abort(404, 'Requested item not found!')
+        # pylint: disable=C0121
         tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
         if tag is None:
             abort(400, 'Requested item tag not found!')
@@ -275,9 +278,11 @@ class ItemItemTags(Resource):
         """
         tag_id = request.get_json()["id"]
 
+        # pylint: disable=C0121
         item = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
         if item is None:
             abort(404, 'Requested item not found!')
+        # pylint: disable=C0121
         if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
             abort(400, 'Requested item tag not found!')
 
@@ -324,9 +329,11 @@ class ItemAttributeList(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
+        # pylint: disable=C0121
         attributes = ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
         return attributes; # DON'T CHANGE THIS!!
         # It is necessary because a Flask Bug prehibits log messages on return statements.
@@ -355,9 +362,11 @@ class ItemAttributeDetail(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
+        # pylint: disable=C0121
         attribute = (ItemToAttributeDefinition
                      .query
                      .filter(ItemToAttributeDefinition.item_id == item_id)
@@ -382,10 +391,12 @@ class ItemAttributeDetail(Resource):
         Set a single attribute of this item.
         """
 
+        # pylint: disable=C0121
         if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
         value = request.get_json()["value"]
+        # pylint: disable=C0121
         attribute = (ItemToAttributeDefinition
                      .query
                      .filter(ItemToAttributeDefinition.item_id == item_id)
@@ -428,6 +439,7 @@ class ItemParentItems(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
@@ -458,6 +470,7 @@ class ItemContainedItems(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
@@ -478,7 +491,9 @@ class ItemContainedItems(Resource):
         Add a new contained item to this item
         """
         contained_item_id = request.get_json()["id"]
+        # pylint: disable=C0121
         parent = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
+        # pylint: disable=C0121
         child = Item.query.filter(Item.id == contained_item_id).filter(Item.deleted == False).first()
 
         if parent is None:
@@ -520,8 +535,10 @@ class ItemContainedItems(Resource):
         """
         contained_item_id = request.get_json()["id"]
 
+        # pylint: disable=C0121
         if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item (current) not found!')
+        # pylint: disable=C0121
         if Item.query.filter(Item.id == contained_item_id).filter(Item.deleted == False).first() is None:
             abort(400, 'Requested item (to be contained) not found!')
 
@@ -563,6 +580,7 @@ class ItemFile(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
@@ -592,6 +610,7 @@ class ItemLendings(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
+        # pylint: disable=C0121
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
