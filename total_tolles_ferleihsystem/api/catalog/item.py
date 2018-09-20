@@ -578,6 +578,7 @@ class ItemLendings(Resource):
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
     @API.marshal_list_with(LENDING_GET)
+    # pylint: disable=R0201
     def get(self, item_id):
         """
         Get the lendings concerning the specific item.
