@@ -67,7 +67,7 @@ class TagToAttributeDefinition (DB.Model):
     tag_id = DB.Column(DB.Integer, DB.ForeignKey('Tag.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
 
-    tag = DB.relationship(Tag, lazy='select' backref=DB.backref('_tag_to_attribute_definitions', lazy='select'))
+    tag = DB.relationship(Tag, lazy='select', backref=DB.backref('_tag_to_attribute_definitions', lazy='select'))
     attribute_definition = DB.relationship('AttributeDefinition', lazy='joined')
 
     def __init__(self, tag_id: int, attribute_definition_id: int):

@@ -296,7 +296,7 @@ BLACKLIST_LINKS = API.inherit('BlacklistLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('', url_data={'id' : 'id'})),
 })
 
-BLACKLIST_POST = API.inherit('BlacklistPOST', BLACKLIST_ITEM_TYPE_BASIC, {
+BLACKLIST_POST = API.inherit('BlacklistPOST', BLACKLIST_ITEM_TYPE, {
     'item_type_id': fields.Integer(min=1, example=1, readonly=True, title='Internal Identifier'),
 })
 BLACKLIST_PUT = API.inherit('BlacklistPUT', BLACKLIST_BASIC, {})
