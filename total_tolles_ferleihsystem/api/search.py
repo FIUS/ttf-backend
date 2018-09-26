@@ -6,7 +6,7 @@ from flask import request
 from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional, get_jwt_claims
 from . import API
-from ..db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToLending
+from ..db_models.item import Item, ItemToTag, ItemToAttributeDefinition
 from ..db_models.tag import Tag
 from .models import ITEM_GET
 from ..login import UserRole

@@ -13,7 +13,7 @@ from .. import DB
 
 from .models import LENDING_GET, LENDING_POST, LENDING_PUT, ID_LIST
 from ..login import UserRole
-from ..db_models.item import Lending, ItemToLending, Item
+from ..db_models.item import Lending, Item
 
 PATH: str = '/lending'
 ANS = API.namespace('lending', description='Lendings', path=PATH)

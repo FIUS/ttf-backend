@@ -98,16 +98,17 @@ ITEM_TYPE_BASIC = API.inherit('ItemTypeBasic', VISIBLE_FOR, {
     'how_to': fields.String(nullable=True, title='How to'),
 })
 ITEM_TYPE_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
-    'self': HaLUrl(UrlData('api.item_type_item_type_detail', url_data={'type_id': 'id'}),
-                   required=False),
+    'self': HaLUrl(UrlData('api.item_type_item_type_detail', url_data={'type_id': 'id'})),
     'attributes': HaLUrl(UrlData('api.item_type_item_type_attributes', url_data={'type_id' : 'id'})),
-    'can_contain': HaLUrl(UrlData('api.item_type_item_type_can_contain_types',
+    'parent_types': HaLUrl(UrlData('api.item_type_item_type_can_contain_types',
+                                  url_data={'type_id' : 'id'})),
+    'contained_types': HaLUrl(UrlData('api.item_type_item_type_can_contain_types',
                                   url_data={'type_id' : 'id'})),
 })
 
 ITEM_TYPE_POST = API.inherit('ItemTypePOST', ITEM_TYPE_BASIC, {})
 ITEM_TYPE_PUT = API.inherit('ItemTypePUT', ITEM_TYPE_BASIC, {})
-ITEM_TYPE_GET = API.inherit('ItemType', ITEM_TYPE_BASIC, ID, {
+ITEM_TYPE_GET = API.inherit('ItemTypeGET', ITEM_TYPE_BASIC, ID, {
     'deleted': fields.Boolean(readonly=True),
     '_links': NestedFields(ITEM_TYPE_LINKS),
 })
@@ -184,12 +185,13 @@ ITEM_BASIC = API.inherit('ItemBasic', VISIBLE_FOR, {
 })
 ITEM_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_item_detail', url_data={'item_id' : 'id'}), required=False),
+    'item_type': HaLUrl(UrlData('api.item_type_item_type_detail', url_data={'type_id': 'type_id'})),
     'tags': HaLUrl(UrlData('api.item_item_item_tags', url_data={'item_id' : 'id'})),
     'attributes': HaLUrl(UrlData('api.item_item_attribute_list', url_data={'item_id' : 'id'})),
     'parent_items': HaLUrl(UrlData('api.item_item_parent_items', url_data={'item_id' : 'id'})),
     'contained_items': HaLUrl(UrlData('api.item_item_contained_items', url_data={'item_id' : 'id'})),
     'files': HaLUrl(UrlData('api.item_item_file', url_data={'item_id' : 'id'})),
-    'lendings': HaLUrl(UrlData('', url_data={'item_id' : 'id'})),
+    'lendings': HaLUrl(UrlData('api.item_item_lendings', url_data={'item_id' : 'id'})),
 })
 
 ITEM_POST = API.inherit('ItemPOST', ITEM_BASIC, {})
@@ -236,7 +238,8 @@ FILE_BASIC = API.inherit('FileBASIC', VISIBLE_FOR, {
 })
 FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.file_file_detail',
-                           url_data={'file_id': 'id'}), required=False),
+                           url_data={'file_id': 'id'})),
+    'item': HaLUrl(UrlData('api.item_item_detail', url_data={'file_id': 'id'}), required=False),
     'download': HaLUrl(UrlData('api.file_file_data',
                                url_data={'file_hash': 'file_hash'}), required=False),
 })

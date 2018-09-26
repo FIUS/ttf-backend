@@ -20,7 +20,6 @@ __all__ = [
     'File',
     'Lending',
     'ItemToItem',
-    'ItemToLending',
     'ItemToTag',
     'ItemToAttributeDefinition'
 ]
@@ -36,11 +35,14 @@ class Item(DB.Model):
     name = DB.Column(DB.String(STD_STRING_SIZE))
     update_name_from_schema = DB.Column(DB.Boolean, default=True, nullable=False)
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
+    lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), default=None, nullable=True)
     lending_duration = DB.Column(DB.Integer, nullable=True)  # in seconds
+    due = DB.Column(DB.DateTime, default=None, nullable=True)
     deleted = DB.Column(DB.Boolean, default=False)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
+    lending = DB.relationship('Lending', lazy='joined')
 
     __table_args__ = (
         UniqueConstraint('name', 'type_id', name='_name_type_id_uc'),
@@ -264,7 +266,7 @@ class File(DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), nullable=True)
     name = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     file_type = DB.Column(DB.String(STD_STRING_SIZE))
-    file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True, index=True)
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     creation = DB.Column(DB.DateTime, server_default=func.now())
     invalidation = DB.Column(DB.DateTime, nullable=True)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
@@ -338,26 +340,6 @@ class ItemToItem(DB.Model):
     def __init__(self, parent_id: int, item_id: int):
         self.parent_id = parent_id
         self.item_id = item_id
-
-
-class ItemToLending (DB.Model):
-
-    __tablename__ = 'ItemToLending'
-
-    item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
-    lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), primary_key=True)
-    due = DB.Column(DB.DateTime)
-
-    item = DB.relationship('Item', lazy='select', backref=DB.backref('_lending', lazy='select',
-                                                                     single_parent=True, cascade="all, delete-orphan"))
-    lending = DB.relationship('Lending', lazy='select', backref=DB.backref('itemLendings', lazy='select',
-                                                                           single_parent=True,
-                                                                           cascade="all, delete-orphan"))
-
-    def __init__(self, item: Item, lending: Lending):
-        self.item = item
-        self.lending = lending
-        self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration)
 
 
 class ItemToTag (DB.Model):

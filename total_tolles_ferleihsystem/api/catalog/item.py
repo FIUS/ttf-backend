@@ -2,21 +2,19 @@
 This module contains all API endpoints for the namespace 'item'
 """
 
-import logging
-
 from flask import request
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
 from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_GET, FILE_GET, LENDING_GET
-from ... import DB
+from ... import DB, APP
 from ...login import UserRole
 from ...performance import record_view_performance
 
-from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, ItemToLending, Lending
+from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, Lending
 from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
@@ -42,8 +40,7 @@ class ItemList(Resource):
         Get a list of all items currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-
-        base_query = Item.query.options(joinedload(Item.type)).filter(Item.deleted == test_for)
+        base_query = Item.query.options(joinedload('_lending')).filter(Item.deleted == test_for)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

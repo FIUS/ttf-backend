@@ -5,20 +5,21 @@ This module contains all API endpoints for the namespace 'item_type'
 from flask import request
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
 from ..models import ITEM_TYPE_GET, ITEM_TYPE_POST, ATTRIBUTE_DEFINITION_GET, ID, ITEM_TYPE_PUT
-from ... import DB
+from ... import DB, APP
 from ...login import UserRole
 
 from ...db_models.attributeDefinition import AttributeDefinition
 from ...db_models.itemType import ItemType, ItemTypeToAttributeDefinition, ItemTypeToItemType
 from ...db_models.item import Item
 
+
 PATH: str = '/catalog/item_types'
 ANS = API.namespace('item_type', description='ItemTypes', path=PATH)
-
 
 @ANS.route('/')
 class ItemTypeList(Resource):
@@ -35,7 +36,7 @@ class ItemTypeList(Resource):
         Get a list of all item types currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        base_query = ItemType.query
+        base_query = ItemType.query.filter(ItemType.deleted == test_for)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -44,27 +45,31 @@ class ItemTypeList(Resource):
             else:
                 base_query = base_query.filter(ItemType.visible_for == 'all')
 
-        return base_query.filter(ItemType.deleted == test_for).order_by(ItemType.name).all()
+        return base_query.order_by(ItemType.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
+    @API.marshal_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def post(self):
         """
         Add a new item type to the system
         """
         new = ItemType(**request.get_json())
+
         try:
             DB.session.add(new)
             DB.session.commit()
             return marshal(new, ITEM_TYPE_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique.', err)
                 abort(409, 'Name is not unique!')
+            APP.logger.error('SQL Error', err)
             abort(500)
 
 @ANS.route('/<int:type_id>/')
@@ -81,7 +86,7 @@ class ItemTypeDetail(Resource):
         """
         Get a single item type object
         """
-        base_query = ItemType.query
+        base_query = ItemType.query.filter(ItemType.id == type_id)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -90,9 +95,12 @@ class ItemTypeDetail(Resource):
             else:
                 base_query = base_query.filter(ItemType.visible_for == 'all')
 
-        item_type = base_query.filter(ItemType.id == type_id).first()
+        item_type = base_query.first()
+
         if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
+
         return item_type
 
     @jwt_required
@@ -105,16 +113,12 @@ class ItemTypeDetail(Resource):
         Delete a item type object
         """
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
+
         if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         item_type.deleted = True
-
-        # Not intended -neumantm
-        # for element in item_type._contained_item_types:
-        #     DB.session.delete(element)
-        # for element in item_type._item_type_to_attribute_definitions:
-        #     DB.session.delete(element)
 
         items = Item.query.filter(Item.type_id == type_id).all()
         for item in items:
@@ -135,9 +139,13 @@ class ItemTypeDetail(Resource):
         Undelete a item type object
         """
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
+
         if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
+
         item_type.deleted = False
+
         DB.session.commit()
         return "", 204
 
@@ -152,16 +160,22 @@ class ItemTypeDetail(Resource):
         Replace a item type object
         """
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
+
         if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
+
         item_type.update(**request.get_json())
+
         try:
             DB.session.commit()
             return marshal(item_type, ITEM_TYPE_GET), 200
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique.', err)
                 abort(409, 'Name is not unique!')
+            APP.logger.error('SQL Error', err)
             abort(500)
 
 
@@ -179,14 +193,22 @@ class ItemTypeAttributes(Resource):
         """
         Get all attribute definitions for this item type.
         """
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        base_query = ItemType.query.options(joinedload('_item_type_to_attribute_definitions')).filter(ItemType.id == type_id).filter(ItemType.deleted == False)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((ItemType.visible_for == 'all') | (ItemType.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(ItemType.visible_for == 'all')
+
+        item_type = base_query.first()
+
+        if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
 
-        associations = (ItemTypeToAttributeDefinition
-                        .query
-                        .filter(ItemTypeToAttributeDefinition.item_type_id == type_id)
-                        .all())
-        return [element.attribute_definition for element in associations if not element.item_type.deleted]
+        return [ittad.attribute_definition for ittad in item_type._item_type_to_attribute_definitions]
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -201,16 +223,19 @@ class ItemTypeAttributes(Resource):
         Associate a new attribute definition with the item type.
         """
         attribute_definition_id = request.get_json()["id"]
+        # pylint: disable=C0121
         attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
 
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
         if attribute_definition is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(400, 'Requested attribute definition not found!')
 
         items = Item.query.filter(Item.type_id == type_id).all()
-
         new = ItemTypeToAttributeDefinition(type_id, attribute_definition_id)
+
         try:
             DB.session.add(new)
             for item in items:
@@ -226,8 +251,10 @@ class ItemTypeAttributes(Resource):
             return [e.attribute_definition for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Attribute definition is already asociated with item type!', err)
                 abort(409, 'Attribute definition is already asociated with item type!')
+            APP.logger.error('SQL Error', err)
             abort(500)
 
     @jwt_required
@@ -243,7 +270,9 @@ class ItemTypeAttributes(Resource):
         """
         attribute_definition_id = request.get_json()["id"]
         item_type = ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first()
+
         if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         code, msg, commit = item_type.unassociate_attr_def(attribute_definition_id)
@@ -254,11 +283,12 @@ class ItemTypeAttributes(Resource):
         if code == 204:
             return '', 204
 
+        APP.logger.error("Error.", code, msg)
         abort(code, msg)
 
 
-@ANS.route('/<int:type_id>/can_contain/')
-class ItemTypeCanContainTypes(Resource):
+@ANS.route('/<int:type_id>/contained_types/')
+class ItemTypeContainedTypes(Resource):
     """
     The item types that a item of this type can contain.
     """
@@ -271,7 +301,7 @@ class ItemTypeCanContainTypes(Resource):
         """
         Get all item types, this item_type may contain.
         """
-        base_query = ItemType.query
+        base_query = ItemType.query.options(joinedload('_contained_item_types').joinedload('item_type')).filter(ItemType.id == type_id).filter(ItemType.deleted == False)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -280,11 +310,12 @@ class ItemTypeCanContainTypes(Resource):
             else:
                 base_query = base_query.filter(ItemType.visible_for == 'all')
 
-        if base_query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        item_type = base_query.first()
+        if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
 
-        associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
-        return [e.item_type for e in associations if not e.parent.deleted]
+        return [cit.item_type for cit in item_type._contained_item_types]
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -300,11 +331,12 @@ class ItemTypeCanContainTypes(Resource):
         """
         child_id = request.get_json()["id"]
 
-
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
         if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
-            abort(400, 'Requested attribute definition not found!')
+            APP.logger.debug('Requested contained type not found!', child_id)
+            abort(400, 'Requested contained type not found!')
 
         new = ItemTypeToItemType(type_id, child_id)
         try:
@@ -314,8 +346,10 @@ class ItemTypeCanContainTypes(Resource):
             return [e.item_type for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Item type can already be contained in this item type.', err)
                 abort(409, 'Item type can already be contained in this item type.')
+            APP.logger.error('SQL Error', err)
             abort(500)
 
     @jwt_required
@@ -331,22 +365,121 @@ class ItemTypeCanContainTypes(Resource):
         """
         child_id = request.get_json()["id"]
 
-
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested item type not found!', type_id)
             abort(404, 'Requested item type not found!')
         if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
-            abort(400, 'Requested attribute definition not found!')
+            APP.logger.debug('Requested contained type not found!', child_id)
+            abort(400, 'Requested contained type not found!')
 
         association = (ItemTypeToItemType
                        .query
                        .filter(ItemTypeToItemType.parent_id == type_id)
                        .filter(ItemTypeToItemType.item_type_id == child_id)
                        .first())
+
         if association is None:
             return '', 204
+
+        DB.session.delete(association)
+        DB.session.commit()
+        return '', 204
+
+@ANS.route('/<int:type_id>/parent_types/')
+class ItemTypeParentTypes(Resource):
+    """
+    The item types that a item of this type can be contained by.
+    """
+
+    @jwt_required
+    @ANS.response(404, 'Requested item type not found!')
+    @API.marshal_with(ITEM_TYPE_GET)
+    # pylint: disable=R0201
+    def get(self, type_id):
+        """
+        Get all item types, this item_type may be contained in.
+        """
+        base_query = ItemType.query.options(joinedload('_possible_parent_item_types').joinedload('parent')).filter(ItemType.id == type_id).filter(ItemType.deleted == False)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((ItemType.visible_for == 'all') | (ItemType.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(ItemType.visible_for == 'all')
+
+        item_type = base_query.first()
+        if item_type is None:
+            APP.logger.debug('Requested item type not found!', type_id)
+            abort(404, 'Requested item type not found!')
+
+        return [ppit.parent for ppit in item_type._possible_parent_item_types]
+
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
+    @ANS.doc(body=ID)
+    @ANS.response(404, 'Requested item type not found!')
+    @ANS.response(400, 'Requested parent item type not found!')
+    @ANS.response(409, 'Item type can already be contained in this item type.')
+    @API.marshal_with(ITEM_TYPE_GET)
+    # pylint: disable=R0201
+    def post(self, type_id):
+        """
+        Add new item type which can contain this item type.
+        """
+        parent_id = request.get_json()["id"]
+
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested item type not found!', type_id)
+            abort(404, 'Requested item type not found!')
+        if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested parent type not found!', parent_id)
+            abort(400, 'Requested parent type not found!')
+
+        new = ItemTypeToItemType(parent_id, type_id)
+
         try:
-            DB.session.delete(association)
+            DB.session.add(new)
             DB.session.commit()
-            return '', 204
-        except IntegrityError:
+            associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
+            return [e.item_type for e in associations]
+        except IntegrityError as err:
+            message = str(err)
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('This item type can already contain the given item type.', err)
+                abort(409, 'This item type can already contain the given item type.')
+            APP.logger.error('SQL Error', err)
             abort(500)
+
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
+    @ANS.doc(body=ID)
+    @ANS.response(404, 'Requested item type not found!')
+    @ANS.response(400, 'Requested child item type not found!')
+    @ANS.response(204, 'Success.')
+    # pylint: disable=R0201
+    def delete(self, type_id):
+        """
+        Remove item type which can contain this item type
+        """
+        parent_id = request.get_json()["id"]
+
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested item type not found!', type_id)
+            abort(404, 'Requested item type not found!')
+        if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted == False).first() is None:
+            APP.logger.debug('Requested parent type not found!', parent_id)
+            abort(400, 'Requested parent type not found!')
+
+        association = (ItemTypeToItemType
+                       .query
+                       .filter(ItemTypeToItemType.parent_id == type_id)
+                       .filter(ItemTypeToItemType.item_type_id == parent_id)
+                       .first())
+
+        if association is None:
+            return '', 204
+
+        DB.session.delete(association)
+        DB.session.commit()
+        return '', 204

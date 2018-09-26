@@ -41,9 +41,9 @@ class FileList(Resource):
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
             if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
-                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+                base_query = base_query.filter((File.visible_for == 'all') | (File.visible_for == 'moderator'))
             else:
-                base_query = base_query.filter(Item.visible_for == 'all')
+                base_query = base_query.filter(File.visible_for == 'all')
 
         return base_query.all()
 
@@ -64,7 +64,7 @@ class FileList(Resource):
         file = request.files['file']
         if not file:
             abort(400, 'File Empty!')
-        if file.filename == None or file.filename == '':
+        if file.filename is None or file.filename == '':
             abort(400, 'No file name!')
         item_id = request.form['item_id']
         if item_id is None:
@@ -85,12 +85,9 @@ class FileList(Resource):
             file_on_disk.write(file.stream.read())
 
         # add the file to the sql database
-        try:
-            DB.session.add(new)
-            DB.session.commit()
-            return marshal(new, FILE_GET), 201
-        except IntegrityError:
-            abort(500, 'SQL Error!')
+        DB.session.add(new)
+        DB.session.commit()
+        return marshal(new, FILE_GET), 201
 
 
 @ANS.route('/<int:file_id>/')
@@ -106,18 +103,20 @@ class FileDetail(Resource):
         """
         Get a single file object
         """
-        base_query = File.query
+        base_query = File.query.filter(File.id == file_id)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
             if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
-                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+                base_query = base_query.filter((File.visible_for == 'all') | (File.visible_for == 'moderator'))
             else:
-                base_query = base_query.filter(Item.visible_for == 'all')
+                base_query = base_query.filter(File.visible_for == 'all')
 
-        file = base_query.filter(File.id == file_id).first()
+        file = base_query.first()
+
         if file is None:
-            abort(404, 'Requested item not found!')
+            APP.logger.debug('Requested file not found!', file_id)
+            abort(404, 'Requested file not found!')
 
         return file
 
@@ -130,8 +129,11 @@ class FileDetail(Resource):
         Delete a file object
         """
         file = File.query.filter(File.id == file_id).first()
+
         if file is None:
-            abort(404, 'Requested item not found!')
+            APP.logger.debug('Requested file not found!', file_id)
+            abort(404, 'Requested file not found!')
+
         DB.session.delete(file)
         DB.session.commit()
         return "", 204
@@ -147,16 +149,15 @@ class FileDetail(Resource):
         Replace a file object
         """
         file = File.query.filter(File.id == file_id).first()
+
         if file is None:
+            APP.logger.debug('Requested file not found!', file_id)
             abort(404, 'Requested file not found!')
 
         file.update(**request.get_json())
 
-        try:
-            DB.session.commit()
-            return file
-        except IntegrityError:
-            abort(500, 'SQL Error!')
+        DB.session.commit()
+        return file
 
 
 @ANS.route('/archive')
@@ -204,23 +205,32 @@ class ArchiveHandler(Resource):
 PATH2: str = '/file-store'
 ANS2 = API.namespace('file', description='The download Endpoint to download any file from the system.', path=PATH2)
 
-@ANS2.route('/<string:file_hash>/')
+@ANS2.route('/<int:file_id>/')
 class FileData(Resource):
     """
     The endpoints to get the actual stored file
     """
 
     @jwt_required
-    @satisfies_role(UserRole.MODERATOR)
     @ANS.response(404, 'Requested file not found!')
     @ANS.response(500, 'Something crashed while reading file!')
-    def get(self, file_hash):
+    def get(self, file_id):
         """
         Get the actual file
         """
-        file = File.query.filter(File.file_hash == file_hash).first()
+        base_query = File.query.filter(File.file_id == file_id)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((File.visible_for == 'all') | (File.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(File.visible_for == 'all')
+
+        file = base_query.first()
 
         if file is None:
+            APP.logger.debug('Requested file not found!', file_id)
             abort(404, 'Requested file was not found!')
 
         headers = {
@@ -229,4 +239,6 @@ class FileData(Resource):
 
         with open(os.path.join(APP.config['DATA_DIRECTORY'], file.file_hash), mode='rb') as file_on_disk:
             return make_response(file_on_disk.read(), headers)
+
+        APP.logger.error('Crash while downloading file.', file_id)
         abort(500, 'Something crashed while reading file!')
