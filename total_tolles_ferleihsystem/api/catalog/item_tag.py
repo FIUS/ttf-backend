@@ -199,7 +199,7 @@ class ItemTagAttributes(Resource):
         """
         Get all attribute definitions for this tag.
         """
-        base_query = Tag.query.options(joindload('_tag_to_attribute_definitions')).filter(Tag.id == tag_id).filter(Tag.deleted == False)
+        base_query = Tag.query.options(joinedload('_tag_to_attribute_definitions')).filter(Tag.id == tag_id).filter(Tag.deleted == False)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -237,7 +237,7 @@ class ItemTagAttributes(Resource):
             APP.logger.debug('Requested attribute definition not found.', attribute_definition_id)
             abort(400, 'Requested attribute definition not found!')
 
-        items = [itt.item for itt in ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()]
+        items = [itt.item for itt in ItemToTag.query.filter(ItemToTag.tag_id == tag_id).options(joinedload('item')).all()]
 
         new = TagToAttributeDefinition(tag_id, attribute_definition_id)
         try:

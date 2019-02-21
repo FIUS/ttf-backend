@@ -342,7 +342,7 @@ class ItemTypeContainedTypes(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
+            associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).options(joinedload('item_type')).all()
             return [e.item_type for e in associations]
         except IntegrityError as err:
             message = str(err)
@@ -441,7 +441,7 @@ class ItemTypeParentTypes(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).all()
+            associations = ItemTypeToItemType.query.filter(ItemTypeToItemType.parent_id == type_id).options(joinedload('item_type')).all()
             return [e.item_type for e in associations]
         except IntegrityError as err:
             message = str(err)

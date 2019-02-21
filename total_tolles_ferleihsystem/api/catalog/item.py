@@ -369,6 +369,7 @@ class ItemAttributeDetail(Resource):
                      .filter(ItemToAttributeDefinition.item_id == item_id)
                      .filter(ItemToAttributeDefinition.deleted == False)
                      .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
+                     .options(joinedload('attribute_definition'))
                      .first())
 
         if attribute is None:
@@ -399,6 +400,7 @@ class ItemAttributeDetail(Resource):
                      .filter(ItemToAttributeDefinition.item_id == item_id)
                      .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
                      .filter(ItemToAttributeDefinition.deleted == False)
+                     .options(joinedload('attribute_definition'))
                      .first())
 
         if attribute is None:
@@ -440,7 +442,7 @@ class ItemParentItems(Resource):
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
-        associations = ItemToItem.query.filter(ItemToItem.item_id == item_id).all()
+        associations = ItemToItem.query.filter(ItemToItem.item_id == item_id).options(joinedload('parent')).all()
         return [e.parent for e in associations if not e.item.deleted]
 
 
@@ -471,7 +473,7 @@ class ItemContainedItems(Resource):
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
-        associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+        associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).options(joinedload('item')).all()
         return [e.item for e in associations if not e.item.deleted]
 
     @jwt_required
@@ -511,7 +513,7 @@ class ItemContainedItems(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+            associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).options(joinedload('item')).all()
             return [e.item for e in associations]
         except IntegrityError as err:
             message = str(err)
@@ -581,13 +583,12 @@ class ItemFile(Resource):
         if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
             abort(404, 'Requested item not found!')
 
-        return File.query.filter(File.item_id == item_id).all()
+        return File.query.filter(File.item_id == item_id).options(joinedload('item')).all()
 
-
-@ANS.route('/<int:item_id>/lendings/')
+@ANS.route('/<int:item_id>/lending/')
 class ItemLendings(Resource):
     """
-    Current and past lendings of a single item.
+    Current lending of a single item.
     """
 
     @jwt_required
@@ -596,7 +597,7 @@ class ItemLendings(Resource):
     # pylint: disable=R0201
     def get(self, item_id):
         """
-        Get the lendings concerning the specific item.
+        Get the lending concerning the specific item.
         """
         base_query = Item.query
 
@@ -608,7 +609,8 @@ class ItemLendings(Resource):
                 base_query = base_query.filter(Item.visible_for == 'all')
 
         # pylint: disable=C0121
-        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        item = base_query.filter(Item.id == item_id).filter(Item.deleted == False).first()
+        if item is None:
             abort(404, 'Requested item not found!')
 
-        return Lending.query.join(ItemToLending).filter(ItemToLending.item_id == item_id).all()
+        return item.lending

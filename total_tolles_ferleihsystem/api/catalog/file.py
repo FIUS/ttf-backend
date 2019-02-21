@@ -9,6 +9,7 @@ from hashlib import sha3_256
 from flask import request, make_response
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from total_tolles_ferleihsystem.tasks.file import create_archive
@@ -36,7 +37,7 @@ class FileList(Resource):
         """
         Get a list of files
         """
-        base_query = File.query
+        base_query = File.query.options(joinedload('item'))
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -103,7 +104,7 @@ class FileDetail(Resource):
         """
         Get a single file object
         """
-        base_query = File.query.filter(File.id == file_id)
+        base_query = File.query.filter(File.id == file_id).options(joinedload('item'))
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -148,7 +149,7 @@ class FileDetail(Resource):
         """
         Replace a file object
         """
-        file = File.query.filter(File.id == file_id).first()
+        file = File.query.filter(File.id == file_id).options(joinedload('item')).first()
 
         if file is None:
             APP.logger.debug('Requested file not found!', file_id)
@@ -218,7 +219,7 @@ class FileData(Resource):
         """
         Get the actual file
         """
-        base_query = File.query.filter(File.file_id == file_id)
+        base_query = File.query.filter(File.file_id == file_id).options(joinedload('item'))
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

@@ -194,7 +194,7 @@ class AttributeDefinitionValues(Resource):
         """
         Get all values of this attribute definition
         """
-        base_query = AttributeDefinition.query.options(joinedload('_item_to_attribute_definitions')).filter(AttributeDefinition.id == definition_id)
+        base_query = AttributeDefinition.query.options(joinedload('_item_to_attribute_definitions').joinedload('item')).filter(AttributeDefinition.id == definition_id)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
