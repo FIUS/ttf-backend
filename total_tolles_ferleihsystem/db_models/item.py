@@ -1,15 +1,14 @@
 """
 The database models of the item and all connected tables
 """
-
-import datetime
 from sqlalchemy.sql import func
 from sqlalchemy.schema import UniqueConstraint
 import string
 from json import loads
 from datetime import date
+import time
 
-from .. import DB
+from .. import DB, LENDING_LOGGER
 from . import STD_STRING_SIZE
 
 from . import itemType
@@ -37,12 +36,13 @@ class Item(DB.Model):
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
     lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), default=None, nullable=True)
     lending_duration = DB.Column(DB.Integer, nullable=True)  # in seconds
-    due = DB.Column(DB.DateTime, default=None, nullable=True)
+    due = DB.Column(DB.Integer, default=-1) # unix time
     deleted = DB.Column(DB.Boolean, default=False)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
-    lending = DB.relationship('Lending', lazy='joined')
+    lending = DB.relationship('Lending', lazy='select', 
+                              backref=DB.backref('_items', lazy='select'))
 
     __table_args__ = (
         UniqueConstraint('name', 'type_id', name='_name_type_id_uc'),
@@ -79,33 +79,11 @@ class Item(DB.Model):
         self.visible_for = visible_for
 
     @property
-    def lending_id(self):
-        """
-        The lending_id this item is currently associated with. -1 if not lent.
-        """
-        if self._lending:
-            return self._lending[0].lending_to_item.lending_id
-        return -1
-
-    @property
-    def item_lending(self):
-        """
-        The lending this item is currently associated with.
-        """
-        if self._lending:
-            return self._lending[0]
-        return None
-
-    @property
     def is_currently_lent(self):
         """
         If the item is currently lent.
         """
-        return self.lending_id != -1
-
-    @property
-    def due(self):
-        return -1 if self.lending_id is not None else self.item_lending.due
+        return self.lending is not None
 
     @property
     def parent(self):
@@ -305,23 +283,90 @@ class Lending(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True)
     moderator = DB.Column(DB.String(STD_STRING_SIZE))
     user = DB.Column(DB.String(STD_STRING_SIZE))
-    date = DB.Column(DB.DateTime)
+    date = DB.Column(DB.Integer) #unix time
     deposit = DB.Column(DB.String(STD_STRING_SIZE))
 
-    def __init__(self, moderator: str, user: str, deposit: str):
+    def __repr__(self):
+        ret = "Lending by "
+        ret += self.moderator
+        ret += " to "
+        ret += self.user
+        ret += " at "
+        ret += str(self.date)
+        ret += " with "
+        ret += self.deposit
+        ret += ". Items:"
+        ret += str([str(item.id) for item in self._items])
+        return ret
+
+    def __init__(self, moderator: str, user: str, deposit: str, item_ids: list):
         self.moderator = moderator
         self.user = user
-        self.date = datetime.datetime.now()
+        self.date = int(time.time())
         self.deposit = deposit
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).filter(Item.deleted == False).first()
+            if item is None:
+                raise ValueError("Item not found:" + str(element))
+            if not item.type.lendable:
+                raise ValueError("Item not lendable:" + str(element))
+            if item.is_currently_lent:
+               raise ValueError("Item already lent:" + str(element))
+            item.lending = self
+            item.due = self.date + item.effective_lending_duration
+        LENDING_LOGGER.info("New lending: %s", repr(self))
+        
 
-    def update(self, moderator: str, user: str, deposit: str):
+    def update(self, moderator: str, user: str, deposit: str, item_ids: list):
         """
         Function to update the objects data
         """
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
+        old_items = self._items
+        new_items = []
 
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).filter(Item.deleted == False).first()
+            if item is None:
+                raise ValueError("Item not found:" + str(element))
+            new_items.append(item)
+        
+        items_to_remove = [item for item in old_items if item not in new_items]
+        items_to_add = [item for item in new_items if item not in old_items]
+
+        for item in items_to_remove:
+            item.lending = None
+            item.due = -1
+        
+        for item in items_to_add:
+            if not item.type.lendable:
+                raise ValueError("Item not lendable:" + str(item))
+            if item.is_currently_lent:
+                raise ValueError("Item already lent:" + str(item))
+            item.lending = self
+            item.due = self.date + item.effective_lending_duration
+        LENDING_LOGGER.info("Updated lending: %s", repr(self))
+
+
+    def remove_items(self, item_ids: list):
+        """
+        Function to remove a list of items from this lending
+        """
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).first()
+            if item is None:
+                raise ValueError("Item not found:" + str(element))
+            item.lending = None
+            item.due = -1
+        LENDING_LOGGER.info("Updated lending(remove items): %s", repr(self))
+
+    def pre_delete(self):
+        LENDING_LOGGER.info("Deleting lending: %s", repr(self))
+        for item in list(self._items):
+            item.lending = None
+            item.due = -1
 
 class ItemToItem(DB.Model):
 

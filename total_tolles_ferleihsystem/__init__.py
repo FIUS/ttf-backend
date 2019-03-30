@@ -44,6 +44,7 @@ APP.logger.debug('Debug logging enabled')
 APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
 
 AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
+LENDING_LOGGER = getLogger('ttf.lending')  # type: Logger
 
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy

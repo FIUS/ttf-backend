@@ -201,10 +201,9 @@ ITEM_GET = API.inherit('ItemGET', ITEM_BASIC, ID, {
     'type': fields.Nested(ITEM_TYPE_GET),
     'is_currently_lent': fields.Boolean(readonly=True),
     'effective_lending_duration': fields.Integer(readonly=True),
-    'due': fields.DateTime(attribute='item_lending.due', readonly=True),
-    '_links': NestedFields(ITEM_LINKS)
+    'due': fields.Integer(readonly=True, title="Due date", description="[Unix time]"),
+    '_links': NestedFields(ITEM_LINKS),
 })
-
 
 #
 # --- Attribute ---
@@ -228,7 +227,7 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_BASIC, {
 
 
 #
-# --- FIle ---
+# --- File ---
 #
 
 FILE_BASIC = API.inherit('FileBASIC', VISIBLE_FOR, {
@@ -262,10 +261,6 @@ LENDING_BASIC = API.model('LendingBASIC', {
     'user': fields.String(max_length=STD_STRING_SIZE),
     'deposit': fields.String(example="Studentenausweis", max_length=STD_STRING_SIZE),
 })
-LENDING_ITEM = API.model('LendingItem', {
-    'due': fields.DateTime(),
-    'item': fields.Nested(ITEM_GET),
-})
 LENDING_LINKS = API.inherit('LendingLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.lending_lending_detail',
                            url_data={'lending_id' : 'id'}), required=False),
@@ -277,10 +272,9 @@ LENDING_POST = API.inherit('LendingPOST', LENDING_BASIC, {
 LENDING_PUT = API.inherit('LendingPUT', LENDING_POST, {})
 LENDING_GET = API.inherit('LendingGET', LENDING_BASIC, ID, {
     '_links': NestedFields(LENDING_LINKS),
-    'date': fields.DateTime(),
-    'item_lendings': fields.Nested(LENDING_ITEM),
+    'date': fields.Integer(title="Lending date", description="[Unix time]"),
+    'items': fields.Nested(ITEM_GET, attribute='_items'),
 })
-
 
 #
 # --- Blacklist ---
