@@ -100,9 +100,9 @@ ITEM_TYPE_BASIC = API.inherit('ItemTypeBasic', VISIBLE_FOR, {
 ITEM_TYPE_LINKS = API.inherit('ItemTypeLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.item_type_item_type_detail', url_data={'type_id': 'id'})),
     'attributes': HaLUrl(UrlData('api.item_type_item_type_attributes', url_data={'type_id' : 'id'})),
-    'parent_types': HaLUrl(UrlData('api.item_type_item_type_can_contain_types',
+    'parent_types': HaLUrl(UrlData('api.item_type_item_type_parent_types',
                                   url_data={'type_id' : 'id'})),
-    'contained_types': HaLUrl(UrlData('api.item_type_item_type_can_contain_types',
+    'contained_types': HaLUrl(UrlData('api.item_type_item_type_contained_types',
                                   url_data={'type_id' : 'id'})),
 })
 

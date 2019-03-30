@@ -52,7 +52,6 @@ class ItemTypeList(Resource):
     @ANS.doc(model=ITEM_TYPE_GET, body=ITEM_TYPE_POST)
     @ANS.response(409, 'Name is not Unique.')
     @ANS.response(201, 'Created.')
-    @API.marshal_with(ITEM_TYPE_GET)
     # pylint: disable=R0201
     def post(self):
         """
