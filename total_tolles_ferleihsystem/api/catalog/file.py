@@ -116,7 +116,7 @@ class FileDetail(Resource):
         file = base_query.first()
 
         if file is None:
-            APP.logger.debug('Requested file not found!', file_id)
+            APP.logger.debug('Requested file not found for id: %s !', file_id)
             abort(404, 'Requested file not found!')
 
         return file
@@ -132,7 +132,7 @@ class FileDetail(Resource):
         file = File.query.filter(File.id == file_id).first()
 
         if file is None:
-            APP.logger.debug('Requested file not found!', file_id)
+            APP.logger.debug('Requested file not found for id: %s !', file_id)
             abort(404, 'Requested file not found!')
 
         DB.session.delete(file)
@@ -152,7 +152,7 @@ class FileDetail(Resource):
         file = File.query.filter(File.id == file_id).options(joinedload('item')).first()
 
         if file is None:
-            APP.logger.debug('Requested file not found!', file_id)
+            APP.logger.debug('Requested file not found for id: %s !', file_id)
             abort(404, 'Requested file not found!')
 
         file.update(**request.get_json())
@@ -231,7 +231,7 @@ class FileData(Resource):
         file = base_query.first()
 
         if file is None:
-            APP.logger.debug('Requested file not found!', file_id)
+            APP.logger.debug('Requested file not found for id: %s !', file_id)
             abort(404, 'Requested file was not found!')
 
         headers = {
@@ -241,5 +241,5 @@ class FileData(Resource):
         with open(os.path.join(APP.config['DATA_DIRECTORY'], file.file_hash), mode='rb') as file_on_disk:
             return make_response(file_on_disk.read(), headers)
 
-        APP.logger.error('Crash while downloading file.', file_id)
+        APP.logger.error('Crash while downloading file: %s !', file_id)
         abort(500, 'Something crashed while reading file!')

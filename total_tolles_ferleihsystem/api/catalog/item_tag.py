@@ -65,9 +65,9 @@ class ItemTagList(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Name is not unique.', err)
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
 
@@ -112,7 +112,7 @@ class ItemTagDetail(Resource):
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
-            APP.logger.debug('Requested item tag not found.', tag_id)
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
@@ -139,7 +139,7 @@ class ItemTagDetail(Resource):
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
-            APP.logger.debug('Requested item tag not found.', tag_id)
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
@@ -168,7 +168,7 @@ class ItemTagDetail(Resource):
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
 
         if item_tag is None:
-            APP.logger.debug('Requested item tag not found.', tag_id)
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         item_tag.update(**request.get_json())
@@ -179,9 +179,9 @@ class ItemTagDetail(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Name is not unique.', err)
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
 
@@ -210,7 +210,7 @@ class ItemTagAttributes(Resource):
 
         tag = base_query.first()
         if tag is None:
-            APP.logger.debug('Requested item tag not found.', tag_id)
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         return [ttad.attribute_definition for ttad in tag._tag_to_attribute_definitions]
@@ -231,10 +231,10 @@ class ItemTagAttributes(Resource):
         attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
 
         if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
-            APP.logger.debug('Requested item tag not found.', tag_id)
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
         if attribute_definition is None:
-            APP.logger.debug('Requested attribute definition not found.', attribute_definition_id)
+            APP.logger.debug('Requested attribute definition not found for id: %s !', attribute_definition_id)
             abort(400, 'Requested attribute definition not found!')
 
         items = [itt.item for itt in ItemToTag.query.filter(ItemToTag.tag_id == tag_id).options(joinedload('item')).all()]
@@ -253,9 +253,9 @@ class ItemTagAttributes(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Attribute definition is already asociated with this tag!', err)
+                APP.logger.info('Attribute definition is already asociated with this tag! %s', err)
                 abort(409, 'Attribute definition is already asociated with this tag!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
     @jwt_required
@@ -272,7 +272,7 @@ class ItemTagAttributes(Resource):
         attribute_definition_id = request.get_json()["id"]
         tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
         if tag is None:
-            APP.logger.debug('Requested item tag not found.', tag_id)
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         code, msg, commit = tag.unassociate_attr_def(attribute_definition_id)
@@ -282,5 +282,5 @@ class ItemTagAttributes(Resource):
         if code == 204:
             return '', 204
 
-        APP.logger.debug('Error.', code, msg)
+        APP.logger.debug('Error: %s, %s', code, msg)
         abort(code, msg)

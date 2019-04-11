@@ -66,9 +66,9 @@ class AttributeDefinitionList(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Name is not unique.', err)
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
 @ANS.route('/<int:definition_id>/')
@@ -96,7 +96,7 @@ class AttributeDefinitionDetail(Resource):
 
         attribute = base_query.first()
         if attribute is None:
-            APP.logger.debug('Requested attribute not found!', definition_id)
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
         return attribute
 
@@ -148,7 +148,7 @@ class AttributeDefinitionDetail(Resource):
         """
         attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if attribute is None:
-            APP.logger.debug('Requested attribute not found!', definition_id)
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
         attribute.deleted = False
         DB.session.commit()
@@ -166,7 +166,7 @@ class AttributeDefinitionDetail(Resource):
         """
         attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if attribute is None:
-            APP.logger.debug('Requested attribute not found!', definition_id)
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
         attribute.update(**request.get_json())
         try:
@@ -175,9 +175,9 @@ class AttributeDefinitionDetail(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Name is not unique.', err)
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
 
@@ -205,7 +205,7 @@ class AttributeDefinitionValues(Resource):
 
         attributeDefinition = base_query.first()
         if attributeDefinition is None:
-            APP.logger.debug('Requested attribute not found!', definition_id)
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
 
         return list(set([itad.value for itad in attributeDefinition._item_to_attribute_definitions])).sort()

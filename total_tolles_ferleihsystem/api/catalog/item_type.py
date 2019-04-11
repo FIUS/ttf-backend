@@ -66,9 +66,9 @@ class ItemTypeList(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Name is not unique.', err)
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error, %s', err)
             abort(500)
 
 @ANS.route('/<int:type_id>/')
@@ -97,7 +97,7 @@ class ItemTypeDetail(Resource):
         item_type = base_query.first()
 
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         return item_type
@@ -114,7 +114,7 @@ class ItemTypeDetail(Resource):
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
 
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         item_type.deleted = True
@@ -140,7 +140,7 @@ class ItemTypeDetail(Resource):
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
 
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         item_type.deleted = False
@@ -161,7 +161,7 @@ class ItemTypeDetail(Resource):
         item_type = ItemType.query.filter(ItemType.id == type_id).first()
 
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         item_type.update(**request.get_json())
@@ -172,9 +172,9 @@ class ItemTypeDetail(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Name is not unique.', err)
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error %s', err)
             abort(500)
 
 
@@ -204,7 +204,7 @@ class ItemTypeAttributes(Resource):
         item_type = base_query.first()
 
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         return [ittad.attribute_definition for ittad in item_type._item_type_to_attribute_definitions]
@@ -226,10 +226,10 @@ class ItemTypeAttributes(Resource):
         attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
 
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
         if attribute_definition is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(400, 'Requested attribute definition not found!')
 
         items = Item.query.filter(Item.type_id == type_id).all()
@@ -251,9 +251,9 @@ class ItemTypeAttributes(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Attribute definition is already asociated with item type!', err)
+                APP.logger.info('Attribute definition is already asociated with item type! %s', err)
                 abort(409, 'Attribute definition is already asociated with item type!')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error %s', err)
             abort(500)
 
     @jwt_required
@@ -271,7 +271,7 @@ class ItemTypeAttributes(Resource):
         item_type = ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first()
 
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         code, msg, commit = item_type.unassociate_attr_def(attribute_definition_id)
@@ -282,7 +282,7 @@ class ItemTypeAttributes(Resource):
         if code == 204:
             return '', 204
 
-        APP.logger.error("Error.", code, msg)
+        APP.logger.error("Error. %s, %s", code, msg)
         abort(code, msg)
 
 
@@ -311,7 +311,7 @@ class ItemTypeContainedTypes(Resource):
 
         item_type = base_query.first()
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         return [cit.item_type for cit in item_type._contained_item_types]
@@ -331,10 +331,10 @@ class ItemTypeContainedTypes(Resource):
         child_id = request.get_json()["id"]
 
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
         if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested contained type not found!', child_id)
+            APP.logger.debug('Requested contained type (id: %s) not found!', child_id)
             abort(400, 'Requested contained type not found!')
 
         new = ItemTypeToItemType(type_id, child_id)
@@ -346,9 +346,9 @@ class ItemTypeContainedTypes(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('Item type can already be contained in this item type.', err)
+                APP.logger.info('Item type can already be contained in this item type. %s', err)
                 abort(409, 'Item type can already be contained in this item type.')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error %s', err)
             abort(500)
 
     @jwt_required
@@ -365,10 +365,10 @@ class ItemTypeContainedTypes(Resource):
         child_id = request.get_json()["id"]
 
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
         if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested contained type not found!', child_id)
+            APP.logger.debug('Requested contained type (id: %s) not found!', child_id)
             abort(400, 'Requested contained type not found!')
 
         association = (ItemTypeToItemType
@@ -409,7 +409,7 @@ class ItemTypeParentTypes(Resource):
 
         item_type = base_query.first()
         if item_type is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
 
         return [ppit.parent for ppit in item_type._possible_parent_item_types]
@@ -429,10 +429,10 @@ class ItemTypeParentTypes(Resource):
         parent_id = request.get_json()["id"]
 
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
         if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested parent type not found!', parent_id)
+            APP.logger.debug('Requested parent type (id: %s) not found!', parent_id)
             abort(400, 'Requested parent type not found!')
 
         new = ItemTypeToItemType(parent_id, type_id)
@@ -445,9 +445,9 @@ class ItemTypeParentTypes(Resource):
         except IntegrityError as err:
             message = str(err)
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
-                APP.logger.info('This item type can already contain the given item type.', err)
+                APP.logger.info('This item type can already contain the given item type. %s', err)
                 abort(409, 'This item type can already contain the given item type.')
-            APP.logger.error('SQL Error', err)
+            APP.logger.error('SQL Error %s', err)
             abort(500)
 
     @jwt_required
@@ -464,10 +464,10 @@ class ItemTypeParentTypes(Resource):
         parent_id = request.get_json()["id"]
 
         if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested item type not found!', type_id)
+            APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
         if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted == False).first() is None:
-            APP.logger.debug('Requested parent type not found!', parent_id)
+            APP.logger.debug('Requested parent type (id: %s) not found!', parent_id)
             abort(400, 'Requested parent type not found!')
 
         association = (ItemTypeToItemType
