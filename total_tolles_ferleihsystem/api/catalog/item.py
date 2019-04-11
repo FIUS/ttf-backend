@@ -40,7 +40,7 @@ class ItemList(Resource):
         Get a list of all items currently in the system
         """
         test_for = request.args.get('deleted', 'false') == 'true'
-        base_query = Item.query.options(joinedload('lending')).filter(Item.deleted == test_for)
+        base_query = Item.query.options(joinedload('lending'), joinedload("_tags")).filter(Item.deleted == test_for)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

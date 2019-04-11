@@ -99,7 +99,7 @@ class Item(DB.Model):
         if self.lending_duration and (self.lending_duration >= 0):
             return self.lending_duration
 
-        tag_lending_duration = min((t.lending_duration for t in self._tags if t.lending_duration > 0), default=-1)
+        tag_lending_duration = min((t.tag.lending_duration for t in self._tags if t.tag.lending_duration > 0), default=-1)
 
         if tag_lending_duration >= 0:
             return tag_lending_duration

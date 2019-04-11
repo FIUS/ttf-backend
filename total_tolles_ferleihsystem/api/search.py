@@ -5,6 +5,7 @@ This is the module containing the search endpoint.
 from flask import request
 from flask_restplus import Resource
 from flask_jwt_extended import jwt_optional, get_jwt_claims
+from sqlalchemy.orm import joinedload
 from . import API
 from ..db_models.item import Item, ItemToTag, ItemToAttributeDefinition
 from ..db_models.tag import Tag
@@ -44,7 +45,7 @@ class Search(Resource):
         lent = request.args.get('lent', default=False, type=lambda x: x == 'true')
 
         search_string = '%' + search + '%'
-        search_result = Item.query
+        search_result = Item.query.options(joinedload('lending'), joinedload("_tags"))
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -69,7 +70,7 @@ class Search(Resource):
             search_result = search_result.filter(~Item.deleted)
 
         if not lent:
-            search_result = search_result.join(ItemToLending, isouter=True).filter(ItemToLending.lending_id.is_(None))
+            search_result = search_result.filter(Item.lending == None)
 
         if item_type != -1:
             search_result = search_result.filter(Item.type_id == item_type)
