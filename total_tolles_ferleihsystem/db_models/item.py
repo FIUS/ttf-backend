@@ -309,7 +309,7 @@ class Lending(DB.Model):
         self.date = int(time.time())
         self.deposit = deposit
         for element in item_ids:
-            item = Item.query.filter(Item.id == element).filter(Item.deleted == False).first()
+            item = Item.query.filter(Item.id == element).filter(Item.deleted_time == None).first()
             if item is None:
                 raise ValueError("Item not found:" + str(element))
             if not item.type.lendable:
@@ -332,7 +332,7 @@ class Lending(DB.Model):
         new_items = []
 
         for element in item_ids:
-            item = Item.query.filter(Item.id == element).filter(Item.deleted == False).first()
+            item = Item.query.filter(Item.id == element).filter(Item.deleted_time == None).first()
             if item is None:
                 raise ValueError("Item not found:" + str(element))
             new_items.append(item)

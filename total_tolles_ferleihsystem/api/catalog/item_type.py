@@ -35,9 +35,13 @@ class ItemTypeList(Resource):
         """
         Get a list of all item types currently in the system
         """
+        base_query = ItemType.query
         test_for = request.args.get('deleted', 'false') == 'true'
-        base_query = ItemType.query.filter(ItemType.deleted == test_for)
-
+        if test_for:
+            base_query = base_query.filter(ItemType.deleted_time != None)
+        else:
+            base_query = base_query.filter(ItemType.deleted_time == None)
+        
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
             if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
@@ -192,7 +196,7 @@ class ItemTypeAttributes(Resource):
         """
         Get all attribute definitions for this item type.
         """
-        base_query = ItemType.query.options(joinedload('_item_type_to_attribute_definitions')).filter(ItemType.id == type_id).filter(ItemType.deleted == False)
+        base_query = ItemType.query.options(joinedload('_item_type_to_attribute_definitions')).filter(ItemType.id == type_id).filter(ItemType.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -223,9 +227,9 @@ class ItemTypeAttributes(Resource):
         """
         attribute_definition_id = request.get_json()["id"]
         # pylint: disable=C0121
-        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted_time == None).first()
 
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
         if attribute_definition is None:
@@ -268,7 +272,7 @@ class ItemTypeAttributes(Resource):
         Remove association of a attribute definition with the item type.
         """
         attribute_definition_id = request.get_json()["id"]
-        item_type = ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first()
+        item_type = ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted_time == None).first()
 
         if item_type is None:
             APP.logger.debug('Requested item type (id: %s) not found!', type_id)
@@ -300,7 +304,7 @@ class ItemTypeContainedTypes(Resource):
         """
         Get all item types, this item_type may contain.
         """
-        base_query = ItemType.query.options(joinedload('_contained_item_types').joinedload('item_type')).filter(ItemType.id == type_id).filter(ItemType.deleted == False)
+        base_query = ItemType.query.options(joinedload('_contained_item_types').joinedload('item_type')).filter(ItemType.id == type_id).filter(ItemType.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -330,10 +334,10 @@ class ItemTypeContainedTypes(Resource):
         """
         child_id = request.get_json()["id"]
 
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
-        if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested contained type (id: %s) not found!', child_id)
             abort(400, 'Requested contained type not found!')
 
@@ -364,10 +368,10 @@ class ItemTypeContainedTypes(Resource):
         """
         child_id = request.get_json()["id"]
 
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
-        if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == child_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested contained type (id: %s) not found!', child_id)
             abort(400, 'Requested contained type not found!')
 
@@ -398,7 +402,7 @@ class ItemTypeParentTypes(Resource):
         """
         Get all item types, this item_type may be contained in.
         """
-        base_query = ItemType.query.options(joinedload('_possible_parent_item_types').joinedload('parent')).filter(ItemType.id == type_id).filter(ItemType.deleted == False)
+        base_query = ItemType.query.options(joinedload('_possible_parent_item_types').joinedload('parent')).filter(ItemType.id == type_id).filter(ItemType.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -428,10 +432,10 @@ class ItemTypeParentTypes(Resource):
         """
         parent_id = request.get_json()["id"]
 
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
-        if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested parent type (id: %s) not found!', parent_id)
             abort(400, 'Requested parent type not found!')
 
@@ -463,10 +467,10 @@ class ItemTypeParentTypes(Resource):
         """
         parent_id = request.get_json()["id"]
 
-        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == type_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested item type (id: %s) not found!', type_id)
             abort(404, 'Requested item type not found!')
-        if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted == False).first() is None:
+        if ItemType.query.filter(ItemType.id == parent_id).filter(ItemType.deleted_time == None).first() is None:
             APP.logger.debug('Requested parent type (id: %s) not found!', parent_id)
             abort(400, 'Requested parent type not found!')
 

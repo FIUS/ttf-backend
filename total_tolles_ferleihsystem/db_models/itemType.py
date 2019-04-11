@@ -42,11 +42,11 @@ class ItemType (DB.Model):
     def deleted(self):
         return self.deleted_time is not None
 
-    @deleted.setter()
+    @deleted.setter
     def deleted(self, value: bool):
         if value:
             self.deleted_time = int(time.time())
-        else
+        else:
             self.deleted_time = None
 
     def unassociate_attr_def(self, attribute_definition_id):
@@ -54,7 +54,7 @@ class ItemType (DB.Model):
         Does all necessary changes to the database for unassociating a attribute definition from this type.
         Does not commit the changes.
         """
-        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first() is None:
+        if AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted_time == None).first() is None:
             return(400, 'Requested attribute definition not found!', False)
         association = (ItemTypeToAttributeDefinition
                        .query

@@ -35,8 +35,12 @@ class ItemTagList(Resource):
         """
         Get a list of all item tags currently in the system
         """
+        base_query = Tag.query
         test_for = request.args.get('deleted', 'false') == 'true'
-        base_query = Tag.query.filter(Tag.deleted == test_for)
+        if test_for:
+            base_query = base_query.filter(Tag.deleted_time != None)
+        else:
+            base_query = base_query.filter(Tag.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -199,7 +203,7 @@ class ItemTagAttributes(Resource):
         """
         Get all attribute definitions for this tag.
         """
-        base_query = Tag.query.options(joinedload('_tag_to_attribute_definitions')).filter(Tag.id == tag_id).filter(Tag.deleted == False)
+        base_query = Tag.query.options(joinedload('_tag_to_attribute_definitions')).filter(Tag.id == tag_id).filter(Tag.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -228,9 +232,9 @@ class ItemTagAttributes(Resource):
         Associate a new attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted_time == None).first()
 
-        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
+        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted_time == None).first() is None:
             APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
         if attribute_definition is None:
@@ -270,7 +274,7 @@ class ItemTagAttributes(Resource):
         Remove association of a attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
+        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted_time == None).first()
         if tag is None:
             APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')

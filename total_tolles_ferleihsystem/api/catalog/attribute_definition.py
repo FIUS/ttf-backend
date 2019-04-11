@@ -36,8 +36,12 @@ class AttributeDefinitionList(Resource):
         """
         Get a list of all attribute definitions currently in the system
         """
+        base_query = AttributeDefinition.query
         test_for = request.args.get('deleted', 'false') == 'true'
-        base_query = AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for)
+        if test_for:
+            base_query = base_query.filter(AttributeDefinition.deleted_time != None)
+        else:
+            base_query = base_query.filter(AttributeDefinition.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:

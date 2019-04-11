@@ -67,7 +67,7 @@ class Search(Resource):
             search_result = search_result.filter(search_condition)
 
         if not deleted:
-            search_result = search_result.filter(~Item.deleted)
+            search_result = search_result.filter(Item.deleted_time == None)
 
         if not lent:
             search_result = search_result.filter(Item.lending == None)
