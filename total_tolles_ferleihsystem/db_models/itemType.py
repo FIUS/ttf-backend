@@ -15,7 +15,7 @@ class ItemType (DB.Model):
     name_schema = DB.Column(DB.String(STD_STRING_SIZE))
     lendable = DB.Column(DB.Boolean, default=True)
     lending_duration = DB.Column(DB.Integer, nullable=True)
-    deleted = DB.Column(DB.Boolean, default=False)
+    deleted_time = DB.Column(DB.Integer, default=None)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     how_to = DB.Column(DB.Text, nullable=True)
 
@@ -37,6 +37,17 @@ class ItemType (DB.Model):
         self.lending_duration = lending_duration
         self.visible_for = visible_for
         self.how_to = how_to
+
+    @property
+    def deleted(self):
+        return self.deleted_time is not None
+
+    @deleted.setter()
+    def deleted(self, value: bool):
+        if value:
+            self.deleted_time = int(time.time())
+        else
+            self.deleted_time = None
 
     def unassociate_attr_def(self, attribute_definition_id):
         """

@@ -19,7 +19,7 @@ class Tag(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True)
     name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
     lending_duration = DB.Column(DB.Integer)
-    deleted = DB.Column(DB.Boolean, default=False)
+    deleted_time = DB.Column(DB.Integer, default=None)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE))
 
     def __init__(self, name: str, lending_duration: int, visible_for: str):
@@ -31,6 +31,10 @@ class Tag(DB.Model):
         self.name = name
         self.lending_duration = lending_duration
         self.visible_for = visible_for
+
+    @property
+    def deleted(self):
+        return self.deleted_time is not None
 
     def unassociate_attr_def(self, attribute_definition_id):
         """

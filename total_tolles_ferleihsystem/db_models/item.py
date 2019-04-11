@@ -5,7 +5,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.schema import UniqueConstraint
 import string
 from json import loads
-from datetime import date
 import time
 
 from .. import DB, LENDING_LOGGER
@@ -37,7 +36,7 @@ class Item(DB.Model):
     lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), default=None, nullable=True)
     lending_duration = DB.Column(DB.Integer, nullable=True)  # in seconds
     due = DB.Column(DB.Integer, default=-1) # unix time
-    deleted = DB.Column(DB.Boolean, default=False)
+    deleted_time = DB.Column(DB.Integer, default=None)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
@@ -77,6 +76,10 @@ class Item(DB.Model):
         self.type_id = type_id
         self.lending_duration = lending_duration
         self.visible_for = visible_for
+
+    @property
+    def deleted(self):
+        return self.deleted_time is not None
 
     @property
     def is_currently_lent(self):
@@ -245,8 +248,8 @@ class File(DB.Model):
     name = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     file_type = DB.Column(DB.String(STD_STRING_SIZE))
     file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
-    creation = DB.Column(DB.DateTime, server_default=func.now())
-    invalidation = DB.Column(DB.DateTime, nullable=True)
+    creation = DB.Column(DB.Integer)
+    invalidation = DB.Column(DB.Integer, nullable=True)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     item = DB.relationship('Item', lazy='select', backref=DB.backref('_files', lazy='select',
@@ -259,11 +262,12 @@ class File(DB.Model):
         self.name = name
         self.file_type = file_type
         self.file_hash = file_hash
+        self.creation = int(time.time())
 
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
-    def update(self, name: str, file_type: str, invalidation, item_id: int, visible_for: str = '') -> None:
+    def update(self, name: str, file_type: str, invalidation: int, item_id: int, visible_for: str = '') -> None:
         """
         Function to update the objects data
         """
@@ -410,7 +414,7 @@ class ItemToAttributeDefinition (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
     value = DB.Column(DB.String(STD_STRING_SIZE))
-    deleted = DB.Column(DB.Boolean, default=False)
+    deleted_time = DB.Column(DB.Integer, default=None)
 
     item = DB.relationship('Item', lazy='select', backref=DB.backref('_attributes', lazy='select',
                                                                      single_parent=True, cascade="all, delete-orphan"))
@@ -444,8 +448,5 @@ class ItemToAttributeDefinition (DB.Model):
         self.deleted = False
 
     @property
-    def is_deleted(self) -> bool:
-        """
-        Checks whether this association is currently soft deleted
-        """
-        return self.deleted
+    def deleted(self):
+        return self.deleted_time is not None

@@ -12,7 +12,7 @@ class AttributeDefinition (DB.Model):
     type = DB.Column(DB.String(STD_STRING_SIZE))
     jsonschema = DB.Column(DB.Text)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE))
-    deleted = DB.Column(DB.Boolean, default=False)
+    deleted_time = DB.Column(DB.Integer, default=None)
 
     def __init__(self, name: str, type: str, jsonschema: str, visible_for: str):
         self.name = name
@@ -25,3 +25,7 @@ class AttributeDefinition (DB.Model):
         self.type = type
         self.jsonschema = jsonschema
         self.visible_for = visible_for
+
+    @property
+    def deleted(self):
+        return self.deleted_time is not None

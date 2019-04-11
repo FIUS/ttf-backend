@@ -233,7 +233,7 @@ ATTRIBUTE_GET = API.inherit('AttributeGET', ATTRIBUTE_BASIC, {
 FILE_BASIC = API.inherit('FileBASIC', VISIBLE_FOR, {
     'name': fields.String(max_length=STD_STRING_SIZE, nullable=True),
     'file_type': fields.String(max_length=20),
-    'invalidation': fields.DateTime(nullable=True),
+    'invalidation': fields.Integer(nullable=True, title="Invalidation date", description="[Unix time]"),
 })
 FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.file_file_detail',
@@ -247,7 +247,7 @@ FILE_PUT = API.inherit('FilePUT', FILE_BASIC, {})
 FILE_GET = API.inherit('FileGET', FILE_BASIC, ID, {
     'item': fields.Nested(ITEM_GET),
     'file_hash': fields.String(max_length=STD_STRING_SIZE),
-    'creation': fields.DateTime(),
+    'creation': fields.Integer(title="Creation date", description="[Unix time]"),
     '_links': NestedFields(FILE_LINKS)
 })
 
@@ -286,7 +286,7 @@ BLACKLIST_BASIC = API.model('BlacklistBasic', {
     'reason': fields.String(),
 })
 BLACKLIST_ITEM_TYPE = API.model('BlacklistItemType', {
-    'end_time': fields.DateTime(),
+    'end_time': fields.Integer(title="Date of end of blacklisting", description="[Unix time]"),
     'reason': fields.String(),
 })
 BLACKLIST_LINKS = API.inherit('BlacklistLinks', WITH_CURIES, {
