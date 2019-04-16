@@ -29,3 +29,10 @@ class AttributeDefinition (DB.Model):
     @property
     def deleted(self):
         return self.deleted_time is not None
+
+    @deleted.setter
+    def deleted(self, value: bool):
+        if value:
+            self.deleted_time = int(time.time())
+        else:
+            self.deleted_time = None

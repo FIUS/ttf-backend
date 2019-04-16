@@ -40,7 +40,7 @@ class Item(DB.Model):
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
-    lending = DB.relationship('Lending', lazy='select', 
+    lending = DB.relationship('Lending', lazy='select',
                               backref=DB.backref('_items', lazy='select'))
 
     __table_args__ = (
@@ -80,6 +80,13 @@ class Item(DB.Model):
     @property
     def deleted(self):
         return self.deleted_time is not None
+
+    @deleted.setter
+    def deleted(self, value: bool):
+        if value:
+            self.deleted_time = int(time.time())
+        else:
+            self.deleted_time = None
 
     @property
     def is_currently_lent(self):

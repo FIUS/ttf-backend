@@ -1,6 +1,7 @@
 """
 This module contains all API endpoints for the namespace 'attribute_definition'
 """
+import time
 
 from flask import request
 from flask_restplus import Resource, abort, marshal

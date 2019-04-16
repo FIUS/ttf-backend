@@ -145,6 +145,7 @@ class DebugConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
     JWT_SECRET_KEY = 'debug'
+    JWT_ACCESS_TOKEN_EXPIRES = False
     LOGIN_PROVIDERS = ['Debug']
     Config.LOGGING['loggers']['flask.app.auth']['level'] = logging.DEBUG
     Config.LOGGING['loggers']['flask.app.db']['level'] = logging.DEBUG
