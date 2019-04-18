@@ -21,33 +21,53 @@ def upgrade():
     op.drop_table('ItemToLending')
     with op.batch_alter_table('AttributeDefinition', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
-        op.execute(' UPDATE `AttributeDefinition` SET `deleted_time` = 1 WHERE `AttributeDefinition`.`deleted` <> 0')
+
+    op.execute(' UPDATE `AttributeDefinition` SET `deleted_time` = 1 WHERE `AttributeDefinition`.`deleted` <> 0')
+
+    with op.batch_alter_table('AttributeDefinition', schema=None) as batch_op:
         batch_op.drop_column('deleted')
+
 
     with op.batch_alter_table('File', schema=None) as batch_op:
         batch_op.drop_index('ix_File_file_hash')
+
 
     with op.batch_alter_table('Item', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column('due', sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column('lending_id', sa.Integer(), nullable=True))
-        op.execute(' UPDATE `Item` SET `deleted_time` = 1 WHERE `Item`.`deleted` <> 0')
+
+    op.execute(' UPDATE `Item` SET `deleted_time` = 1 WHERE `Item`.`deleted` <> 0')
+
+    with op.batch_alter_table('Item', schema=None) as batch_op:
         batch_op.create_foreign_key(batch_op.f('fk_Item_lending_id'), 'Lending', ['lending_id'], ['id'])
         batch_op.drop_column('deleted')
 
+
     with op.batch_alter_table('ItemToAttributeDefinition', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
-        op.execute(' UPDATE `ItemToAttributeDefinition` SET `deleted_time` = 1 WHERE `ItemToAttributeDefinition`.`deleted` <> 0')
+
+    op.execute(' UPDATE `ItemToAttributeDefinition` SET `deleted_time` = 1 WHERE `ItemToAttributeDefinition`.`deleted` <> 0')
+
+    with op.batch_alter_table('ItemToAttributeDefinition', schema=None) as batch_op:
         batch_op.drop_column('deleted')
+
 
     with op.batch_alter_table('ItemType', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
-        op.execute(' UPDATE `ItemType` SET `deleted_time` = 1 WHERE `ItemType`.`deleted` <> 0')
+
+    op.execute(' UPDATE `ItemType` SET `deleted_time` = 1 WHERE `ItemType`.`deleted` <> 0')
+
+    with op.batch_alter_table('ItemType', schema=None) as batch_op:
         batch_op.drop_column('deleted')
+
 
     with op.batch_alter_table('Tag', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
-        op.execute(' UPDATE `Tag` SET `deleted_time` = 1 WHERE `Tag`.`deleted` <> 0')
+
+    op.execute(' UPDATE `Tag` SET `deleted_time` = 1 WHERE `Tag`.`deleted` <> 0')
+
+    with op.batch_alter_table('Tag', schema=None) as batch_op:
         batch_op.drop_column('deleted')
 
     # ### end Alembic commands ###
