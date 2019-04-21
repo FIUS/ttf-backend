@@ -804,8 +804,8 @@ export class ApiService implements OnInit {
                         if (b.due == null || b.due == '') {
                             return 1;
                         }
-                        const d_a = new Date(a.due);
-                        const d_b = new Date(b.due);
+                        const d_a = new Date(a.due * 1000);
+                        const d_b = new Date(b.due * 1000);
                         if (d_a < d_b) {
                             return -1;
                         } else if (d_a > d_b) {

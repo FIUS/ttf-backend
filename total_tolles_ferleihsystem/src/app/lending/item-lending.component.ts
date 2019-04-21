@@ -11,7 +11,7 @@ import { ApiObject } from '../shared/rest/api-base.service';
 export class ItemLendingComponent implements OnInit, OnDestroy {
 
 
-    @Input() itemLending: any;
+    @Input() item: any;
     @Output() return: EventEmitter<number> = new EventEmitter<number>();
 
     tags: ApiObject[] = [];
@@ -23,11 +23,11 @@ export class ItemLendingComponent implements OnInit, OnDestroy {
     constructor(private api: ApiService) { }
 
     ngOnInit(): void {
-      if (this.itemLending != null && this.itemLending.item != null) {
-            this.api.getTagsForItem(this.itemLending.item).take(1).subscribe(tags => {
+      if (this.item != null && this.item != null) {
+            this.api.getTagsForItem(this.item).take(1).subscribe(tags => {
               this.tags = tags;
             });
-            this.api.getAttributes(this.itemLending.item).take(1).subscribe(attributes => {
+            this.api.getAttributes(this.item).take(1).subscribe(attributes => {
               this.attributes = attributes;
             });
         }

@@ -16,7 +16,7 @@ import { Observable } from 'rxjs';
             grid-column-gap: 20px;
             grid-row-gap: 20px;
             grid-template-columns: repeat(auto-fill, 17rem);
-            justify-content: space-between;	
+            justify-content: space-between;
             margin-left: .5rem;
             margin-right: .5rem;
         }`
@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit {
     }
 
     itemOverdue(item: ApiObject): boolean {
-        const due = new Date(item.due);
+        const due = new Date(item.due * 1000);
         return due < new Date();
     }
 

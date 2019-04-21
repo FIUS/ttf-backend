@@ -3,10 +3,10 @@
         <div>
             <i class="f5 fa fa-chevron-right" [hidden]="open"></i>
             <i class="f5 fa fa-chevron-down" [hidden]="!open"></i>
-            {{itemLending?.item?.name}} (due: {{itemLending?.due | date:'short'}})
+            {{item?.name}} (due: {{item?.due * 1000 | date:'short'}})
         </div>
         <div>
-            <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return" (click)="return.emit(itemLending?.item?.id)">
+            <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return" (click)="return.emit(item?.id)">
                 <i class="fa fa-reply"></i>
             </div>
         </div>
@@ -14,13 +14,13 @@
     <div class="ph2 bt b--black-10" [hidden]="!open">
         <p class="f4">
             <span class="b">Type:</span>
-            <span class="link underline-hover pointer" routerLink="/item-types/{{itemLending?.item?.type?.id}}">{{itemLending?.item?.type?.name}}</span>
+            <span class="link underline-hover pointer" routerLink="/item-types/{{item?.type?.id}}">{{item?.type?.name}}</span>
             <span class="pointer dim" (click)="howTo.open()">
                 <i class="fa fa-question-circle"></i>
             </span>
         </p>
         <p class="f4"><span class="b">Tags:</span> <span *ngFor="let tag of tags; let isLast=last" routerLink="/tags/{{tag.id}}"><span class="link underline-hover pointer">{{tag.name}}</span>{{isLast ? '' : ', '}}</span></p>
-        <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="lendingDuration"></ttf-lending-duration></p>
+        <p class="f4"><span class="b">Lending Duration:</span><ttf-lending-duration [duration]="item?.effective_lending_duration"></ttf-lending-duration></p>
         <p class="f4 b">Attributes:</p>
         <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition?.name}}:</span> {{attr?.value}}</p>
     </div>
@@ -29,6 +29,6 @@
 <ttf-dialog [dialogType]="'info'" #howTo>
     <h1 class="mv0" title>How To:</h1>
     <div class="w-100 ph3 pv2" body>
-        <div>{{itemLending?.item?.type?.how_to}}</div>
+        <div>{{item?.type?.how_to}}</div>
     </div>
 </ttf-dialog>

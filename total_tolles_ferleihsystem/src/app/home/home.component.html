@@ -14,7 +14,7 @@
                         <a class="min-w5 link">{{item.name}} ({{item.type?.name}})</a>
                     </th>
                     <th class="ph3 pv2 tl link bg-animate hover-bg-near-white pointer" [ngClass]="{'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}" [routerLink]="(jwt.isModerator() || jwt.isAdmin()) ? ['lendings', item.lending_id] : ['items', item.id]">
-                        <a class="link">{{item.due | date:'short'}}</a>
+                        <a class="link">{{item.due * 1000 | date:'short'}}</a>
                     </th>
                 </tr>
             </tbody>

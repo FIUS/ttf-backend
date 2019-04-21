@@ -35,7 +35,7 @@
             </p>
             <p class="f4" *ngIf="item?.due" >
                 <span class="b">Due:</span>
-                <span>{{item?.due | date:'short'}}</span>
+                <span>{{item?.due * 1000 | date:'short'}}</span>
             </p>
             <div [hidden]="attributes?.length === 0">
                 <p class="f4 b">Attributes:</p>
