@@ -41,7 +41,7 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
             if (this.canContainSubscription != null) {
                 this.canContainSubscription.unsubscribe();
             }
-            this.canContainSubscription = this.api.getCanContain(this.itemType).subscribe(canContain => {
+            this.canContainSubscription = this.api.getContainedTypes(this.itemType).subscribe(canContain => {
                 this.canContain = canContain;
             });
         });
@@ -58,13 +58,13 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
 
     addCanContain() {
         if (this.canContainTypeID != null && this.canContainTypeID >= 0) {
-            this.api.postCanContain(this.itemType, this.canContainTypeID);
+            this.api.postContainedType(this.itemType, this.canContainTypeID);
         }
     }
 
     removeCanContain(id) {
         if (this.canContainTypeID != null && this.canContainTypeID >= 0) {
-            this.api.deleteCanContain(this.itemType, id);
+            this.api.deleteContainedType(this.itemType, id);
         }
     }
 

@@ -116,7 +116,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             if (this.containedTypeSubscription != null) {
                 this.containedTypeSubscription.unsubscribe();
             }
-            this.containedTypeSubscription = this.api.getCanContain(item.type).subscribe(canContain => {
+            this.containedTypeSubscription = this.api.getContainedTypes(item.type).subscribe(canContain => {
                 this.canContain = canContain;
             });
             if (this.containedItemsSubscription != null) {

@@ -446,12 +446,12 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    getCanContain(item_type: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
-        const resource = 'item-types/' + item_type.id + '/can-contain';
+    getContainedTypes(item_type: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
+        const resource = 'item-types/' + item_type.id + '/contained-types';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.get(item_type._links.can_contain, token).subscribe(data => {
+            this.rest.get(item_type._links.contained_types, token).subscribe(data => {
                 stream.next(data);
             }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
@@ -459,12 +459,12 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject[]>);
     }
 
-    postCanContain(item_type: ApiObject, itemTypeID, showErrors: string= 'all'): Observable<ApiObject[]> {
-        const resource = 'item-types/' + item_type.id + '/can-contain';
+    postContainedType(item_type: ApiObject, itemTypeID, showErrors: string= 'all'): Observable<ApiObject[]> {
+        const resource = 'item-types/' + item_type.id + '/contained-types';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.post(item_type._links.can_contain, {id: itemTypeID}, token).subscribe(data => {
+            this.rest.post(item_type._links.contained_types, {id: itemTypeID}, token).subscribe(data => {
                 stream.next(data);
             }, error => this.errorHandler(error, resource, 'POST', showErrors));
         });
@@ -472,13 +472,13 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject[]>);
     }
 
-    deleteCanContain(item_type: ApiObject, itemTypeID, showErrors: string= 'all'): Observable<ApiObject[]> {
-        const resource = 'item-types/' + item_type.id + '/can-contain';
+    deleteContainedType(item_type: ApiObject, itemTypeID, showErrors: string= 'all'): Observable<ApiObject[]> {
+        const resource = 'item-types/' + item_type.id + '/contained-types';
         const stream = this.getStreamSource(resource);
 
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.rest.delete(item_type._links.can_contain, token, {id: itemTypeID}).subscribe(data => {
-                this.getCanContain(item_type);
+            this.rest.delete(item_type._links.contained_types, token, {id: itemTypeID}).subscribe(data => {
+                this.getContainedTypes(item_type);
             }, error => this.errorHandler(error, resource, 'DELETE', showErrors));
         });
 
