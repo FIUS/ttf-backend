@@ -34,6 +34,7 @@ import { myTableComponent } from './table/table.component';
 import { FileSelectorComponent } from './file-selector/file-selector.component';
 
 import { ClickOutsideDirective } from './click-outside.directive';
+import { IsVisibleDirective } from './is-visible.directive';
 
 @NgModule({
     imports:      [ CommonModule, FormsModule, ReactiveFormsModule ],
@@ -54,6 +55,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         DateTimeInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
+        IsVisibleDirective,
     ],
     providers: [
         InfoService,
@@ -84,6 +86,7 @@ import { ClickOutsideDirective } from './click-outside.directive';
         DateTimeInputComponent,
         DurationInputComponent,
         ClickOutsideDirective,
+        IsVisibleDirective,
 
         CommonModule,
         FormsModule,

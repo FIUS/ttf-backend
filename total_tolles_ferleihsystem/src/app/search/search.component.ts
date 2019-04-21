@@ -77,12 +77,6 @@ export class SearchComponent  {
             this.alphabet.forEach(letter => map.set(letter, []));
             this.nrOfItemsFound = data.length;
             data.forEach(item => {
-                this.api.getTagsForItem(item, 'errors', this.nrOfItemsFound > 9).take(1).subscribe(tags => {
-                    this.itemTags.set(item.id, tags);
-                });
-                this.api.getAttributes(item, 'errors', this.nrOfItemsFound > 9).take(1).subscribe(attributes => {
-                    this.itemAttributes.set(item.id, attributes);
-                });
                 let letter: string = item.name.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
@@ -212,5 +206,19 @@ export class SearchComponent  {
                 });
             }
         }
+    }
+
+    /**
+     * Load further data for items in view.
+     *
+     * @param item the item that was scrolled into view
+     */
+    loadData(item) {
+        this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
+            this.itemTags.set(item.id, tags);
+        });
+        this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
+            this.itemAttributes.set(item.id, attributes);
+        });
     }
 }

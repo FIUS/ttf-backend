@@ -8,7 +8,7 @@
         <ng-container *ngIf="data?.get(letter).length > 0">
             <div class="f3 gray" style="width: 1em">{{letter}}</div>
             <ul class="mt0 list">
-                <li class="min-w2 mb1 hide-child" *ngFor="let item of data?.get(letter)">
+                <li class="min-w2 mb1 hide-child" *ngFor="let item of data?.get(letter)" (isVisible)="loadData(item)">
                     <p class="mv0">
                         <span class="b link underline-hover pointer" routerLink="/items/{{item.id}}">{{item.name}}</span>
                         <span class="i gray" [hidden]="!item?.is_currently_lent">lent</span>

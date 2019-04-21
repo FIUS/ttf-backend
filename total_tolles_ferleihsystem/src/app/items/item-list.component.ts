@@ -33,12 +33,6 @@ export class ItemListComponent implements OnInit, OnDestroy {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
             data.forEach(item => {
-                this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
-                    this.itemTags.set(item.id, tags);
-                });
-                this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
-                    this.itemAttributes.set(item.id, attributes);
-                });
                 let letter: string = item.name.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
@@ -83,6 +77,20 @@ export class ItemListComponent implements OnInit, OnDestroy {
             || this.data != null && this.data.get(value) != null && this.data.get(value).length > 0) {
             this.filter = value;
         }
+    }
+
+    /**
+     * Load further data for items in view.
+     *
+     * @param item the item that was scrolled into view
+     */
+    loadData(item) {
+        this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
+            this.itemTags.set(item.id, tags);
+        });
+        this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
+            this.itemAttributes.set(item.id, attributes);
+        });
     }
 
 }
