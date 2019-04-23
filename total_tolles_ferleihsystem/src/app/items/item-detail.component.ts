@@ -19,6 +19,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     private paramSubscription: Subscription;
     private itemSubscription: Subscription;
+    private itemTypeSubscription: Subscription;
     private attributesSubscription: Subscription;
     private tagsSubscription: Subscription;
     private containedTypeSubscription: Subscription;
@@ -31,6 +32,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
 
     itemID: number;
     item: ApiObject;
+    itemType: ApiObject;
     attributes: ApiObject[];
     tags: ApiObject[];
 
@@ -98,6 +100,16 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 return;
             }
             this.item = item;
+            if (this.itemType == null || this.itemType.id !== item.type_id) {
+                console.log('HI')
+                if (this.itemTypeSubscription != null) {
+                    this.itemTypeSubscription.unsubscribe();
+                }
+                this.itemTypeSubscription = this.api.getItemType(item.type_id).subscribe(itemType => {
+                    this.itemType = itemType;
+                    this.updateContainedItems(item, itemType);
+                });
+            }
             this.data.changeBreadcrumbs([new Breadcrumb('Items', '/items'),
             new Breadcrumb('"' + item.name + '"', '/items/' + itemID)]);
 
@@ -112,28 +124,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             }
             this.tagsSubscription = this.api.getTagsForItem(item).subscribe(tags => {
                 this.tags = tags;
-            });
-            if (this.containedTypeSubscription != null) {
-                this.containedTypeSubscription.unsubscribe();
-            }
-            this.containedTypeSubscription = this.api.getContainedTypes(item.type).subscribe(canContain => {
-                this.canContain = canContain;
-            });
-            if (this.containedItemsSubscription != null) {
-                this.containedItemsSubscription.unsubscribe();
-            }
-            this.containedItemsSubscription = this.api.getContainedItems(item).subscribe(containedItems => {
-                const itemMap = new Map<number, ApiObject[]>();
-                containedItems.forEach(item => {
-                    let list = itemMap.get(item.type.id);
-                    if (list == null) {
-                        list = [];
-                        itemMap.set(item.type.id, list);
-                    }
-                    list.push(item);
-                });
-                this.containedItemsAsMap = itemMap;
-                this.containedItems = containedItems;
             });
             if (this.filesSubscription != null) {
                 this.filesSubscription.unsubscribe();
@@ -171,6 +161,31 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         });
     }
 
+    private updateContainedItems(item: ApiObject, itemType: ApiObject) {
+        if (this.containedTypeSubscription != null) {
+            this.containedTypeSubscription.unsubscribe();
+        }
+        this.containedTypeSubscription = this.api.getContainedTypes(itemType).subscribe(canContain => {
+            this.canContain = canContain;
+        });
+        if (this.containedItemsSubscription != null) {
+            this.containedItemsSubscription.unsubscribe();
+        }
+        this.containedItemsSubscription = this.api.getContainedItems(item).subscribe(containedItems => {
+            const itemMap = new Map<number, ApiObject[]>();
+            containedItems.forEach(innerItem => {
+                let list = itemMap.get(innerItem.type_id);
+                if (list == null) {
+                    list = [];
+                    itemMap.set(innerItem.type_id, list);
+                }
+                list.push(innerItem);
+            });
+            this.containedItemsAsMap = itemMap;
+            this.containedItems = containedItems;
+        });
+    }
+
     get canEdit() {
         return this.jwt.isAdmin();
     }
@@ -199,6 +214,9 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         }
         if (this.itemSubscription != null) {
             this.itemSubscription.unsubscribe();
+        }
+        if (this.itemTypeSubscription != null) {
+            this.itemTypeSubscription.unsubscribe();
         }
         if (this.attributesSubscription != null) {
             this.attributesSubscription.unsubscribe();

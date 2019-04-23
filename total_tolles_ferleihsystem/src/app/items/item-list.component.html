@@ -12,7 +12,7 @@
                     <p class="mv0">
                         <span class="b link underline-hover pointer" routerLink="/items/{{item.id}}">{{item.name}}</span>
                         <span class="i gray" [hidden]="!item?.is_currently_lent">lent</span>
-                        <ng-container *ngIf="item?.type?.lendable && !item?.is_currently_lent">
+                        <ng-container *ngIf="itemTypes.get(item.type_id)?.lendable && !item?.is_currently_lent">
                             <i class="child grow-large fa fa-cart-plus" [hidden]="staging.isStaged(item.id)" (click)="staging.stage(item.id)"></i>
                             <i class="fa fa-shopping-cart" [hidden]="!staging.isStaged(item.id)"></i>
                         </ng-container>
@@ -22,7 +22,7 @@
                             <span class="b">
                                 Type:
                             </span>
-                            {{item.type?.name}}
+                            {{itemTypes.get(item.type_id)?.name}}
                             <ng-container *ngIf="itemTags.get(item.id)?.length > 0">
                                 <span class="ml3 b">
                                     Tags:

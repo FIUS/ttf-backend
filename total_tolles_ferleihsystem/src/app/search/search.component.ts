@@ -36,6 +36,7 @@ export class SearchComponent  {
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, any>;
+    itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
     availableLetters: Set<string>;
     itemTags: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
@@ -71,6 +72,7 @@ export class SearchComponent  {
                 }
             });
         }
+        this.api.getItemTypes(); // refresh item types cache
         this.api.search(this.searchstring, this.type, this.tags, attributes, this.includeDeleted, this.includeLent).subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             const availableLetters = new Set<string>();
@@ -191,7 +193,7 @@ export class SearchComponent  {
         if (letter == null) {
             this.data.forEach(items => {
                 items.forEach(item => {
-                    if (item.type.lendable && item.is_currently_lent) {
+                    if (this.itemTypes.has(item._type_id) && this.itemTypes.get(item._type_id).lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
                     }
                 });
@@ -200,7 +202,7 @@ export class SearchComponent  {
             const items = this.data.get(letter);
             if (items != null) {
                 items.forEach(item => {
-                    if (item.type.lendable && item.is_currently_lent) {
+                    if (this.itemTypes.has(item._type_id) && this.itemTypes.get(item._type_id).lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
                     }
                 });
@@ -214,6 +216,9 @@ export class SearchComponent  {
      * @param item the item that was scrolled into view
      */
     loadData(item) {
+        this.api.getItemType(item.type_id, 'all', true).take(1).subscribe(itemType => {
+            this.itemTypes.set(itemType.id, itemType);
+        });
         this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
             this.itemTags.set(item.id, tags);
         });

@@ -181,7 +181,6 @@ ITEM_BASIC = API.inherit('ItemBasic', VISIBLE_FOR, {
     'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),
     'update_name_from_schema': fields.Boolean(default=True, title='Schema Name'),
     'type_id': fields.Integer(min=1, title='Type'),
-    'lending_id': fields.Integer(min=1, title='Lending'),
     'lending_duration': fields.Integer(nullable=True, title='Lending Duration'),
 })
 ITEM_LINKS = API.inherit('ItemLinks', WITH_CURIES, {
@@ -200,6 +199,7 @@ ITEM_PUT = API.inherit('ItemPUT', ITEM_BASIC, {})
 ITEM_GET = API.inherit('ItemGET', ITEM_BASIC, ID, {
     'deleted': fields.Boolean(readonly=True),
     'is_currently_lent': fields.Boolean(readonly=True),
+    'lending_id': fields.Integer(min=1, title='Lending'),
     'effective_lending_duration': fields.Integer(readonly=True),
     'due': fields.Integer(readonly=True, title="Due date", description="[Unix time]"),
     '_links': NestedFields(ITEM_LINKS),

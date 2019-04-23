@@ -19,6 +19,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, ApiObject[]>;
+    itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
     itemTags: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     deleted: ApiObject[];
@@ -29,6 +30,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
     constructor(private api: ApiService, private jwt: JWTService, private staging: StagingService) { }
 
     ngOnInit(): void {
+        this.api.getItemTypes() // refresh cached itemTypes
         this.subscription = this.api.getItems().subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             this.alphabet.forEach(letter => map.set(letter, []));
@@ -85,6 +87,9 @@ export class ItemListComponent implements OnInit, OnDestroy {
      * @param item the item that was scrolled into view
      */
     loadData(item) {
+        this.api.getItemType(item.type_id, 'all', true).take(1).subscribe(itemType => {
+            this.itemTypes.set(itemType.id, itemType);
+        });
         this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
             this.itemTags.set(item.id, tags);
         });

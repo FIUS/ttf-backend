@@ -81,6 +81,7 @@ export class ApiService implements OnInit {
         this.jwtSource.complete();
         this.getRoot();
         this.getCatalog();
+        this.getItemTypes();
         this.getAuthRoot();
     }
 
@@ -355,6 +356,12 @@ export class ApiService implements OnInit {
             this.getCatalog().subscribe((catalog) => {
                 this.rest.get(catalog._links.item_types, token, params).subscribe(data => {
                     stream.next(data);
+
+                    // insert item types into detail cache streams
+                    (data as ApiObject[]).forEach(itemType => {
+                        const detailStream = this.getStreamSource(resource + '/' +  itemType.id);
+                        detailStream.next(itemType);
+                    });
                 }, error => this.errorHandler(error, resource, 'GET', showErrors));
             }, error => this.errorHandler(error, resource, 'GET', showErrors));
         });
@@ -362,18 +369,20 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject[]>).filter(data => data != null);
     }
 
-    getItemType(id: number, showErrors: string= 'all'): Observable<ApiObject> {
+    getItemType(id: number, showErrors: string= 'all', preferCache: boolean= false): Observable<ApiObject> {
         const baseResource = 'item_types';
         const resource = baseResource + '/' + id;
         const stream = this.getStreamSource(resource);
 
-        this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
-            this.getCatalog().subscribe((catalog) => {
-                this.rest.get(catalog._links.item_types.href + id, token).subscribe(data => {
-                    this.updateResource(baseResource, data as ApiObject);
+        if (!(preferCache && stream.value != null)) {
+            this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
+                this.getCatalog().subscribe((catalog) => {
+                    this.rest.get(catalog._links.item_types.href + id, token).subscribe(data => {
+                        this.updateResource(baseResource, data as ApiObject);
+                    }, error => this.errorHandler(error, resource, 'GET', showErrors));
                 }, error => this.errorHandler(error, resource, 'GET', showErrors));
-            }, error => this.errorHandler(error, resource, 'GET', showErrors));
-        });
+            });
+        }
 
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }

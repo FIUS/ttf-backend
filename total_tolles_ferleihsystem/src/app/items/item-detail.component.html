@@ -5,7 +5,7 @@
             <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': edit}" (click)="edit = !edit" [hidden]="!canEdit" title-right>
                 <i class="fa fa-pencil" [ngClass]="{'fa-inverse': edit}"></i>
             </div>
-            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': staging.isStaged(itemID)}" (click)="staging.stage(itemID)" [hidden]="!item?.type.lendable || item?.is_currently_lent" title-right>
+            <div class="button fc h2 pv1 ph2 br2 ml2 link bg-animate hover-bg-light-silver pointer" [ngClass]="{'bg-silver': staging.isStaged(itemID)}" (click)="staging.stage(itemID)" [hidden]="!itemType?.lendable || item?.is_currently_lent" title-right>
                 <i class="fa fa-cart-plus" [hidden]="staging.isStaged(itemID)"></i>
                 <i class="fa fa-shopping-cart fa-inverse" [hidden]="!staging.isStaged(itemID)"></i>
             </div>
@@ -13,8 +13,8 @@
         <div class="w-100 ph3 pv2" body>
             <p class="f4">
                 <span class="b">Type:</span>
-                <span class="link" [ngClass]="{'underline-hover': jwt.isModerator(), 'pointer': jwt.isModerator()}" routerLink="{{jwt.isModerator() ? ('/item-types/' + item?.type?.id) : '/items/' + item?.id}}">
-                    {{item?.type?.name}}
+                <span class="link" [ngClass]="{'underline-hover': jwt.isModerator(), 'pointer': jwt.isModerator()}" routerLink="{{jwt.isModerator() ? ('/item-types/' + item?.type_id) : '/items/' + item?.id}}">
+                    {{itemType?.name}}
                 </span>
                 <span class="pointer dim" (click)="howTo.open()">
                     <i class="fa fa-question-circle"></i>
@@ -110,7 +110,7 @@
     <ttf-dialog [dialogType]="'info'" #howTo>
         <h1 class="mv0" title>How To:</h1>
         <div class="w-100 ph3 pv2" body>
-            <div>{{item?.type?.how_to}}</div>
+            <div>{{itemType?.how_to}}</div>
         </div>
     </ttf-dialog>
 

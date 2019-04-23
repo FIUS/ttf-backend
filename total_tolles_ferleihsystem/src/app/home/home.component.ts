@@ -25,6 +25,7 @@ import { Observable } from 'rxjs';
 export class HomeComponent implements OnInit {
 
     lentItems: ApiObject[];
+    itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
 
     justifyBetween: boolean = false;
 
@@ -37,6 +38,11 @@ export class HomeComponent implements OnInit {
         this.data.changeBreadcrumbs([]);
         this.api.getLentItems('errors').subscribe(items => {
             this.lentItems = items;
+            items.forEach(item => {
+                this.api.getItemType(item.type_id, 'all', true)
+                    .take(1)
+                    .subscribe(type => this.itemTypes.set(type.id, type));
+            });
         });
         Observable.timer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
         Observable.timer(1).subscribe(() => this.updateJustify());
