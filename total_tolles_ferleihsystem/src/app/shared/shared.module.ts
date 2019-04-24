@@ -11,6 +11,7 @@ import { NumberInputComponent } from './forms/dynamic-form/number-input/number-i
 import { DateInputComponent } from './forms/dynamic-form/date-input/date-input.component';
 import { DateTimeInputComponent } from './forms/dynamic-form/date-input/datetime-input.component';
 import { DurationInputComponent } from './forms/dynamic-form/duration-input/duration-input.component';
+import { DropdownInputComponent } from './forms/dynamic-form/dropdown-input/dropdown-input.component';
 
 import { QuestionControlService } from './forms/question-control.service';
 import { QuestionService } from './forms/question.service';
@@ -54,6 +55,7 @@ import { IsVisibleDirective } from './is-visible.directive';
         DateInputComponent,
         DateTimeInputComponent,
         DurationInputComponent,
+        DropdownInputComponent,
         ClickOutsideDirective,
         IsVisibleDirective,
     ],
@@ -85,6 +87,7 @@ import { IsVisibleDirective } from './is-visible.directive';
         DateInputComponent,
         DateTimeInputComponent,
         DurationInputComponent,
+        DropdownInputComponent,
         ClickOutsideDirective,
         IsVisibleDirective,
 

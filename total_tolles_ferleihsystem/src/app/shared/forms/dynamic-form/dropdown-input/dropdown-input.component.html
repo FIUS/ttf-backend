@@ -1,0 +1,8 @@
+<div class="min-w5 bb b--gray flex items-center flex-grow-1">
+    <input class="input-reset flex-grow-1 bn pa1" [id]="question.key" [attr.list]="question.key + '-datalist'"
+        [placeholder]="chosenOption ? chosenOption : 'choose'" [ngModel]="searchString" (ngModelChange)="updateValue($event)"
+        (focus)="searchString=''" (blur)="searchString = chosenOption" #dropdown>
+    <datalist [id]="question.key + '-datalist'">
+        <option *ngFor="let opt of question.options" [value]="opt" (click)="dropdown.blur()">{{opt}}</option>
+    </datalist>
+</div>
