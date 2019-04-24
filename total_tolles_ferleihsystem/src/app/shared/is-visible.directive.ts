@@ -8,8 +8,8 @@ export class IsVisibleDirective {
 
     intersectionObserverOptions = {
         root: null,
-        rootMargin: '150px',
-        threshold: 1.0
+        rootMargin: '150px 0px 300px 0px',
+        threshold: 0.25
     }
 
     constructor(private _elementRef: ElementRef) {

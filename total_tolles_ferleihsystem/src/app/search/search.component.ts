@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { QuestionService } from '../shared/forms/question.service';
@@ -13,7 +13,8 @@ import { Subject, Observable, AsyncSubject } from 'rxjs/Rx';
 
 @Component({
     selector: 'ttf-search',
-    templateUrl: './search.component.html'
+    templateUrl: './search.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchComponent  {
 
@@ -48,19 +49,32 @@ export class SearchComponent  {
     @Input() restrictToType: number = -1;
     @Output() selectedChanged: EventEmitter<ApiObject> = new EventEmitter<ApiObject>();
 
+    private changeDetectionBatchSubject: Subject<null> = new Subject<null>();
+
     constructor(private api: ApiService, private staging: StagingService,
-                private qs: QuestionService, private qcs: QuestionControlService) { }
+                private qs: QuestionService, private qcs: QuestionControlService,
+                private changeDetector: ChangeDetectorRef) {
+        this.changeDetectionBatchSubject.asObservable().debounceTime(100).subscribe(() => this.runChangeDetection());
+    }
+
+    private runChangeDetection() {
+        this.changeDetector.markForCheck();
+        //this.changeDetector.checkNoChanges();
+    }
 
     resetSearchData() {
         console.log('RESET');
         this.searchDone = false;
         this.data = new Map<string, ApiObject[]>();
+        this.changeDetectionBatchSubject.next();
     }
 
     search = () => {
         this.searchDone = false;
+        this.changeDetectionBatchSubject.next();
         if (this.restrictToType != null && this.restrictToType >= 0) {
             this.type = this.restrictToType;
+            this.changeDetectionBatchSubject.next();
         }
         const attributes = new Map<number, string>();
         if (this.attributes != null) {
@@ -68,7 +82,7 @@ export class SearchComponent  {
                 if (this.attributeForms.get(attr.id).valid &&
                     this.attributeForms.get(attr.id).value[attr.name] != null &&
                     !(attr.type === 'string' && this.attributeForms.get(attr.id).value[attr.name].length === 0)) {
-                    attributes.set(attr.id, JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]))
+                    attributes.set(attr.id, JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]));
                 }
             });
         }
@@ -104,12 +118,14 @@ export class SearchComponent  {
             this.data = map;
             this.availableLetters = availableLetters;
             this.searchDone = true;
+            this.changeDetectionBatchSubject.next();
         });
     }
 
     setFilter(value) {
         if (value == null || (this.data != null && this.data.get(value) != null && this.data.get(value).length > 0)) {
             this.filter = value;
+            this.changeDetectionBatchSubject.next();
         }
     }
 
@@ -126,6 +142,7 @@ export class SearchComponent  {
         .subscribe(attributes => {
             this.attributes = attributes;
             attributes.forEach(this.getQuestion);
+            this.changeDetectionBatchSubject.next();
         });
 
         const finished = [];
@@ -182,11 +199,13 @@ export class SearchComponent  {
             form.patchValue({
                 [attribute_definition.name]: value,
             });
+            this.changeDetectionBatchSubject.next();
         });
     }
 
     select(item: ApiObject) {
         this.selectedChanged.emit(item);
+        this.changeDetectionBatchSubject.next();
     }
 
     stageAll(letter?: string) {
@@ -195,6 +214,7 @@ export class SearchComponent  {
                 items.forEach(item => {
                     if (this.itemTypes.has(item._type_id) && this.itemTypes.get(item._type_id).lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
+                        this.changeDetectionBatchSubject.next();
                     }
                 });
             });
@@ -204,6 +224,7 @@ export class SearchComponent  {
                 items.forEach(item => {
                     if (this.itemTypes.has(item._type_id) && this.itemTypes.get(item._type_id).lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
+                        this.changeDetectionBatchSubject.next();
                     }
                 });
             }
@@ -218,12 +239,15 @@ export class SearchComponent  {
     loadData(item) {
         this.api.getItemType(item.type_id, 'all', true).take(1).subscribe(itemType => {
             this.itemTypes.set(itemType.id, itemType);
+            this.changeDetectionBatchSubject.next();
         });
         this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
             this.itemTags.set(item.id, tags);
+            this.changeDetectionBatchSubject.next();
         });
         this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
             this.itemAttributes.set(item.id, attributes);
+            this.changeDetectionBatchSubject.next();
         });
     }
 }
