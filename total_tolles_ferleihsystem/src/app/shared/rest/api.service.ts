@@ -712,11 +712,13 @@ export class ApiService implements OnInit {
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.get(attrDef._links.autocomplete, token).subscribe(data => {
                 const parsed = [];
-                (data as any[]).forEach(element => {
-                    try {
-                        parsed.push(JSON.parse(element as string));
-                    } catch (error) {}
-                });
+                if (data != null && (data as any[]).length > 0) {
+                    (data as any[]).forEach(element => {
+                        try {
+                            parsed.push(JSON.parse(element as string));
+                        } catch (error) {}
+                    });
+                }
                 stream.next(parsed as any);
             });
         });
