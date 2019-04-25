@@ -335,7 +335,13 @@ class ItemAttributeList(Resource):
             abort(404, 'Requested item not found!')
 
         # pylint: disable=C0121
-        attributes = ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted_time == None).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
+        attributes = (ItemToAttributeDefinition.query
+                      .filter(ItemToAttributeDefinition.item_id == item_id)
+                      .filter(ItemToAttributeDefinition.deleted_time == None)
+                      .join(ItemToAttributeDefinition.attribute_definition)
+                      .order_by(AttributeDefinition.name)
+                      .options(joinedload('attribute_definition'))
+                      .all())
         return attributes; # DON'T CHANGE THIS!!
         # It is necessary because a Flask Bug prehibits log messages on return statements.
 
