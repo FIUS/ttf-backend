@@ -8,6 +8,7 @@ from flask_jwt_extended import jwt_optional, get_jwt_claims
 from sqlalchemy.orm import joinedload
 from . import API
 from ..db_models.item import Item, ItemToTag, ItemToAttributeDefinition
+from ..db_models.itemType import ItemType
 from ..db_models.tag import Tag
 from .models import ITEM_GET
 from ..login import UserRole
@@ -30,6 +31,7 @@ class Search(Resource):
     @API.param('type', 'Only show items with the given type id', type=int, required=False, default='')
     @API.param('deleted', 'If true also search deleted items', type=bool, required=False, default=False)
     @API.param('lent', 'If true also search lent items', type=bool, required=False, default=False)
+    @API.param('lendable', 'If true only return lendable items', type=bool, required=False, default=False)
     @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self):
@@ -43,6 +45,7 @@ class Search(Resource):
         item_type = request.args.get('type', default=-1, type=int)
         deleted = request.args.get('deleted', default=False, type=lambda x: x == 'true')
         lent = request.args.get('lent', default=False, type=lambda x: x == 'true')
+        lendable = request.args.get('lendable', default=False, type=lambda x: x == 'true')
 
         search_result = Item.query.options(joinedload('lending'), joinedload("_tags"))
 
@@ -79,6 +82,10 @@ class Search(Resource):
 
         if not lent:
             search_result = search_result.filter(Item.lending == None)
+
+        if lendable:
+            search_result = search_result.join(ItemType)
+            search_result = search_result.filter(ItemType.lendable == True)
 
         if item_type != -1:
             search_result = search_result.filter(Item.type_id == item_type)
