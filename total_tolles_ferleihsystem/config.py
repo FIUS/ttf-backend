@@ -143,7 +143,11 @@ class ProductionConfig(Config):
 
 class DebugConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
+    SQLALCHEMY_DATABASE_URI = 'mysql+cymysql://root:clubmate@localhost:3306/ttf'
+    SQLALCHEMY_POOL_RECYCLE = 300
+    SQLALCHEMY_POOL_SIZE = 20
+    SQLALCHEMY_MAX_OVERFLOW = 10
+    LONG_REQUEST_THRESHHOLD = 0
     JWT_SECRET_KEY = 'debug'
     JWT_ACCESS_TOKEN_EXPIRES = False
     LOGIN_PROVIDERS = ['Debug']
