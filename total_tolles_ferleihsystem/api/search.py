@@ -61,7 +61,7 @@ class Search(Resource):
                 search_result = search_result.join(ItemToTag, isouter=True).join(Tag, isouter=True)
                 search_condition = search_condition | Tag.name.like('%' + search_array[0].strip() + '%')
 
-            search_result = search_result.join(ItemToAttributeDefinition, isouter=True).filter(~ItemToAttributeDefinition.attribute_definition_id.in_([attribute.split('-', 1)[1] for attribute in attributes]))
+            search_result = search_result.join(ItemToAttributeDefinition, isouter=True).filter(~ItemToAttributeDefinition.attribute_definition_id.in_([attribute.split('-', 1)[0] for attribute in attributes]))
             search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_array[0].strip() + '%')
 
             for search_string in search_array[1:]:
