@@ -44,7 +44,6 @@ class Search(Resource):
         deleted = request.args.get('deleted', default=False, type=lambda x: x == 'true')
         lent = request.args.get('lent', default=False, type=lambda x: x == 'true')
 
-        search_string = '%' + search + '%'
         search_result = Item.query.options(joinedload('lending'), joinedload("_tags"))
 
         # auth check
@@ -55,14 +54,23 @@ class Search(Resource):
                 search_result = search_result.filter(Item.visible_for == 'all')
 
         if search:
-            search_condition = Item.name.like(search_string)
+            search_array = search.split('|') #TODO make character configurable
+            search_condition = search_condition | Item.name.like('%' + search_array[0].strip() + '%')
 
             if not tags:
                 search_result = search_result.join(ItemToTag, isouter=True).join(Tag, isouter=True)
-                search_condition = search_condition | Tag.name.like(search_string)
+                search_condition = search_condition | Tag.name.like('%' + search_array[0].strip() + '%')
             if not attributes:
                 search_result = search_result.join(ItemToAttributeDefinition, isouter=True)
-                search_condition = search_condition | ItemToAttributeDefinition.value.like(search_string)
+                search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_array[0].strip() + '%')
+
+            for search_string in search_array[1:]:
+                search_condition = search_condition | Item.name.like('%' + search_string.strip() + '%')
+
+                if not tags:
+                    search_condition = search_condition | Tag.name.like('%' + search_string.strip() + '%')
+                if not attributes:
+                    search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_string.strip() + '%')
 
             search_result = search_result.filter(search_condition)
 
