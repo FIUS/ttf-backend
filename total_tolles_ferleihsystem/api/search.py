@@ -55,22 +55,22 @@ class Search(Resource):
 
         if search:
             search_array = search.split('|') #TODO make character configurable
-            search_condition = search_condition | Item.name.like('%' + search_array[0].strip() + '%')
+            search_condition = Item.name.like('%' + search_array[0].strip() + '%')
 
             if not tags:
                 search_result = search_result.join(ItemToTag, isouter=True).join(Tag, isouter=True)
                 search_condition = search_condition | Tag.name.like('%' + search_array[0].strip() + '%')
-            if not attributes:
-                search_result = search_result.join(ItemToAttributeDefinition, isouter=True)
-                search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_array[0].strip() + '%')
+
+            search_result = search_result.join(ItemToAttributeDefinition, isouter=True).filter(~ItemToAttributeDefinition.attribute_definition_id.in_([attribute.split('-', 1)[1] for attribute in attributes]))
+            search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_array[0].strip() + '%')
 
             for search_string in search_array[1:]:
                 search_condition = search_condition | Item.name.like('%' + search_string.strip() + '%')
 
                 if not tags:
                     search_condition = search_condition | Tag.name.like('%' + search_string.strip() + '%')
-                if not attributes:
-                    search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_string.strip() + '%')
+
+                search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_string.strip() + '%')
 
             search_result = search_result.filter(search_condition)
 
