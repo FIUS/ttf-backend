@@ -13,6 +13,7 @@ import { LendingOverviewComponent } from './lending/lending-overview.component';
 import { LendingComponent } from './lending/lending.component';
 
 import { ItemsOverviewComponent } from './items/items-overview.component';
+import { ItemsOfTypeOverviewComponent } from './items/items-of-type-overview.component';
 import { ItemDetailComponent } from './items/item-detail.component';
 
 import { ItemTypesOverviewComponent } from './item-types/item-types-overview.component';
@@ -35,6 +36,7 @@ const routes: Routes = [
   { path: 'lendings/:id', component: LendingComponent, canActivate: [ModGuard] },
   { path: 'items', component: ItemsOverviewComponent, canActivate: [LoginGuard] },
   { path: 'items/:id', component: ItemDetailComponent, canActivate: [LoginGuard] },
+  { path: 'items-of-type/:id', component: ItemsOfTypeOverviewComponent, canActivate: [LoginGuard] },
   { path: 'item-types', component: ItemTypesOverviewComponent, canActivate: [ModGuard] },
   { path: 'item-types/:id', component: ItemTypeDetailComponent, canActivate: [ModGuard] },
   { path: 'tags', component: TagsOverviewComponent, canActivate: [ModGuard] },

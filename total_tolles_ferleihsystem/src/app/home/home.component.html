@@ -46,4 +46,8 @@
         <i class="f2 fa fa-address-card"></i>
         <a class="f3 ttf-main-button">Lendings</a>
     </div>
+    <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngFor="let typeId of pinnedTypes" [routerLink]="['/items-of-type', typeId]">
+        <i class="f2 fa fa-thumb-tack"></i>
+        <a class="f3 ttf-main-button">{{itemTypes.get(typeId)?.name}}</a>
+    </div>
 </div>

@@ -1,0 +1,7 @@
+<ttf-box>
+    <h1 class="mv0" title>{{itemType?.name}}:</h1>
+    <div class="w-100 ph3 pv2" *ngIf="itemTypeId != null" body>
+        <ttf-search [asSelector]="true" [restrictToType]="itemTypeId" [autoSearch]="true"></ttf-search>
+    </div>
+</ttf-box>
+

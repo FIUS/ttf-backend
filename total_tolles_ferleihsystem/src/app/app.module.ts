@@ -28,6 +28,7 @@ import { LendingComponent } from './lending/lending.component';
 import { ItemLendingComponent } from './lending/item-lending.component';
 
 import { ItemsOverviewComponent } from './items/items-overview.component';
+import { ItemsOfTypeOverviewComponent } from './items/items-of-type-overview.component';
 import { ItemListComponent } from './items/item-list.component';
 import { ItemDetailComponent } from './items/item-detail.component';
 import { FileDetailComponent } from './items/file-detail.component';
@@ -81,6 +82,7 @@ import { AppComponent } from './app.component';
         ItemLendingComponent,
 
         ItemsOverviewComponent,
+        ItemsOfTypeOverviewComponent,
         ItemListComponent,
         ItemDetailComponent,
         FileDetailComponent,

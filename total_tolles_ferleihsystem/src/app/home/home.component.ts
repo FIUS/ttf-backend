@@ -4,6 +4,7 @@ import { JWTService } from '../shared/rest/jwt.service';
 import { ApiService } from '../shared/rest/api.service';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { Observable } from 'rxjs';
+import { SettingsService } from 'app/shared/settings/settings.service';
 
 @Component({
     selector: 'ttf-home',
@@ -26,23 +27,27 @@ export class HomeComponent implements OnInit {
 
     lentItems: ApiObject[];
     itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
+    pinnedTypes: number[] = [];
 
     justifyBetween: boolean = false;
 
     @ViewChild('#menuContainer') menuContainer;
 
-    constructor(private data: NavigationService, private jwt: JWTService, private api: ApiService) { }
+    constructor(private data: NavigationService, private jwt: JWTService, private api: ApiService, private settings: SettingsService) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Home');
         this.data.changeBreadcrumbs([]);
-        this.api.getLentItems('errors').subscribe(items => {
+        this.api.getLentItems('errors').take(2).subscribe(items => {
             this.lentItems = items;
-            items.forEach(item => {
-                this.api.getItemType(item.type_id, 'all', true)
-                    .take(1)
-                    .subscribe(type => this.itemTypes.set(type.id, type));
-            });
+        });
+        this.api.getItemTypes().take(2).subscribe(types => {
+            types.forEach(itemType => this.itemTypes.set(itemType.id, itemType));
+        });
+        this.settings.getSetting('pinnedItemTypes').take(2).subscribe(pinnedTypes => {
+            if (pinnedTypes != null) {
+                this.pinnedTypes = pinnedTypes;
+            }
         });
         Observable.timer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
         Observable.timer(1).subscribe(() => this.updateJustify());

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { QuestionService } from '../shared/forms/question.service';
@@ -16,7 +16,7 @@ import { Subject, Observable, AsyncSubject } from 'rxjs/Rx';
     templateUrl: './search.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SearchComponent  {
+export class SearchComponent implements OnChanges {
 
     typeQuestion: NumberQuestion = new NumberQuestion();
 
@@ -48,6 +48,7 @@ export class SearchComponent  {
 
     @Input() asSelector: boolean = false;
     @Input() restrictToType: number = -1;
+    @Input() autoSearch: boolean = false;
     @Output() selectedChanged: EventEmitter<ApiObject> = new EventEmitter<ApiObject>();
 
     private changeDetectionBatchSubject: Subject<null> = new Subject<null>();
@@ -61,6 +62,14 @@ export class SearchComponent  {
     private runChangeDetection() {
         this.changeDetector.markForCheck();
         //this.changeDetector.checkNoChanges();
+    }
+
+    ngOnChanges(changes) {
+        if (changes.restrictToType != null || changes.autoSearch != null) {
+            if (this.autoSearch) {
+                this.search();
+            }
+        }
     }
 
     resetSearchData() {
