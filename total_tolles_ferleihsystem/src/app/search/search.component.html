@@ -25,6 +25,11 @@
                 <i class="fa fa-fw fa-square-o" [hidden]="includeLent"></i>
                 <i class="fa fa-fw fa-check-square-o" [hidden]="!includeLent"></i>
             </span>
+            <span class="mr2 flex-grow-1 pointer" (click)="onlyLendable = !onlyLendable">
+                Only Lendable Items:
+                <i class="fa fa-fw fa-square-o" [hidden]="onlyLendable"></i>
+                <i class="fa fa-fw fa-check-square-o" [hidden]="!onlyLendable"></i>
+            </span>
         </div>
         <div class="mt2 flex items-center" [ngClass]="{flex: !(restrictToType >= 0)}" [hidden]="restrictToType >= 0">
             <span class="mr2 w5">Filter Type:</span>

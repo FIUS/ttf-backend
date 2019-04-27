@@ -25,6 +25,7 @@ export class SearchComponent  {
     searchstring: string = '';
     includeDeleted: boolean = false;
     includeLent: boolean = true;
+    onlyLendable: boolean = false;
     type: number;
     tags: Set<number>;
     attributes: ApiObject[];
@@ -82,12 +83,19 @@ export class SearchComponent  {
                 if (this.attributeForms.get(attr.id).valid &&
                     this.attributeForms.get(attr.id).value[attr.name] != null &&
                     !(attr.type === 'string' && this.attributeForms.get(attr.id).value[attr.name].length === 0)) {
-                    attributes.set(attr.id, JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]));
+                    let value = JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]);
+                    if (attr.type === 'number' || attr.type === 'integer') {
+                        // since search field was a string get rid of serialized '"' here for now...
+                        // TODO remove if api supports queries like "> 5" for number attributes
+                        value = value.replace(/(^\")|(\"$)/g, '');
+                    }
+                    attributes.set(attr.id, value);
                 }
             });
         }
         this.api.getItemTypes(); // refresh item types cache
-        this.api.search(this.searchstring, this.type, this.tags, attributes, this.includeDeleted, this.includeLent).subscribe(data => {
+        this.api.search(this.searchstring, this.type, this.tags, attributes, this.includeDeleted, this.includeLent, this.onlyLendable)
+        .subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             const availableLetters = new Set<string>();
             this.alphabet.forEach(letter => map.set(letter, []));
@@ -171,6 +179,12 @@ export class SearchComponent  {
             schema = JSON.parse(attribute_definition.jsonschema);
         }
         schema.type = attribute_definition.type;
+        // if type is number type make it string for supporting '>' queries in the future
+        if (schema.type === 'number' || schema.type === 'integer') {
+            schema.type = 'string';
+            // add maxLength to get single line text field
+            schema.maxLength = (window as any).maxDBStringLength - 2;
+        }
         schema['x-nullable'] = true;
         if (attribute_definition.type === 'string') {
             const maxLength = (window as any).maxDBStringLength - 2;
