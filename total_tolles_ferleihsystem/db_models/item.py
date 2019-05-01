@@ -6,6 +6,7 @@ from sqlalchemy.schema import UniqueConstraint
 import string
 from json import loads
 import time
+from datetime import date
 
 from .. import DB, LENDING_LOGGER
 from . import STD_STRING_SIZE
@@ -326,7 +327,7 @@ class Lending(DB.Model):
             item.lending = self
             item.due = self.date + item.effective_lending_duration
         LENDING_LOGGER.info("New lending: %s", repr(self))
-        
+
 
     def update(self, moderator: str, user: str, deposit: str, item_ids: list):
         """
@@ -343,14 +344,14 @@ class Lending(DB.Model):
             if item is None:
                 raise ValueError("Item not found:" + str(element))
             new_items.append(item)
-        
+
         items_to_remove = [item for item in old_items if item not in new_items]
         items_to_add = [item for item in new_items if item not in old_items]
 
         for item in items_to_remove:
             item.lending = None
             item.due = -1
-        
+
         for item in items_to_add:
             if not item.type.lendable:
                 raise ValueError("Item not lendable:" + str(item))
