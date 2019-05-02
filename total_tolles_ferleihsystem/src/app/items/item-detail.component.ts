@@ -269,7 +269,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     }
 
     save = () => {
-        this.api.postItem(this.newItemData).take(1).subscribe(data => {
+        const sub = this.api.postItem(this.newItemData).take(1).subscribe(data => {
             this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
                 this.addItemToContained(data, this.item);
                 if (navigate) {
@@ -277,6 +277,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                         this.router.navigate(['items', data.id]);
                     });
                 }
+                sub.unsubscribe();
             });
         });
     };

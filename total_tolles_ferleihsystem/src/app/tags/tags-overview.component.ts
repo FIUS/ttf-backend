@@ -27,11 +27,12 @@ export class TagsOverviewComponent implements OnInit {
     }
 
     save = () => {
-        this.api.postTag(this.newTagData).subscribe(data => {
+        const sub = this.api.postTag(this.newTagData).subscribe(data => {
             this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
                 if (navigate) {
                     this.router.navigate(['tags', data.id]);
                 }
+                sub.unsubscribe();
             });
         });
     };
