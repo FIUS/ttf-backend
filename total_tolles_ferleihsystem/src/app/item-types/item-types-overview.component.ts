@@ -27,11 +27,12 @@ export class ItemTypesOverviewComponent implements OnInit {
     }
 
     save = () => {
-        this.api.postItemType(this.newItemTypeData).subscribe(data => {
+        const sub = this.api.postItemType(this.newItemTypeData).subscribe(data => {
             this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
                 if (navigate) {
                     this.router.navigate(['item-types', data.id]);
                 }
+                sub.unsubscribe();
             });
         });
     };
