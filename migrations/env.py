@@ -75,7 +75,6 @@ def run_migrations_online():
                       target_metadata=target_metadata,
                       process_revision_directives=process_revision_directives,
                       render_as_batch=True,
-                      sqlalchemy_module_prefix='DB',
                       compare_type=True,
                       **current_app.extensions['migrate'].configure_args)
 
