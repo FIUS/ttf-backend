@@ -47,6 +47,21 @@ class Search(Resource):
         lent = request.args.get('lent', default=False, type=lambda x: x == 'true')
         lendable = request.args.get('lendable', default=False, type=lambda x: x == 'true')
 
+        def generate_keyword_search_condition(search_string_param, search_condition_param = None):
+            search_string_param = search_string_param.strip()
+
+            if search_condition_param is None:
+                search_condition_param = Item.name.like('%' + search_string_param + '%');
+            else:
+                search_condition_param = search_condition_param | Item.name.like('%' + search_string_param + '%');
+
+            if not tags:
+                search_condition_param = search_condition_param | Tag.name.like('%' + search_string_param + '%')
+
+            search_condition_param = search_condition_param | ItemToAttributeDefinition.value.like('%' + search_string_param.strip() + '%')
+
+            return search_condition_param
+
         search_result = Item.query.options(joinedload('lending'), joinedload("_tags"))
 
         # auth check
@@ -58,22 +73,14 @@ class Search(Resource):
 
         if search:
             search_array = search.split('|') #TODO make character configurable
-            search_condition = Item.name.like('%' + search_array[0].strip() + '%')
 
             if not tags:
                 search_result = search_result.join(ItemToTag, isouter=True).join(Tag, isouter=True)
-                search_condition = search_condition | Tag.name.like('%' + search_array[0].strip() + '%')
-
             search_result = search_result.join(ItemToAttributeDefinition, isouter=True).filter(~ItemToAttributeDefinition.attribute_definition_id.in_([attribute.split('-', 1)[0] for attribute in attributes]))
-            search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_array[0].strip() + '%')
 
+            search_condition = generate_keyword_search_condition(search_array[0])
             for search_string in search_array[1:]:
-                search_condition = search_condition | Item.name.like('%' + search_string.strip() + '%')
-
-                if not tags:
-                    search_condition = search_condition | Tag.name.like('%' + search_string.strip() + '%')
-
-                search_condition = search_condition | ItemToAttributeDefinition.value.like('%' + search_string.strip() + '%')
+                search_condition = generate_keyword_search_condition(search_string, search_condition)
 
             search_result = search_result.filter(search_condition)
 
@@ -99,6 +106,17 @@ class Search(Resource):
                 search_result = search_result.join(ItemToAttributeDefinition, aliased=True)
                 search_result = search_result.filter(ItemToAttributeDefinition.attribute_definition_id ==
                                                      attribute.split('-', 1)[0])
-                search_result = search_result.filter(ItemToAttributeDefinition.value == attribute.split('-', 1)[1])
+
+                search_value = attribute.split('-', 1)[1].strip()
+                if search_value[:2] == '>=':
+                    search_result = search_result.filter(ItemToAttributeDefinition.value >= search_value[2:].strip())
+                elif search_value[:2] == '<=':
+                    search_result = search_result.filter(ItemToAttributeDefinition.value <= search_value[2:].strip())
+                elif search_value[:1] == '>':
+                    search_result = search_result.filter(ItemToAttributeDefinition.value > search_value[1:].strip())
+                elif search_value[:1] == '<':
+                    search_result = search_result.filter(ItemToAttributeDefinition.value < search_value[1:].strip())
+                else:
+                    search_result = search_result.filter(ItemToAttributeDefinition.value == search_value)
 
         return search_result.order_by(Item.name).limit(limit).all()
