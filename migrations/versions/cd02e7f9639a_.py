@@ -26,22 +26,41 @@ def upgrade():
         batch_op.drop_column('deleted')
 
     with op.batch_alter_table('BlacklistToItemType', schema=None) as batch_op:
-        batch_op.alter_column('end_time',
-               existing_type=sa.DATETIME(),
-               type_=sa.Integer(),
-               existing_nullable=True)
+        batch_op.alter_column('end_time', 
+            existing_type=sa.DATETIME(),
+            existing_nullable=True,
+            server_default=None,
+            new_column_name='end_time_tmp')
+        batch_op.add_column(sa.Column('end_time', sa.Integer(), nullable=True))
+
+    op.execute(' UPDATE `BlacklistToItemType` SET `end_time` = UNIX_TIMESTAMP(end_time_tmp)')
+
+    with op.batch_alter_table('BlacklistToItemType', schema=None) as batch_op:
+        batch_op.drop_column('end_time_tmp')
 
     with op.batch_alter_table('File', schema=None) as batch_op:
         batch_op.alter_column('creation',
-               existing_type=sa.DATETIME(),
-               type_=sa.Integer(),
-               existing_nullable=True,
-               existing_server_default=sa.text('CURRENT_TIMESTAMP'))
+            existing_type=sa.DATETIME(),
+            existing_nullable=True,
+            server_default=None,
+            new_column_name='creation_tmp'),
+        batch_op.add_column(sa.Column('creation', sa.Integer(), nullable=True))
+
         batch_op.alter_column('invalidation',
-               existing_type=sa.DATETIME(),
-               type_=sa.Integer(),
-               existing_nullable=True)
+            existing_type=sa.DATETIME(),
+            existing_nullable=True,
+            server_default=None,
+            new_column_name='invalidation_tmp'),
+        batch_op.add_column(sa.Column('invalidation', sa.Integer(), nullable=True))
+        
         batch_op.drop_index('ix_File_file_hash')
+
+    op.execute(' UPDATE `File` SET `creation` = UNIX_TIMESTAMP(creation_tmp)')
+    op.execute(' UPDATE `File` SET `invalidation` = UNIX_TIMESTAMP(invalidation_tmp)')
+
+    with op.batch_alter_table('File', schema=None) as batch_op:
+        batch_op.drop_column('creation_tmp')
+        batch_op.drop_column('invalidation_tmp')
 
     with op.batch_alter_table('Item', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
@@ -66,9 +85,13 @@ def upgrade():
 
     with op.batch_alter_table('Lending', schema=None) as batch_op:
         batch_op.alter_column('date',
-               existing_type=sa.DATETIME(),
-               type_=sa.Integer(),
-               existing_nullable=True)
+            existing_type=sa.DATETIME(),
+            existing_nullable=True,
+            server_default=None,
+            new_column_name='date_tmp'),
+        batch_op.add_column(sa.Column('date', sa.Integer(), nullable=True))
+
+    op.execute(' UPDATE `Lending` SET `date` = UNIX_TIMESTAMP(date_tmp)')
 
     with op.batch_alter_table('Tag', schema=None) as batch_op:
         batch_op.add_column(sa.Column('deleted_time', sa.Integer(), nullable=True))
