@@ -238,9 +238,9 @@ FILE_BASIC = API.inherit('FileBASIC', VISIBLE_FOR, {
 FILE_LINKS = API.inherit('FileLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.file_file_detail',
                            url_data={'file_id': 'id'})),
-    'item': HaLUrl(UrlData('api.item_item_detail', url_data={'file_id': 'id'}), required=False),
+    'item': HaLUrl(UrlData('api.item_item_detail', url_data={'item_id': 'id'}), required=False),
     'download': HaLUrl(UrlData('api.file_file_data',
-                               url_data={'file_hash': 'file_hash'}), required=False),
+                               url_data={'file_id': 'file_id'}), required=False),
 })
 
 FILE_PUT = API.inherit('FilePUT', FILE_BASIC, {})
