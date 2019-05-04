@@ -85,7 +85,9 @@ class ItemList(Resource):
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            print(message)
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
             abort(500)
 
@@ -193,8 +195,9 @@ class ItemDetail(Resource):
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Name is not unique!:' + message)
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
+                abort(409, 'Name is not unique!')
             abort(500)
 
 @ANS.route('/<int:item_id>/tags/')
@@ -262,7 +265,8 @@ class ItemItemTags(Resource):
             return [e.tag for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Tag is already associated with this item. %s', err)
                 abort(409, 'Tag is already associated with this item!')
             abort(500)
 
@@ -527,8 +531,9 @@ class ItemContainedItems(Resource):
             return [e.item for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Attribute definition is already asociated with this tag!')
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('That item is already contained in this item. %s', err)
+                abort(409, 'That item is already contained in this item.')
             abort(500)
 
     @jwt_required
