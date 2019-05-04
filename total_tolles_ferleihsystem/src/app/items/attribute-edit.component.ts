@@ -17,6 +17,7 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
 
     private itemSubscription: Subscription;
     private attributeSubscription: Subscription;
+    private formStatusChangeSubscription: Subscription;
 
     @Input() itemID: number;
     @Input() attributeID: number;
@@ -46,7 +47,9 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
                     if (this.attributeID != null) {
                         this.attributeSubscription = this.api.getAttribute(this.item, this.attributeID).subscribe(data => {
                             this.attribute = data;
-                            this.getQuestion(this.attribute);
+                            if (this.form == null) {
+                                this.getQuestion(this.attribute);
+                            }
                             this.saved = true;
                         });
                     }
@@ -87,7 +90,10 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
             this.form.patchValue({
                 [attribute.attribute_definition.name]: value,
             });
-            this.form.statusChanges.filter(status => status === 'VALID').map(status => {
+            if (this.formStatusChangeSubscription != null) {
+                this.formStatusChangeSubscription.unsubscribe();
+            }
+            this.formStatusChangeSubscription = this.form.statusChanges.filter(status => status === 'VALID').map(status => {
                 this.saved = false;
                 return JSON.stringify(this.form.value[attribute.attribute_definition.name]);
             }).debounceTime(700).subscribe(value => {
@@ -106,6 +112,9 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
         }
         if (this.attributeSubscription != null) {
             this.attributeSubscription.unsubscribe();
+        }
+        if (this.formStatusChangeSubscription != null) {
+            this.formStatusChangeSubscription.unsubscribe();
         }
     }
 
