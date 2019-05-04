@@ -85,6 +85,12 @@ export class AttributeDefinitionEditComponent implements OnChanges, OnDestroy {
     }
 
     save = (event) => {
+        if (event.jsonschema !== '') {
+            // Try formatting the jsonscheme before saving to help editing later
+            try {
+                event.jsonschema = JSON.stringify(JSON.parse(event.jsonschema), undefined, '\t');
+            } catch (error) {}
+        }
         this.api.putAttributeDefinition(this.attrDef.id, event).take(1).subscribe(() => {
             this.form.saveFinished(true);
             this.updateTestForm();
