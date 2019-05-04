@@ -54,6 +54,8 @@ import { AttributeDefinitionDetailComponent } from './attribute-definitions/attr
 import { AttributeDefinitionEditComponent } from './attribute-definitions/attribute-definition-edit.component';
 import { LinkedAttributeDefinitionComponent } from './linked-attribute-definitions/linked-attribute-definitions.component';
 
+import { AttributeDefinitionTitlePipe } from './attribute-definitions/attribute-title.pipe';
+
 import { AppComponent } from './app.component';
 
 
@@ -107,6 +109,8 @@ import { AppComponent } from './app.component';
         AttributeDefinitionDetailComponent,
         AttributeDefinitionEditComponent,
         LinkedAttributeDefinitionComponent,
+
+        AttributeDefinitionTitlePipe
     ],
     imports: [
         HttpModule,

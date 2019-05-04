@@ -90,7 +90,7 @@
                         <p class="mv0 pl2" *ngIf="itemAttributes.get(item.id)?.length > 0">
                             <span class="black-70" *ngFor="let attr of itemAttributes.get(item.id); let last = last">
                                 <span class="b">
-                                    {{attr.attribute_definition?.name}}:
+                                    {{attr.attribute_definition | attributeDefinitionTitle}}:
                                 </span>
                                 {{attr.value}}{{last ? '' : ', '}}
                             </span>
