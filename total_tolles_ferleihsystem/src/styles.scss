@@ -21,61 +21,61 @@
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 300;
-    src: local('Roboto'), local('Roboto-Light'), url(./assets/Roboto/Roboto-Light.ttf) format('truetype');
+    src: local('Roboto-Light'), url(./assets/Roboto/Roboto-Light.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: italic;
     font-weight: 300;
-    src: local('Roboto'), local('Roboto-LightItalic'), url(./assets/Roboto/Roboto-LightItalic.ttf) format('truetype');
+    src: local('Roboto-LightItalic'), url(./assets/Roboto/Roboto-LightItalic.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
-    src: local('Roboto'), local('Roboto-Regular'), url(./assets/Roboto/Roboto-Regular.ttf) format('truetype');
+    src: local('Roboto-Regular'), local('Roboto'), url(./assets/Roboto/Roboto-Regular.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: italic;
     font-weight: 400;
-    src: local('Roboto'), local('Roboto-Italic'), url(./assets/Roboto/Roboto-Italic.ttf) format('truetype');
+    src: local('Roboto-Italic'), url(./assets/Roboto/Roboto-Italic.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 500;
-    src: local('Roboto'), local('Roboto-Medium'), url(./assets/Roboto/Roboto-Medium.ttf) format('truetype');
+    src: local('Roboto-Medium'), url(./assets/Roboto/Roboto-Medium.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: italic;
     font-weight: 500;
-    src: local('Roboto'), local('Roboto-MediumItalic'), url(./assets/Roboto/Roboto-MediumItalic.ttf) format('truetype');
+    src: local('Roboto-MediumItalic'), url(./assets/Roboto/Roboto-MediumItalic.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 700;
-    src: local('Roboto'), local('Roboto-Bold'), url(./assets/Roboto/Roboto-Bold.ttf) format('truetype');
+    src: local('Roboto-Bold'), url(./assets/Roboto/Roboto-Bold.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: italic;
     font-weight: 700;
-    src: local('Roboto'), local('Roboto-BoldItalic'), url(./assets/Roboto/Roboto-BoldItalic.ttf) format('truetype');
+    src: local('Roboto-BoldItalic'), url(./assets/Roboto/Roboto-BoldItalic.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 900;
-    src: local('Roboto'), local('Roboto-Black'), url(./assets/Roboto/Roboto-Black.ttf) format('truetype');
+    src: local('Roboto-Black'), url(./assets/Roboto/Roboto-Black.ttf) format('truetype');
 }
 @font-face {
     font-family: 'Roboto';
     font-style: italic;
     font-weight: 900;
-    src: local('Roboto'), local('Roboto-BlackItalic'), url(./assets/Roboto/Roboto-BlackItalic.ttf) format('truetype');
+    src: local('Roboto-BlackItalic'), url(./assets/Roboto/Roboto-BlackItalic.ttf) format('truetype');
 }
 
 :root {
