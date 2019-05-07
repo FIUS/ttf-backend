@@ -1236,8 +1236,8 @@ export class ApiService implements OnInit {
         if (id != null) {
             data.ids.push(id);
         } else {
-            lending.itemLendings.forEach(itemLending => {
-                data.ids.push(itemLending.item.id);
+            lending.items.forEach(item => {
+                data.ids.push(item.id);
             });
         }
 
