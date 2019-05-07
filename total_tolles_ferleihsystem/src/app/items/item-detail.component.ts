@@ -101,7 +101,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
             }
             this.item = item;
             if (this.itemType == null || this.itemType.id !== item.type_id) {
-                console.log('HI')
                 if (this.itemTypeSubscription != null) {
                     this.itemTypeSubscription.unsubscribe();
                 }
@@ -253,7 +252,6 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         this.filesUploading.push(file.name);
         this.filesUploadingMap.set(file.name, file);
         this.api.uploadFile(this.item, file).subscribe(data => {
-            console.log(data);
             const index = this.filesUploading.findIndex(name => name === file.name);
             if (index >= 0) {
                 this.filesUploading.splice(index, 1);

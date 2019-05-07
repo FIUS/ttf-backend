@@ -31,7 +31,6 @@ export class NumberInputComponent implements ControlValueAccessor {
             if (this.question.valueType === 'integer') {
                 return parseInt(this._value, 10);
             } else {
-                console.log(this._value);
                 return parseFloat(this._value);
             }
         }

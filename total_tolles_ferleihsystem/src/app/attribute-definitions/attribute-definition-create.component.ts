@@ -48,7 +48,6 @@ export class AttributeDefinitionCreateComponent {
         const sub = this.api.postAttributeDefinition(this.newAttributeDefinitionData).subscribe(data => {
             if (this.allowAutoNavigate) {
                 this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
-                    console.log(navigate)
                     if (navigate) {
                         this.router.navigate(['attribute-definitions', data.id]);
                     }

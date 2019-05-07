@@ -73,7 +73,6 @@ export class SearchComponent implements OnChanges {
     }
 
     resetSearchData() {
-        console.log('RESET');
         this.searchDone = false;
         this.data = new Map<string, ApiObject[]>();
         this.changeDetectionBatchSubject.next();
