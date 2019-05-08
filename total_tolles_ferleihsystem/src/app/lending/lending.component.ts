@@ -56,11 +56,9 @@ export class LendingComponent implements OnInit, OnDestroy {
 
     return(id?: number) {
         if (this.lending != null) {
-            const subsc = this.api.returnLending(this.lending, id).subscribe(lending => {
-                console.log(lending)
-                if (lending == null) {
+            this.api.returnLending(this.lending, id).subscribe(lendingWasDeleted => {
+                if (lendingWasDeleted) {
                     this.router.navigate(['lendings']);
-                    subsc.unsubscribe();
                 }
             });
         }

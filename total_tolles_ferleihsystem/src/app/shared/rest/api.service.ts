@@ -1,5 +1,5 @@
 import { Injectable, OnInit, Injector } from '@angular/core';
-import { Observable, } from 'rxjs/Rx';
+import { Observable, Subject, } from 'rxjs/Rx';
 import { BaseApiService, ApiObject, LinkObject, ApiLinksObject } from './api-base.service';
 import { JWTService } from './jwt.service';
 import { InfoService } from '../info/info.service';
@@ -1224,7 +1224,16 @@ export class ApiService implements OnInit {
         return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
     }
 
-    returnLending(lending: ApiObject, id?: number, showErrors: string= 'all'): Observable<ApiObject> {
+    /**
+     * Returns items or the whole lending.
+     *
+     * The returned observable evaluates to true only if the lending was deleted by the api.
+     *
+     * @param lending the lending to return
+     * @param id a single item id to return from the lending (if unset return all items)
+     * @param showErrors whether to show errors to the user
+     */
+    returnLending(lending: ApiObject, id?: number, showErrors: string= 'all'): Observable<boolean> {
         const baseResource = 'lendings';
         const resource = baseResource + '/' + lending.id;
         const stream = this.getStreamSource(resource);
@@ -1239,14 +1248,29 @@ export class ApiService implements OnInit {
             });
         }
 
+        const result = new AsyncSubject<boolean>();
+
         this.currentJWT.map(jwt => jwt.token()).subscribe(token => {
             this.rest.post(lending, data, token).subscribe(data => {
-                this.updateResource(baseResource, data as ApiObject);
+                if (data != null) {
+                    this.updateResource(baseResource, data as ApiObject);
+                    result.next(false);
+                } else {
+                    // cleanup old stream
+                    result.next(true);
+                    this.streams[resource] = null;
+                    stream.next(null);
+                }
+                result.complete();
                 this.getLentItems();
-            }, error => this.errorHandler(error, resource, 'GET', showErrors));
+            }, error => {
+                result.error(error);
+                result.complete();
+                this.errorHandler(error, resource, 'GET', showErrors)
+            });
         });
 
-        return (stream.asObservable() as Observable<ApiObject>).filter(data => data != null);
+        return result.asObservable();
     }
 
 }
