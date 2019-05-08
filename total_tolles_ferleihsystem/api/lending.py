@@ -121,7 +121,7 @@ class LendingDetail(Resource):
     @ANS.doc(body=ID_LIST)
     @ANS.response(404, 'Requested lending not found!')
     @ANS.response(400, "Item not found")
-    @API.marshal_with(LENDING_GET)
+    @ANS.response(201, "Lending would be empty. Was deleted.")
     # pylint: disable=R0201
     def post(self, lending_id):
         """
@@ -135,4 +135,9 @@ class LendingDetail(Resource):
         except ValueError as err:
             abort(400, str(err))
         DB.session.commit()
-        return lending
+        if len(lending._items) <= 0: 
+            lending.pre_delete()
+            DB.session.delete(lending)
+            DB.session.commit()
+            return None, 201
+        return marshal(lending, LENDING_GET)
