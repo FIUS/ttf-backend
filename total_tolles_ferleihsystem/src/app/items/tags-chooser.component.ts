@@ -123,6 +123,8 @@ export class TagsChooserComponent implements OnInit, OnDestroy, OnChanges {
                 } else {
                     this.api.addTagToItem(this.item, tag);
                 }
+                this.searchTerm = '';
+                this.updateFilter();
             }
         }
     }
@@ -135,6 +137,8 @@ export class TagsChooserComponent implements OnInit, OnDestroy, OnChanges {
             } else {
                 this.api.removeTagFromItem(this.item, tag);
             }
+            this.searchTerm = '';
+            this.updateFilter();
         }
     }
 
