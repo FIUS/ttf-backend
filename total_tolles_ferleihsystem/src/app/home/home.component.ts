@@ -29,10 +29,6 @@ export class HomeComponent implements OnInit {
     itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
     pinnedTypes: number[] = [];
 
-    justifyBetween: boolean = false;
-
-    @ViewChild('#menuContainer') menuContainer;
-
     constructor(private data: NavigationService, private jwt: JWTService, private api: ApiService, private settings: SettingsService) { }
 
     ngOnInit(): void {
@@ -50,11 +46,6 @@ export class HomeComponent implements OnInit {
             }
         });
         Observable.timer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
-        Observable.timer(1).subscribe(() => this.updateJustify());
-    }
-
-    updateJustify() {
-        console.log(this.menuContainer);
     }
 
     itemOverdue(item: ApiObject): boolean {

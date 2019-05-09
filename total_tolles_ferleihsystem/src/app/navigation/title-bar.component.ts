@@ -13,7 +13,7 @@ export class TitleBarComponent implements OnInit {
 
     title: string;
 
-    constructor(private data: NavigationService, private jwt: JWTService) { }
+    constructor(private data: NavigationService, private jwt: JWTService, private staging: StagingService) { }
 
     ngOnInit(): void {
         this.data.currentTitle.subscribe(title => this.title = title);
