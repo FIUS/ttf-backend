@@ -4,7 +4,8 @@ This module contains all API endpoints for the namespace 'item_tag'
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
@@ -26,7 +27,6 @@ class ItemTagList(Resource):
     Item tags root item tag
     """
 
-
     @jwt_required
     @API.param('deleted', 'get all deleted item tags (and only these)', type=bool, required=False, default=False)
     @API.marshal_list_with(ITEM_TAG_GET)
@@ -35,8 +35,21 @@ class ItemTagList(Resource):
         """
         Get a list of all item tags currently in the system
         """
+        base_query = Tag.query
         test_for = request.args.get('deleted', 'false') == 'true'
-        return Tag.query.filter(Tag.deleted == test_for).order_by(Tag.name).all()
+        if test_for:
+            base_query = base_query.filter(Tag.deleted_time != None)
+        else:
+            base_query = base_query.filter(Tag.deleted_time == None)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Tag.visible_for == 'all') | (Tag.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Tag.visible_for == 'all')
+
+        return base_query.order_by(Tag.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -55,9 +68,12 @@ class ItemTagList(Resource):
             return marshal(new, ITEM_TAG_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
+
 
 @ANS.route('/<int:tag_id>/')
 class ItemTagDetail(Resource):
@@ -73,9 +89,20 @@ class ItemTagDetail(Resource):
         """
         Get a single item tag object
         """
-        item_tag = Tag.query.filter(Tag.id == tag_id).first()
+        base_query = Tag.query.filter(Tag.id == tag_id)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Tag.visible_for == 'all') | (Tag.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Tag.visible_for == 'all')
+
+        item_tag = base_query.first()
+
         if item_tag is None:
             abort(404, 'Requested item tag not found!')
+
         return item_tag
 
     @jwt_required
@@ -89,14 +116,11 @@ class ItemTagDetail(Resource):
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
         items = [itt.item for itt in itts]
-
-        #Not intended -neumantm
-        #for itt in itts:
-        #    DB.session.delete(itt)
 
         for item in items:
             _, attributes_to_delete, _ = item.get_attribute_changes_from_tag(tag_id, True)
@@ -119,6 +143,7 @@ class ItemTagDetail(Resource):
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
         if item_tag is None:
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         itts = ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()
@@ -145,18 +170,23 @@ class ItemTagDetail(Resource):
         Replace a item tag object
         """
         item_tag = Tag.query.filter(Tag.id == tag_id).first()
+
         if item_tag is None:
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
+
         item_tag.update(**request.get_json())
+
         try:
             DB.session.commit()
             return marshal(item_tag, ITEM_TAG_GET), 200
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
-
 
 
 @ANS.route('/<int:tag_id>/attributes/')
@@ -173,16 +203,21 @@ class ItemTagAttributes(Resource):
         """
         Get all attribute definitions for this tag.
         """
-        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
-            abort(404, 'Requested item tag not found!')
-       # Two possibilitys:
-       # return [e.attribute_definition for e in TagToAttributeDefinition.query
-       # .filter(TagToAttributeDefinition.tag_id == tag_id).all()]
-       # return  [e.attribute_definition for e in Tag.query.filter(Tag.id == tag_id)
-       # .first()._tag_to_attribute_definitions ]
+        base_query = Tag.query.options(joinedload('_tag_to_attribute_definitions')).filter(Tag.id == tag_id).filter(Tag.deleted_time == None)
 
-        associations = TagToAttributeDefinition.query.filter(TagToAttributeDefinition.tag_id == tag_id).all()
-        return [e.attribute_definition for e in associations if not e.tag.deleted]
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Tag.visible_for == 'all') | (Tag.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Tag.visible_for == 'all')
+
+        tag = base_query.first()
+        if tag is None:
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
+            abort(404, 'Requested item tag not found!')
+
+        return [ttad.attribute_definition for ttad in tag._tag_to_attribute_definitions]
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -197,14 +232,16 @@ class ItemTagAttributes(Resource):
         Associate a new attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted == False).first()
+        attribute_definition = AttributeDefinition.query.filter(AttributeDefinition.id == attribute_definition_id).filter(AttributeDefinition.deleted_time == None).first()
 
-        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
+        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted_time == None).first() is None:
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
         if attribute_definition is None:
+            APP.logger.debug('Requested attribute definition not found for id: %s !', attribute_definition_id)
             abort(400, 'Requested attribute definition not found!')
 
-        items = [itt.item for itt in ItemToTag.query.filter(ItemToTag.tag_id == tag_id).all()]
+        items = [itt.item for itt in ItemToTag.query.filter(ItemToTag.tag_id == tag_id).options(joinedload('item')).all()]
 
         new = TagToAttributeDefinition(tag_id, attribute_definition_id)
         try:
@@ -219,8 +256,10 @@ class ItemTagAttributes(Resource):
             return [e.attribute_definition for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Attribute definition is already asociated with this tag! %s', err)
                 abort(409, 'Attribute definition is already asociated with this tag!')
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
     @jwt_required
@@ -235,8 +274,9 @@ class ItemTagAttributes(Resource):
         Remove association of a attribute definition with the tag.
         """
         attribute_definition_id = request.get_json()["id"]
-        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
+        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted_time == None).first()
         if tag is None:
+            APP.logger.debug('Requested item tag not found for id: %s !', tag_id)
             abort(404, 'Requested item tag not found!')
 
         code, msg, commit = tag.unassociate_attr_def(attribute_definition_id)
@@ -246,4 +286,5 @@ class ItemTagAttributes(Resource):
         if code == 204:
             return '', 204
 
+        APP.logger.debug('Error: %s, %s', code, msg)
         abort(code, msg)

@@ -11,7 +11,6 @@ export class LendingDurationComponent implements OnChanges {
     minutes: number;
     hours: number;
     days: number;
-    weeks: number;
     years: number;
 
     get valid(): boolean {
@@ -27,7 +26,7 @@ export class LendingDurationComponent implements OnChanges {
         temp = Math.floor(temp / 60);
         this.hours = temp % 24;
         temp = Math.floor(temp / 24);
-        this.days = temp % 7;
+        this.days = temp % 364;
         this.years = Math.floor(temp / 364);
     }
 

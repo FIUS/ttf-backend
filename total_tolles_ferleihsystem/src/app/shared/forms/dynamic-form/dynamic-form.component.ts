@@ -44,6 +44,16 @@ export class DynamicFormComponent implements OnInit, OnChanges {
             this.form.statusChanges.subscribe(status => {
                 this.valid.emit(this.form.valid);
                 this.data.emit(this.form.value);
+                if (this.objectModel === 'ItemPOST') {
+                    // When posting an item that should have automatic name generation
+                    // insert current time as temporary name
+                    const currentVal = this.form.value;
+                    if (currentVal.update_name_from_schema &&
+                        (currentVal.name == null || currentVal.name === '')) {
+                        const currentDate = new Date();
+                        this.form.patchValue({'name': currentDate.toISOString()});
+                    }
+                }
             });
             this.patchFormValues();
         });

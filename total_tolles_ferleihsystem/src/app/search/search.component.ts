@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { QuestionService } from '../shared/forms/question.service';
@@ -13,9 +13,10 @@ import { Subject, Observable, AsyncSubject } from 'rxjs/Rx';
 
 @Component({
     selector: 'ttf-search',
-    templateUrl: './search.component.html'
+    templateUrl: './search.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SearchComponent  {
+export class SearchComponent implements OnChanges {
 
     typeQuestion: NumberQuestion = new NumberQuestion();
 
@@ -24,6 +25,7 @@ export class SearchComponent  {
     searchstring: string = '';
     includeDeleted: boolean = false;
     includeLent: boolean = true;
+    onlyLendable: boolean = false;
     type: number;
     tags: Set<number>;
     attributes: ApiObject[];
@@ -36,6 +38,7 @@ export class SearchComponent  {
                                'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
                                'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     data: Map<string, any>;
+    itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
     availableLetters: Set<string>;
     itemTags: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
     itemAttributes: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
@@ -45,21 +48,42 @@ export class SearchComponent  {
 
     @Input() asSelector: boolean = false;
     @Input() restrictToType: number = -1;
+    @Input() autoSearch: boolean = false;
     @Output() selectedChanged: EventEmitter<ApiObject> = new EventEmitter<ApiObject>();
 
+    private changeDetectionBatchSubject: Subject<null> = new Subject<null>();
+
     constructor(private api: ApiService, private staging: StagingService,
-                private qs: QuestionService, private qcs: QuestionControlService) { }
+                private qs: QuestionService, private qcs: QuestionControlService,
+                private changeDetector: ChangeDetectorRef) {
+        this.changeDetectionBatchSubject.asObservable().debounceTime(100).subscribe(() => this.runChangeDetection());
+    }
+
+    private runChangeDetection() {
+        this.changeDetector.markForCheck();
+        //this.changeDetector.checkNoChanges();
+    }
+
+    ngOnChanges(changes) {
+        if (changes.restrictToType != null || changes.autoSearch != null) {
+            if (this.autoSearch) {
+                this.search();
+            }
+        }
+    }
 
     resetSearchData() {
-        console.log('RESET');
         this.searchDone = false;
         this.data = new Map<string, ApiObject[]>();
+        this.changeDetectionBatchSubject.next();
     }
 
     search = () => {
         this.searchDone = false;
+        this.changeDetectionBatchSubject.next();
         if (this.restrictToType != null && this.restrictToType >= 0) {
             this.type = this.restrictToType;
+            this.changeDetectionBatchSubject.next();
         }
         const attributes = new Map<number, string>();
         if (this.attributes != null) {
@@ -67,22 +91,24 @@ export class SearchComponent  {
                 if (this.attributeForms.get(attr.id).valid &&
                     this.attributeForms.get(attr.id).value[attr.name] != null &&
                     !(attr.type === 'string' && this.attributeForms.get(attr.id).value[attr.name].length === 0)) {
-                    attributes.set(attr.id, JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]))
+                    let value = JSON.stringify(this.attributeForms.get(attr.id).value[attr.name]);
+                    if (attr.type === 'number' || attr.type === 'integer') {
+                        // since search field was a string get rid of serialized '"' here for now...
+                        // TODO remove if api supports queries like "> 5" for number attributes
+                        value = value.replace(/(^\")|(\"$)/g, '');
+                    }
+                    attributes.set(attr.id, value);
                 }
             });
         }
-        this.api.search(this.searchstring, this.type, this.tags, attributes, this.includeDeleted, this.includeLent).subscribe(data => {
+        this.api.getItemTypes(); // refresh item types cache
+        this.api.search(this.searchstring, this.type, this.tags, attributes, this.includeDeleted, this.includeLent, this.onlyLendable)
+        .subscribe(data => {
             const map = new Map<string, ApiObject[]>();
             const availableLetters = new Set<string>();
             this.alphabet.forEach(letter => map.set(letter, []));
             this.nrOfItemsFound = data.length;
             data.forEach(item => {
-                this.api.getTagsForItem(item, 'errors', this.nrOfItemsFound > 9).take(1).subscribe(tags => {
-                    this.itemTags.set(item.id, tags);
-                });
-                this.api.getAttributes(item, 'errors', this.nrOfItemsFound > 9).take(1).subscribe(attributes => {
-                    this.itemAttributes.set(item.id, attributes);
-                });
                 let letter: string = item.name.toUpperCase().substr(0, 1);
                 if (letter === 'Ä') {
                     letter = 'A';
@@ -108,12 +134,14 @@ export class SearchComponent  {
             this.data = map;
             this.availableLetters = availableLetters;
             this.searchDone = true;
+            this.changeDetectionBatchSubject.next();
         });
     }
 
     setFilter(value) {
         if (value == null || (this.data != null && this.data.get(value) != null && this.data.get(value).length > 0)) {
             this.filter = value;
+            this.changeDetectionBatchSubject.next();
         }
     }
 
@@ -130,6 +158,7 @@ export class SearchComponent  {
         .subscribe(attributes => {
             this.attributes = attributes;
             attributes.forEach(this.getQuestion);
+            this.changeDetectionBatchSubject.next();
         });
 
         const finished = [];
@@ -158,6 +187,12 @@ export class SearchComponent  {
             schema = JSON.parse(attribute_definition.jsonschema);
         }
         schema.type = attribute_definition.type;
+        // if type is number type make it string for supporting '>' queries in the future
+        if (schema.type === 'number' || schema.type === 'integer') {
+            schema.type = 'string';
+            // add maxLength to get single line text field
+            schema.maxLength = (window as any).maxDBStringLength - 2;
+        }
         schema['x-nullable'] = true;
         if (attribute_definition.type === 'string') {
             const maxLength = (window as any).maxDBStringLength - 2;
@@ -186,19 +221,22 @@ export class SearchComponent  {
             form.patchValue({
                 [attribute_definition.name]: value,
             });
+            this.changeDetectionBatchSubject.next();
         });
     }
 
     select(item: ApiObject) {
         this.selectedChanged.emit(item);
+        this.changeDetectionBatchSubject.next();
     }
 
     stageAll(letter?: string) {
         if (letter == null) {
             this.data.forEach(items => {
                 items.forEach(item => {
-                    if (item.type.lendable && item.is_currently_lent) {
+                    if (this.itemTypes.has(item._type_id) && this.itemTypes.get(item._type_id).lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
+                        this.changeDetectionBatchSubject.next();
                     }
                 });
             });
@@ -206,11 +244,32 @@ export class SearchComponent  {
             const items = this.data.get(letter);
             if (items != null) {
                 items.forEach(item => {
-                    if (item.type.lendable && item.is_currently_lent) {
+                    if (this.itemTypes.has(item._type_id) && this.itemTypes.get(item._type_id).lendable && item.is_currently_lent) {
                         this.staging.stage(item.id);
+                        this.changeDetectionBatchSubject.next();
                     }
                 });
             }
         }
+    }
+
+    /**
+     * Load further data for items in view.
+     *
+     * @param item the item that was scrolled into view
+     */
+    loadData(item) {
+        this.api.getItemType(item.type_id, 'all', true).take(1).subscribe(itemType => {
+            this.itemTypes.set(itemType.id, itemType);
+            this.changeDetectionBatchSubject.next();
+        });
+        this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
+            this.itemTags.set(item.id, tags);
+            this.changeDetectionBatchSubject.next();
+        });
+        this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
+            this.itemAttributes.set(item.id, attributes);
+            this.changeDetectionBatchSubject.next();
+        });
     }
 }

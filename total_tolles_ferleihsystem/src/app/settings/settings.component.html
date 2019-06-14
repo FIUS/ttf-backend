@@ -39,6 +39,12 @@
                 <span class="pointer" *ngIf="errorTimeout == 15000" (click)="settings.setSetting('errorTimeout', 60000)">15 seconds</span>
                 <span class="pointer" *ngIf="errorTimeout == 60000" (click)="settings.setSetting('errorTimeout', -1)">1 minute</span>
             </p>
+            <p>
+                <span class="b">Pinned Item Types:</span> {{pinnedTypes|json}}
+            </p>
+            <p *ngFor="let type of itemTypes" (click)="toggleType(type)">
+                {{isTypePinned(type) ? 'Unpin' : 'Pin'}} item type "{{type.name}}" to overview.
+            </p>
         </div>
     </ttf-box>
 </div>

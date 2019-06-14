@@ -5,6 +5,7 @@ import { StagingService } from '../navigation/staging-service';
 import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { Subscription } from 'rxjs/Rx';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'ttf-lending',
@@ -19,7 +20,8 @@ export class LendingComponent implements OnInit, OnDestroy {
     lending;
 
     constructor(private data: NavigationService, private api: ApiService,
-                private jwt: JWTService, private route: ActivatedRoute) { }
+                private jwt: JWTService, private route: ActivatedRoute,
+                private router: Router) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Lending');
@@ -54,7 +56,11 @@ export class LendingComponent implements OnInit, OnDestroy {
 
     return(id?: number) {
         if (this.lending != null) {
-            this.api.returnLending(this.lending, id);
+            this.api.returnLending(this.lending, id).subscribe(lendingWasDeleted => {
+                if (lendingWasDeleted) {
+                    this.router.navigate(['lendings']);
+                }
+            });
         }
     }
 

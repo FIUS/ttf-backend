@@ -11,6 +11,7 @@ import { NumberInputComponent } from './forms/dynamic-form/number-input/number-i
 import { DateInputComponent } from './forms/dynamic-form/date-input/date-input.component';
 import { DateTimeInputComponent } from './forms/dynamic-form/date-input/datetime-input.component';
 import { DurationInputComponent } from './forms/dynamic-form/duration-input/duration-input.component';
+import { DropdownInputComponent } from './forms/dynamic-form/dropdown-input/dropdown-input.component';
 
 import { QuestionControlService } from './forms/question-control.service';
 import { QuestionService } from './forms/question.service';
@@ -34,6 +35,7 @@ import { myTableComponent } from './table/table.component';
 import { FileSelectorComponent } from './file-selector/file-selector.component';
 
 import { ClickOutsideDirective } from './click-outside.directive';
+import { IsVisibleDirective } from './is-visible.directive';
 
 @NgModule({
     imports:      [ CommonModule, FormsModule, ReactiveFormsModule ],
@@ -53,7 +55,9 @@ import { ClickOutsideDirective } from './click-outside.directive';
         DateInputComponent,
         DateTimeInputComponent,
         DurationInputComponent,
+        DropdownInputComponent,
         ClickOutsideDirective,
+        IsVisibleDirective,
     ],
     providers: [
         InfoService,
@@ -83,7 +87,9 @@ import { ClickOutsideDirective } from './click-outside.directive';
         DateInputComponent,
         DateTimeInputComponent,
         DurationInputComponent,
+        DropdownInputComponent,
         ClickOutsideDirective,
+        IsVisibleDirective,
 
         CommonModule,
         FormsModule,

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 29d8df81268e
-Revises: 
-Create Date: 2018-07-16 16:11:00.902328
+Revision ID: cd02e7f9639a
+Revises:
+Create Date: 2019-06-14 17:51:42.375806
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '29d8df81268e'
+revision = 'cd02e7f9639a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('type', sa.String(length=190), nullable=True),
     sa.Column('jsonschema', sa.Text(), nullable=True),
     sa.Column('visible_for', sa.String(length=190), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('deleted_time', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_AttributeDefinition')),
     sa.UniqueConstraint('name', name=op.f('uq_AttributeDefinition_name'))
     )
@@ -44,7 +44,7 @@ def upgrade():
     sa.Column('name_schema', sa.String(length=190), nullable=True),
     sa.Column('lendable', sa.Boolean(), nullable=True),
     sa.Column('lending_duration', sa.Integer(), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('deleted_time', sa.Integer(), nullable=True),
     sa.Column('visible_for', sa.String(length=190), nullable=True),
     sa.Column('how_to', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_ItemType')),
@@ -54,15 +54,23 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('moderator', sa.String(length=190), nullable=True),
     sa.Column('user', sa.String(length=190), nullable=True),
-    sa.Column('date', sa.DateTime(), nullable=True),
+    sa.Column('date', sa.Integer(), nullable=True),
     sa.Column('deposit', sa.String(length=190), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_Lending'))
     )
+    op.create_table('Settings',
+    sa.Column('user', sa.String(length=190), nullable=False),
+    sa.Column('settings', sa.Text(), nullable=True),
+    sa.PrimaryKeyConstraint('user', name=op.f('pk_Settings'))
+    )
+    with op.batch_alter_table('Settings', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_Settings_user'), ['user'], unique=False)
+
     op.create_table('Tag',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=190), nullable=True),
     sa.Column('lending_duration', sa.Integer(), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('deleted_time', sa.Integer(), nullable=True),
     sa.Column('visible_for', sa.String(length=190), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_Tag')),
     sa.UniqueConstraint('name', name=op.f('uq_Tag_name'))
@@ -70,7 +78,7 @@ def upgrade():
     op.create_table('BlacklistToItemType',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_type_id', sa.Integer(), nullable=False),
-    sa.Column('end_time', sa.DateTime(), nullable=True),
+    sa.Column('end_time', sa.Integer(), nullable=True),
     sa.Column('reason', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['item_type_id'], ['ItemType.id'], name=op.f('fk_BlacklistToItemType_item_type_id')),
     sa.ForeignKeyConstraint(['user_id'], ['Blacklist.id'], name=op.f('fk_BlacklistToItemType_user_id')),
@@ -79,13 +87,17 @@ def upgrade():
     op.create_table('Item',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=190), nullable=True),
+    sa.Column('update_name_from_schema', sa.Boolean(), nullable=False),
     sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('lending_id', sa.Integer(), nullable=True),
     sa.Column('lending_duration', sa.Integer(), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('due', sa.Integer(), nullable=True),
+    sa.Column('deleted_time', sa.Integer(), nullable=True),
     sa.Column('visible_for', sa.String(length=190), nullable=True),
+    sa.ForeignKeyConstraint(['lending_id'], ['Lending.id'], name=op.f('fk_Item_lending_id')),
     sa.ForeignKeyConstraint(['type_id'], ['ItemType.id'], name=op.f('fk_Item_type_id')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_Item')),
-    sa.UniqueConstraint('name', name=op.f('uq_Item_name'))
+    sa.UniqueConstraint('name', 'type_id', name='_name_type_id_uc')
     )
     op.create_table('ItemTypeToAttributeDefinition',
     sa.Column('item_type_id', sa.Integer(), nullable=False),
@@ -114,19 +126,17 @@ def upgrade():
     sa.Column('name', sa.String(length=190), nullable=True),
     sa.Column('file_type', sa.String(length=190), nullable=True),
     sa.Column('file_hash', sa.String(length=190), nullable=True),
-    sa.Column('creation', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    sa.Column('invalidation', sa.DateTime(), nullable=True),
+    sa.Column('creation', sa.Integer(), nullable=True),
+    sa.Column('invalidation', sa.Integer(), nullable=True),
+    sa.Column('visible_for', sa.String(length=190), nullable=True),
     sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_File_item_id')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_File'))
     )
-    with op.batch_alter_table('File', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_File_file_hash'), ['file_hash'], unique=False)
-
     op.create_table('ItemToAttributeDefinition',
     sa.Column('item_id', sa.Integer(), nullable=False),
     sa.Column('attribute_definition_id', sa.Integer(), nullable=False),
     sa.Column('value', sa.String(length=190), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('deleted_time', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['attribute_definition_id'], ['AttributeDefinition.id'], name=op.f('fk_ItemToAttributeDefinition_attribute_definition_id')),
     sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToAttributeDefinition_item_id')),
     sa.PrimaryKeyConstraint('item_id', 'attribute_definition_id', name=op.f('pk_ItemToAttributeDefinition'))
@@ -137,14 +147,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToItem_item_id')),
     sa.ForeignKeyConstraint(['parent_id'], ['Item.id'], name=op.f('fk_ItemToItem_parent_id')),
     sa.PrimaryKeyConstraint('parent_id', 'item_id', name=op.f('pk_ItemToItem'))
-    )
-    op.create_table('ItemToLending',
-    sa.Column('item_id', sa.Integer(), nullable=False),
-    sa.Column('lending_id', sa.Integer(), nullable=False),
-    sa.Column('due', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['item_id'], ['Item.id'], name=op.f('fk_ItemToLending_item_id')),
-    sa.ForeignKeyConstraint(['lending_id'], ['Lending.id'], name=op.f('fk_ItemToLending_lending_id')),
-    sa.PrimaryKeyConstraint('item_id', 'lending_id', name=op.f('pk_ItemToLending'))
     )
     op.create_table('ItemToTag',
     sa.Column('item_id', sa.Integer(), nullable=False),
@@ -159,12 +161,8 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('ItemToTag')
-    op.drop_table('ItemToLending')
     op.drop_table('ItemToItem')
     op.drop_table('ItemToAttributeDefinition')
-    with op.batch_alter_table('File', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_File_file_hash'))
-
     op.drop_table('File')
     op.drop_table('TagToAttributeDefinition')
     op.drop_table('ItemTypeToItemType')
@@ -172,6 +170,10 @@ def downgrade():
     op.drop_table('Item')
     op.drop_table('BlacklistToItemType')
     op.drop_table('Tag')
+    with op.batch_alter_table('Settings', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_Settings_user'))
+
+    op.drop_table('Settings')
     op.drop_table('Lending')
     op.drop_table('ItemType')
     with op.batch_alter_table('Blacklist', schema=None) as batch_op:

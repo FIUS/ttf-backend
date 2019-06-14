@@ -5,21 +5,19 @@ This module contains all API endpoints for the namespace 'item'
 from flask import request
 from flask_restplus import Resource, abort, marshal
 from flask_jwt_extended import jwt_required, get_jwt_claims
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import noload, joinedload
 
 from .. import API, satisfies_role
-from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_PUT, ATTRIBUTE_GET, FILE_GET, ITEM_GET_WITH_PARENTS
-from ... import DB
+from ..models import ITEM_GET, ITEM_POST, ID, ITEM_PUT, ITEM_TAG_GET, ATTRIBUTE_GET, FILE_GET, LENDING_GET
+from ... import DB, APP
 from ...login import UserRole
 from ...performance import record_view_performance
 
-from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, ItemToLending
+from ...db_models.item import Item, ItemToTag, ItemToAttributeDefinition, ItemToItem, File, Lending
 from ...db_models.itemType import ItemType, ItemTypeToItemType
 from ...db_models.tag import Tag
 from ...db_models.attributeDefinition import AttributeDefinition
-
-import logging
 
 PATH: str = '/catalog/items'
 ANS = API.namespace('item', description='Items', path=PATH)
@@ -41,9 +39,12 @@ class ItemList(Resource):
         """
         Get a list of all items currently in the system
         """
+        base_query = Item.query.options(joinedload('lending'), joinedload("_tags"))
         test_for = request.args.get('deleted', 'false') == 'true'
-
-        base_query = Item.query.options(joinedload(Item.type)).filter(Item.deleted == test_for)
+        if test_for:
+            base_query = base_query.filter(Item.deleted_time != None)
+        else:
+            base_query = base_query.filter(Item.deleted_time == None)
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
@@ -53,7 +54,7 @@ class ItemList(Resource):
                 base_query = base_query.filter(Item.visible_for == 'all')
 
         if request.args.get('lent', 'false') == 'true':
-            base_query = base_query.join(ItemToLending)
+            base_query = base_query.filter(Item.lending_id != None)
 
         return base_query.order_by(Item.name).all()
 
@@ -84,7 +85,9 @@ class ItemList(Resource):
             return marshal(new, ITEM_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            print(message)
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
             abort(500)
 
@@ -96,7 +99,7 @@ class ItemDetail(Resource):
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @API.marshal_with(ITEM_GET_WITH_PARENTS)
+    @API.marshal_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -192,8 +195,9 @@ class ItemDetail(Resource):
             return marshal(item, ITEM_GET), 200
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Name is not unique!:' + message)
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
+                abort(409, 'Name is not unique!')
             abort(500)
 
 @ANS.route('/<int:item_id>/tags/')
@@ -219,7 +223,8 @@ class ItemItemTags(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
-        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item not found!')
 
         associations = ItemToTag.query.filter(ItemToTag.item_id == item_id).all()
@@ -238,10 +243,12 @@ class ItemItemTags(Resource):
         Associate a new tag with the item.
         """
         tag_id = request.get_json()["id"]
-        item = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
+        # pylint: disable=C0121
+        item = Item.query.filter(Item.id == item_id).filter(Item.deleted_time == None).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first()
+        # pylint: disable=C0121
+        tag = Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted_time == None).first()
         if tag is None:
             abort(400, 'Requested item tag not found!')
 
@@ -258,7 +265,8 @@ class ItemItemTags(Resource):
             return [e.tag for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Tag is already associated with this item. %s', err)
                 abort(409, 'Tag is already associated with this item!')
             abort(500)
 
@@ -275,10 +283,12 @@ class ItemItemTags(Resource):
         """
         tag_id = request.get_json()["id"]
 
-        item = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
+        # pylint: disable=C0121
+        item = Item.query.filter(Item.id == item_id).filter(Item.deleted_time == None).first()
         if item is None:
             abort(404, 'Requested item not found!')
-        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if Tag.query.filter(Tag.id == tag_id).filter(Tag.deleted_time == None).first() is None:
             abort(400, 'Requested item tag not found!')
 
         association = (ItemToTag
@@ -324,10 +334,18 @@ class ItemAttributeList(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
-        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item not found!')
 
-        attributes = ItemToAttributeDefinition.query.filter(ItemToAttributeDefinition.item_id == item_id).filter(ItemToAttributeDefinition.deleted == False).join(ItemToAttributeDefinition.attribute_definition).order_by(AttributeDefinition.name).all()
+        # pylint: disable=C0121
+        attributes = (ItemToAttributeDefinition.query
+                      .filter(ItemToAttributeDefinition.item_id == item_id)
+                      .filter(ItemToAttributeDefinition.deleted_time == None)
+                      .join(ItemToAttributeDefinition.attribute_definition)
+                      .order_by(AttributeDefinition.name)
+                      .options(joinedload('attribute_definition'))
+                      .all())
         return attributes; # DON'T CHANGE THIS!!
         # It is necessary because a Flask Bug prehibits log messages on return statements.
 
@@ -355,14 +373,17 @@ class ItemAttributeDetail(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
-        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item not found!')
 
+        # pylint: disable=C0121
         attribute = (ItemToAttributeDefinition
                      .query
                      .filter(ItemToAttributeDefinition.item_id == item_id)
-                     .filter(ItemToAttributeDefinition.deleted == False)
+                     .filter(ItemToAttributeDefinition.deleted_time == None)
                      .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
+                     .options(joinedload('attribute_definition'))
                      .first())
 
         if attribute is None:
@@ -382,15 +403,18 @@ class ItemAttributeDetail(Resource):
         Set a single attribute of this item.
         """
 
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item not found!')
 
         value = request.get_json()["value"]
+        # pylint: disable=C0121
         attribute = (ItemToAttributeDefinition
                      .query
                      .filter(ItemToAttributeDefinition.item_id == item_id)
                      .filter(ItemToAttributeDefinition.attribute_definition_id == attribute_definition_id)
-                     .filter(ItemToAttributeDefinition.deleted == False)
+                     .filter(ItemToAttributeDefinition.deleted_time == None)
+                     .options(joinedload('attribute_definition'))
                      .first())
 
         if attribute is None:
@@ -404,15 +428,16 @@ class ItemAttributeDetail(Resource):
         except IntegrityError:
             abort(500)
 
-@ANS.route('/<int:item_id>/contained/')
-class ItemContainedItems(Resource):
+
+@ANS.route('/<int:item_id>/parent/')
+class ItemParentItems(Resource):
     """
-    The items contained in this item object
+    The parent items of this item object
     """
 
     @jwt_required
     @ANS.response(404, 'Requested item not found!')
-    @API.marshal_with(ITEM_GET)
+    @API.marshal_list_with(ITEM_GET)
     # pylint: disable=R0201
     def get(self, item_id):
         """
@@ -427,10 +452,42 @@ class ItemContainedItems(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
-        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item not found!')
 
-        associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+        associations = ItemToItem.query.filter(ItemToItem.item_id == item_id).options(joinedload('parent')).all()
+        return [e.parent for e in associations if not e.item.deleted]
+
+
+@ANS.route('/<int:item_id>/contained/')
+class ItemContainedItems(Resource):
+    """
+    The items contained in this item object
+    """
+
+    @jwt_required
+    @ANS.response(404, 'Requested item not found!')
+    @API.marshal_list_with(ITEM_GET)
+    # pylint: disable=R0201
+    def get(self, item_id):
+        """
+        Get all contained items of this item.
+        """
+        base_query = Item.query
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        # pylint: disable=C0121
+        if base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
+            abort(404, 'Requested item not found!')
+
+        associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).options(joinedload('item')).all()
         return [e.item for e in associations if not e.item.deleted]
 
     @jwt_required
@@ -447,8 +504,10 @@ class ItemContainedItems(Resource):
         Add a new contained item to this item
         """
         contained_item_id = request.get_json()["id"]
-        parent = Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first()
-        child = Item.query.filter(Item.id == contained_item_id).filter(Item.deleted == False).first()
+        # pylint: disable=C0121
+        parent = Item.query.filter(Item.id == item_id).filter(Item.deleted_time == None).first()
+        # pylint: disable=C0121
+        child = Item.query.filter(Item.id == contained_item_id).filter(Item.deleted_time == None).first()
 
         if parent is None:
             abort(404, 'Requested item (current) not found!')
@@ -468,12 +527,13 @@ class ItemContainedItems(Resource):
         try:
             DB.session.add(new)
             DB.session.commit()
-            associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).all()
+            associations = ItemToItem.query.filter(ItemToItem.parent_id == item_id).options(joinedload('item')).all()
             return [e.item for e in associations]
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
-                abort(409, 'Attribute definition is already asociated with this tag!')
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('That item is already contained in this item. %s', err)
+                abort(409, 'That item is already contained in this item.')
             abort(500)
 
     @jwt_required
@@ -489,9 +549,11 @@ class ItemContainedItems(Resource):
         """
         contained_item_id = request.get_json()["id"]
 
-        if Item.query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if Item.query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item (current) not found!')
-        if Item.query.filter(Item.id == contained_item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if Item.query.filter(Item.id == contained_item_id).filter(Item.deleted_time == None).first() is None:
             abort(400, 'Requested item (to be contained) not found!')
 
         association = (ItemToItem
@@ -532,7 +594,38 @@ class ItemFile(Resource):
             else:
                 base_query = base_query.filter(Item.visible_for == 'all')
 
-        if base_query.filter(Item.id == item_id).filter(Item.deleted == False).first() is None:
+        # pylint: disable=C0121
+        if base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first() is None:
             abort(404, 'Requested item not found!')
 
-        return File.query.filter(File.item_id == item_id).all()
+        return File.query.filter(File.item_id == item_id).options(joinedload('item')).all()
+
+@ANS.route('/<int:item_id>/lending/')
+class ItemLendings(Resource):
+    """
+    Current lending of a single item.
+    """
+
+    @jwt_required
+    @ANS.response(404, 'Requested item not found!')
+    @API.marshal_list_with(LENDING_GET)
+    # pylint: disable=R0201
+    def get(self, item_id):
+        """
+        Get the lending concerning the specific item.
+        """
+        base_query = Item.query
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((Item.visible_for == 'all') | (Item.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(Item.visible_for == 'all')
+
+        # pylint: disable=C0121
+        item = base_query.filter(Item.id == item_id).filter(Item.deleted_time == None).first()
+        if item is None:
+            abort(404, 'Requested item not found!')
+
+        return item.lending

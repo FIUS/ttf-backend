@@ -1,15 +1,14 @@
 """
 The database models of the item and all connected tables
 """
-
-import datetime
 from sqlalchemy.sql import func
 from sqlalchemy.schema import UniqueConstraint
 import string
 from json import loads
+import time
 from datetime import date
 
-from .. import DB
+from .. import DB, LENDING_LOGGER
 from . import STD_STRING_SIZE
 
 from . import itemType
@@ -20,7 +19,6 @@ __all__ = [
     'File',
     'Lending',
     'ItemToItem',
-    'ItemToLending',
     'ItemToTag',
     'ItemToAttributeDefinition'
 ]
@@ -36,18 +34,22 @@ class Item(DB.Model):
     name = DB.Column(DB.String(STD_STRING_SIZE))
     update_name_from_schema = DB.Column(DB.Boolean, default=True, nullable=False)
     type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'))
-    lending_duration = DB.Column(DB.Integer, nullable=True) # in seconds
-    deleted = DB.Column(DB.Boolean, default=False)
+    lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), default=None, nullable=True)
+    lending_duration = DB.Column(DB.Integer, nullable=True)  # in seconds
+    due = DB.Column(DB.Integer, default=-1) # unix time
+    deleted_time = DB.Column(DB.Integer, default=None)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
     type = DB.relationship('ItemType', lazy='joined')
+    lending = DB.relationship('Lending', lazy='select',
+                              backref=DB.backref('_items', lazy='select'))
 
     __table_args__ = (
         UniqueConstraint('name', 'type_id', name='_name_type_id_uc'),
     )
 
     def __init__(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
-            visible_for: str = ''):
+                 visible_for: str = ''):
         self.update_name_from_schema = update_name_from_schema
 
         self.name = name
@@ -61,7 +63,7 @@ class Item(DB.Model):
             self.visible_for = visible_for
 
     def update(self, update_name_from_schema: bool, name: str, type_id: int, lending_duration: int = -1,
-            visible_for: str = ''):
+               visible_for: str = ''):
         """
         Function to update the objects data
         """
@@ -77,33 +79,22 @@ class Item(DB.Model):
         self.visible_for = visible_for
 
     @property
-    def lending_id(self):
-        """
-        The lending_id this item is currently associated with. -1 if not lent.
-        """
-        if self._lending:
-            return self._lending[0].lending_to_item.lending_id
-        return -1
+    def deleted(self):
+        return self.deleted_time is not None
 
-    @property
-    def item_lending(self):
-        """
-        The lending this item is currently associated with.
-        """
-        if self._lending:
-            return self._lending[0]
-        return None
+    @deleted.setter
+    def deleted(self, value: bool):
+        if value:
+            self.deleted_time = int(time.time())
+        else:
+            self.deleted_time = None
 
     @property
     def is_currently_lent(self):
         """
         If the item is currently lent.
         """
-        return self.lending_id != -1
-
-    @property
-    def due(self):
-        return -1 if self.lending_id is not None else self.item_lending.due
+        return self.lending is not None
 
     @property
     def parent(self):
@@ -119,7 +110,7 @@ class Item(DB.Model):
         if self.lending_duration and (self.lending_duration >= 0):
             return self.lending_duration
 
-        tag_lending_duration = min((t.lending_duration for t in self._tags if t.lending_duration > 0), default=-1)
+        tag_lending_duration = min((t.tag.lending_duration for t in self._tags if t.tag.lending_duration > 0), default=-1)
 
         if tag_lending_duration >= 0:
             return tag_lending_duration
@@ -184,20 +175,20 @@ class Item(DB.Model):
                     if(remove):
                         # Check if multiple sources bring it, if yes don't delete it.
                         sources = 0
-                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions if not ittad.attribute_definition.deleted ]):
+                        if(def_id in [ittad.attribute_definition_id for ittad in self.type._item_type_to_attribute_definitions if not ittad.attribute_definition.deleted]):
                             sources += 1
                         for tag in [itt.tag for itt in self._tags]:
                             if(def_id in [ttad.attribute_definition_id for ttad in tag._tag_to_attribute_definitions if not ttad.attribute_definition.deleted]):
                                 sources += 1
-                        if sources == 1 :
+                        if sources == 1:
                             attributes_to_delete.append(itad)
                     elif(itad.deleted):
                         attributes_to_undelete.append(itad)
 
             if not exists and not remove:
                 attributes_to_add.append(ItemToAttributeDefinition(self.id,
-                                                        def_id,
-                                                        "")) #TODO: Get default if possible.
+                                                                   def_id,
+                                                                   ""))  # TODO: Get default if possible.
         return attributes_to_add, attributes_to_delete, attributes_to_undelete
 
     def get_new_attributes_from_type(self, type_id: int):
@@ -209,7 +200,8 @@ class Item(DB.Model):
                                            .query
                                            .filter(itemType.ItemTypeToAttributeDefinition.item_type_id == type_id)
                                            .all())
-        attributes_to_add, _, _ = self.get_attribute_changes([ittad.attribute_definition_id for ittad in item_type_attribute_definitions if not ittad.item_type.deleted], False)
+        attributes_to_add, _, _ = self.get_attribute_changes(
+            [ittad.attribute_definition_id for ittad in item_type_attribute_definitions if not ittad.item_type.deleted], False)
 
         return attributes_to_add
 
@@ -263,26 +255,27 @@ class File(DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), nullable=True)
     name = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
     file_type = DB.Column(DB.String(STD_STRING_SIZE))
-    file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True, index=True)
-    creation = DB.Column(DB.DateTime, server_default=func.now())
-    invalidation = DB.Column(DB.DateTime, nullable=True)
+    file_hash = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
+    creation = DB.Column(DB.Integer)
+    invalidation = DB.Column(DB.Integer, nullable=True)
     visible_for = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
-    item = DB.relationship('Item', lazy='joined', backref=DB.backref('_files', lazy='select',
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_files', lazy='select',
                                                                      single_parent=True,
                                                                      cascade="all, delete-orphan"))
 
-    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int=None, visible_for: str = ''):
+    def __init__(self, name: str, file_type: str, file_hash: str, item_id: int = None, visible_for: str = ''):
         if item_id is not None:
             self.item_id = item_id
         self.name = name
         self.file_type = file_type
         self.file_hash = file_hash
+        self.creation = int(time.time())
 
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
-    def update(self, name: str, file_type: str, invalidation, item_id: int, visible_for: str = '') -> None:
+    def update(self, name: str, file_type: str, invalidation: int, item_id: int, visible_for: str = '') -> None:
         """
         Function to update the objects data
         """
@@ -302,23 +295,90 @@ class Lending(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True)
     moderator = DB.Column(DB.String(STD_STRING_SIZE))
     user = DB.Column(DB.String(STD_STRING_SIZE))
-    date = DB.Column(DB.DateTime)
+    date = DB.Column(DB.Integer) #unix time
     deposit = DB.Column(DB.String(STD_STRING_SIZE))
 
-    def __init__(self, moderator: str, user: str, deposit: str):
+    def __repr__(self):
+        ret = "Lending by "
+        ret += self.moderator
+        ret += " to "
+        ret += self.user
+        ret += " at "
+        ret += str(self.date)
+        ret += " with "
+        ret += self.deposit
+        ret += ". Items:"
+        ret += str([str(item.id) for item in self._items])
+        return ret
+
+    def __init__(self, moderator: str, user: str, deposit: str, item_ids: list):
         self.moderator = moderator
         self.user = user
-        self.date = datetime.datetime.now()
+        self.date = int(time.time())
         self.deposit = deposit
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).filter(Item.deleted_time == None).first()
+            if item is None:
+                raise ValueError("Item not found:" + str(element))
+            if not item.type.lendable:
+                raise ValueError("Item not lendable:" + str(element))
+            if item.is_currently_lent:
+               raise ValueError("Item already lent:" + str(element))
+            item.lending = self
+            item.due = self.date + item.effective_lending_duration
+        LENDING_LOGGER.info("New lending: %s", repr(self))
 
-    def update(self, moderator: str, user: str, deposit: str):
+
+    def update(self, moderator: str, user: str, deposit: str, item_ids: list):
         """
         Function to update the objects data
         """
         self.moderator = moderator
         self.user = user
         self.deposit = deposit
+        old_items = self._items
+        new_items = []
 
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).filter(Item.deleted_time == None).first()
+            if item is None:
+                raise ValueError("Item not found:" + str(element))
+            new_items.append(item)
+
+        items_to_remove = [item for item in old_items if item not in new_items]
+        items_to_add = [item for item in new_items if item not in old_items]
+
+        for item in items_to_remove:
+            item.lending = None
+            item.due = -1
+
+        for item in items_to_add:
+            if not item.type.lendable:
+                raise ValueError("Item not lendable:" + str(item))
+            if item.is_currently_lent:
+                raise ValueError("Item already lent:" + str(item))
+            item.lending = self
+            item.due = self.date + item.effective_lending_duration
+        LENDING_LOGGER.info("Updated lending: %s", repr(self))
+
+
+    def remove_items(self, item_ids: list):
+        """
+        Function to remove a list of items from this lending
+        """
+        for element in item_ids:
+            item = Item.query.filter(Item.id == element).first()
+            if item is None:
+                raise ValueError("Item not found:" + str(element))
+            item.lending = None
+            item.due = -1
+        LENDING_LOGGER.info("Updated lending(remove items): %s", repr(self))
+
+    def pre_delete(self):
+        LENDING_LOGGER.info("Deleting lending: %s", repr(self))
+        for item in list(self._items):
+            item.lending = None
+            item.due = -1
 
 class ItemToItem(DB.Model):
 
@@ -327,37 +387,16 @@ class ItemToItem(DB.Model):
     parent_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
 
-    parent = DB.relationship('Item', foreign_keys=[parent_id],
+    parent = DB.relationship('Item', foreign_keys=[parent_id], lazy='select',
                              backref=DB.backref('_contained_items', lazy='select',
                                                 single_parent=True, cascade="all, delete-orphan"))
-    item = DB.relationship('Item', foreign_keys=[item_id], backref=DB.backref('_parents', lazy='select',
-                                                                              single_parent=True,
-                                                                              cascade="all, delete-orphan"),
-                           lazy='joined')
+    item = DB.relationship('Item', foreign_keys=[item_id], lazy='select',
+                           backref=DB.backref('_parents', lazy='select',
+                                              single_parent=True, cascade="all, delete-orphan"))
 
     def __init__(self, parent_id: int, item_id: int):
         self.parent_id = parent_id
         self.item_id = item_id
-
-
-class ItemToLending (DB.Model):
-
-    __tablename__ = 'ItemToLending'
-
-    item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
-    lending_id = DB.Column(DB.Integer, DB.ForeignKey('Lending.id'), primary_key=True)
-    due = DB.Column(DB.DateTime)
-
-    item = DB.relationship('Item', backref=DB.backref('_lending', lazy='joined',
-                                                      single_parent=True, cascade="all, delete-orphan"))
-    lending = DB.relationship('Lending', backref=DB.backref('itemLendings', lazy='joined',
-                                                            single_parent=True,
-                                                            cascade="all, delete-orphan"), lazy='select')
-
-    def __init__(self, item: Item, lending: Lending):
-        self.item = item
-        self.lending = lending
-        self.due = lending.date + datetime.timedelta(0, item.effective_lending_duration)
 
 
 class ItemToTag (DB.Model):
@@ -367,8 +406,8 @@ class ItemToTag (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     tag_id = DB.Column(DB.Integer, DB.ForeignKey('Tag.id'), primary_key=True)
 
-    item = DB.relationship('Item', backref=DB.backref('_tags', lazy='joined',
-                                                      single_parent=True, cascade="all, delete-orphan"))
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_tags', lazy='select',
+                                                                     single_parent=True, cascade="all, delete-orphan"))
     tag = DB.relationship('Tag', lazy='joined')
 
     def __init__(self, item_id: int, tag_id: int):
@@ -383,11 +422,12 @@ class ItemToAttributeDefinition (DB.Model):
     item_id = DB.Column(DB.Integer, DB.ForeignKey('Item.id'), primary_key=True)
     attribute_definition_id = DB.Column(DB.Integer, DB.ForeignKey('AttributeDefinition.id'), primary_key=True)
     value = DB.Column(DB.String(STD_STRING_SIZE))
-    deleted = DB.Column(DB.Boolean, default=False)
+    deleted_time = DB.Column(DB.Integer, default=None)
 
-    item = DB.relationship('Item', backref=DB.backref('_attributes', lazy='select',
-                                                      single_parent=True, cascade="all, delete-orphan"))
-    attribute_definition = DB.relationship('AttributeDefinition', backref=DB.backref('_item_to_attribute_definitions', lazy='joined'))
+    item = DB.relationship('Item', lazy='select', backref=DB.backref('_attributes', lazy='select',
+                                                                     single_parent=True, cascade="all, delete-orphan"))
+    attribute_definition = DB.relationship('AttributeDefinition', lazy='select',
+                                           backref=DB.backref('_item_to_attribute_definitions', lazy='select'))
 
     def __init__(self, item_id: int, attribute_definition_id: int, value: str):
         self.item_id = item_id
@@ -416,8 +456,12 @@ class ItemToAttributeDefinition (DB.Model):
         self.deleted = False
 
     @property
-    def is_deleted(self) -> bool:
-        """
-        Checks whether this association is currently soft deleted
-        """
-        return self.deleted
+    def deleted(self):
+        return self.deleted_time is not None
+
+    @deleted.setter
+    def deleted(self, value: bool):
+        if value:
+            self.deleted_time = int(time.time())
+        else:
+            self.deleted_time = None

@@ -10,6 +10,8 @@ export class JWTService implements OnInit {
     private sessionExpirySource = new Subject<boolean>();
     readonly sessionExpiry = this.sessionExpirySource.asObservable();
 
+    private apiTokenSource = new BehaviorSubject<string>(null);
+
     private userSource = new BehaviorSubject<string>(undefined);
     readonly user = this.userSource.asObservable();
 
@@ -17,6 +19,7 @@ export class JWTService implements OnInit {
     readonly REFRESH_TOKEN = 'ttf_refresh_token';
 
     private api: ApiService;
+
 
     constructor (private injector: Injector, private router: Router) {
         Observable.timer(1).take(1).subscribe((() => {
@@ -33,20 +36,25 @@ export class JWTService implements OnInit {
                 future = new Date(future.getTime() + (3 * 60 * 1000))
                 if (this.expiration(this.token()) < future) {
                     this.api.refreshLogin(this.refreshToken());
+                } else {
+                    this.apiTokenSource.next(this.token());
                 }
                 if (this.expiration(this.refreshToken()) < future) {
                     this.sessionExpirySource.next(true);
+                    this.apiTokenSource = new BehaviorSubject<string>(null);
                 }
             }
         }).bind(this));
         if (!this.loggedIn()) {
             this.userSource.next(undefined);
+            this.apiTokenSource = new BehaviorSubject<string>(null);
             this.api.guestLogin();
         }
     }
 
     updateTokens(loginToken: string, refreshToken?: string) {
         localStorage.setItem(this.TOKEN, loginToken);
+        this.apiTokenSource.next(loginToken);
         if (refreshToken != null) {
             localStorage.setItem(this.REFRESH_TOKEN, refreshToken);
         }
@@ -60,6 +68,7 @@ export class JWTService implements OnInit {
 
     logout() {
         this.userSource.next(undefined);
+        this.apiTokenSource = new BehaviorSubject<string>(null);
         localStorage.removeItem(this.TOKEN);
         localStorage.removeItem(this.REFRESH_TOKEN);
         this.api.guestLogin();
@@ -76,6 +85,21 @@ export class JWTService implements OnInit {
 
     refreshToken() {
         return localStorage.getItem(this.REFRESH_TOKEN);
+    }
+
+    getValidApiToken() {
+        return this.apiTokenSource.asObservable().filter(token => {
+            if (token == null) { //filter out null
+                return false;
+            }
+            // filter out expired tokens
+            let future = new Date();
+            future = new Date(future.getTime() + (60 * 1000))
+            if (this.expiration(this.token()) < future) {
+                return false;
+            }
+            return true;
+        }).take(1);
     }
 
     private tokenToJson(token: string) {

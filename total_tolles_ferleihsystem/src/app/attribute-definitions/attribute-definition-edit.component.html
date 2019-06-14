@@ -4,7 +4,20 @@
         <i class="fa fa-trash"></i>
     </div>
     <div class="w-100 ph3 pv2" body>
-        <dynamic-form [objectModel]="'AttributeDefinitionPUT'" [startValues]="attrDef" [showSaveButton]="jwt.isAdmin()" (save)="save($event)"></dynamic-form>
+        <dynamic-form [objectModel]="'AttributeDefinitionPUT'" [startValues]="attrDef" [showSaveButton]="jwt.isAdmin()" (data)="currentAttrDef = $event" (save)="save($event)"></dynamic-form>
+    </div>
+</ttf-box>
+<ttf-box>
+    <h1 class="mv0" title>Check definition:</h1>
+    <div class="button h2 pv1 ph2 br2 ttf-header-button link bg-animate pointer" (click)="updateTestForm()" *ngIf="jwt.isAdmin()" title-right>
+        <i class="fa fa-refresh"></i>
+    </div>
+    <div class="w-100 ph3 pv2" *ngIf="testForm" body>
+        <form [formGroup]="testForm">
+            <div *ngFor="let question of questions; trackBy:questionTrackFn" class="form-row">
+                <df-question [question]="question" [form]="testForm"></df-question>
+            </div>
+        </form>
     </div>
 </ttf-box>
 

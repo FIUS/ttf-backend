@@ -4,6 +4,7 @@ import { NavigationService, Breadcrumb } from '../navigation/navigation-service'
 import { SettingsService } from '../shared/settings/settings.service';
 
 import { Themes } from './themes';
+import { ApiService } from 'app/shared/rest/api.service';
 
 @Component({
   selector: 'ttf-settings',
@@ -15,11 +16,14 @@ export class SettingsComponent implements OnInit {
     navigateAfterCreation: boolean;
     theme: any = {};
     themeId: number = 0;
-    infoTimeout: -1;
-    alertTimeout: -1;
-    errorTimeout: -1;
+    infoTimeout: number = -1;
+    alertTimeout: number = -1;
+    errorTimeout: number = -1;
+    pinnedTypes: number[] = [];
 
-    constructor(private data: NavigationService, private settings: SettingsService) { }
+    itemTypes = [];
+
+    constructor(private data: NavigationService, private settings: SettingsService, private api: ApiService) { }
 
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Settings');
@@ -55,6 +59,26 @@ export class SettingsComponent implements OnInit {
             }
             this.errorTimeout = timeout;
         });
+        this.settings.getSetting('pinnedItemTypes').subscribe(pinnedTypes => {
+            if (pinnedTypes == null) {
+                pinnedTypes = [];
+            }
+            this.pinnedTypes = pinnedTypes;
+        });
+        this.api.getItemTypes().subscribe(itemTypes => this.itemTypes = itemTypes);
+    }
+
+    isTypePinned(type) {
+        return this.pinnedTypes.some(typeId => type.id === typeId);
+    }
+
+    toggleType(type) {
+        if (this.isTypePinned(type)) {
+            this.settings.setSetting('pinnedItemTypes', this.pinnedTypes.filter(typeId => typeId !== type.id));
+        } else {
+            this.pinnedTypes.push(type.id);
+            this.settings.setSetting('pinnedItemTypes', this.pinnedTypes);
+        }
     }
 
     changeColor() {

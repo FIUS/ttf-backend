@@ -28,6 +28,7 @@ import { LendingComponent } from './lending/lending.component';
 import { ItemLendingComponent } from './lending/item-lending.component';
 
 import { ItemsOverviewComponent } from './items/items-overview.component';
+import { ItemsOfTypeOverviewComponent } from './items/items-of-type-overview.component';
 import { ItemListComponent } from './items/item-list.component';
 import { ItemDetailComponent } from './items/item-detail.component';
 import { FileDetailComponent } from './items/file-detail.component';
@@ -52,6 +53,8 @@ import { AttributeDefinitionListComponent } from './attribute-definitions/attrib
 import { AttributeDefinitionDetailComponent } from './attribute-definitions/attribute-definition-detail.component';
 import { AttributeDefinitionEditComponent } from './attribute-definitions/attribute-definition-edit.component';
 import { LinkedAttributeDefinitionComponent } from './linked-attribute-definitions/linked-attribute-definitions.component';
+
+import { AttributeDefinitionTitlePipe } from './attribute-definitions/attribute-title.pipe';
 
 import { AppComponent } from './app.component';
 
@@ -81,6 +84,7 @@ import { AppComponent } from './app.component';
         ItemLendingComponent,
 
         ItemsOverviewComponent,
+        ItemsOfTypeOverviewComponent,
         ItemListComponent,
         ItemDetailComponent,
         FileDetailComponent,
@@ -105,6 +109,8 @@ import { AppComponent } from './app.component';
         AttributeDefinitionDetailComponent,
         AttributeDefinitionEditComponent,
         LinkedAttributeDefinitionComponent,
+
+        AttributeDefinitionTitlePipe
     ],
     imports: [
         HttpModule,

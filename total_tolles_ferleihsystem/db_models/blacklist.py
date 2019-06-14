@@ -28,18 +28,15 @@ class BlacklistToItemType (DB.Model):
 
     user_id = DB.Column(DB.Integer, DB.ForeignKey('Blacklist.id'), primary_key=True)
     item_type_id = DB.Column(DB.Integer, DB.ForeignKey('ItemType.id'), primary_key=True)
-    end_time = DB.Column(DB.DateTime, nullable=True)
+    end_time = DB.Column(DB.Integer, nullable=True)
     reason = DB.Column(DB.Text, nullable=True)
 
-    user = DB.relationship('Blacklist', backref=DB.backref('_item_types', lazy='joined',
+    user = DB.relationship('Blacklist', lazy='select', backref=DB.backref('_item_types', lazy='select',
                                                            single_parent=True, cascade="all, delete-orphan"))
     item_type = DB.relationship('ItemType', lazy='joined')
 
-    def __init__(self, user: Blacklist, item_type: ItemType, end_time: any=None, reason: str=None):
-        #TODO Fabi pls FIX duration time
+    def __init__(self, user: Blacklist, item_type: ItemType, end_time: int=None, reason: str=None):
         self.user = user
         self.item_type = item_type
-
-        if self.end_time != None:
-            self.end_time = end_time
-            self.reason = reason
+        self.reason = reason
+        self.end_time = end_time

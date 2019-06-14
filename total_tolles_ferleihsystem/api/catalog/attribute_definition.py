@@ -1,15 +1,17 @@
 """
 This module contains all API endpoints for the namespace 'attribute_definition'
 """
+import time
 
 from flask import request
 from flask_restplus import Resource, abort, marshal
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from .. import API, satisfies_role
 from ..models import ATTRIBUTE_DEFINITION_GET, ATTRIBUTE_DEFINITION_POST, ATTRIBUTE_DEFINITION_PUT, ATTRIBUTE_DEFINITION_VALUES
-from ... import DB
+from ... import DB, APP
 from ...login import UserRole
 from ...db_models.item import ItemToAttributeDefinition
 from ...db_models.attributeDefinition import AttributeDefinition
@@ -35,8 +37,21 @@ class AttributeDefinitionList(Resource):
         """
         Get a list of all attribute definitions currently in the system
         """
+        base_query = AttributeDefinition.query
         test_for = request.args.get('deleted', 'false') == 'true'
-        return AttributeDefinition.query.filter(AttributeDefinition.deleted == test_for).order_by(AttributeDefinition.name).all()
+        if test_for:
+            base_query = base_query.filter(AttributeDefinition.deleted_time != None)
+        else:
+            base_query = base_query.filter(AttributeDefinition.deleted_time == None)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((AttributeDefinition.visible_for == 'all') | (AttributeDefinition.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(AttributeDefinition.visible_for == 'all')
+
+        return base_query.order_by(AttributeDefinition.name).all()
 
     @jwt_required
     @satisfies_role(UserRole.ADMIN)
@@ -55,8 +70,10 @@ class AttributeDefinitionList(Resource):
             return marshal(new, ATTRIBUTE_DEFINITION_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
 @ANS.route('/<int:definition_id>/')
@@ -73,8 +90,18 @@ class AttributeDefinitionDetail(Resource):
         """
         Get a single attribute definition
         """
-        attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
+        base_query = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((AttributeDefinition.visible_for == 'all') | (AttributeDefinition.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(AttributeDefinition.visible_for == 'all')
+
+        attribute = base_query.first()
         if attribute is None:
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
         return attribute
 
@@ -126,6 +153,7 @@ class AttributeDefinitionDetail(Resource):
         """
         attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if attribute is None:
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
         attribute.deleted = False
         DB.session.commit()
@@ -143,6 +171,7 @@ class AttributeDefinitionDetail(Resource):
         """
         attribute = AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first()
         if attribute is None:
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
         attribute.update(**request.get_json())
         try:
@@ -150,8 +179,10 @@ class AttributeDefinitionDetail(Resource):
             return marshal(attribute, ATTRIBUTE_DEFINITION_GET), 200
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
+                APP.logger.info('Name is not unique. %s', err)
                 abort(409, 'Name is not unique!')
+            APP.logger.error('SQL Error: %s', err)
             abort(500)
 
 
@@ -168,7 +199,18 @@ class AttributeDefinitionValues(Resource):
         """
         Get all values of this attribute definition
         """
-        if AttributeDefinition.query.filter(AttributeDefinition.id == definition_id).first() is None:
+        base_query = AttributeDefinition.query.options(joinedload('_item_to_attribute_definitions').joinedload('item')).filter(AttributeDefinition.id == definition_id)
+
+        # auth check
+        if UserRole(get_jwt_claims()) != UserRole.ADMIN:
+            if UserRole(get_jwt_claims()) == UserRole.MODERATOR:
+                base_query = base_query.filter((AttributeDefinition.visible_for == 'all') | (AttributeDefinition.visible_for == 'moderator'))
+            else:
+                base_query = base_query.filter(AttributeDefinition.visible_for == 'all')
+
+        attributeDefinition = base_query.first()
+        if attributeDefinition is None:
+            APP.logger.debug('Requested attribute not found for id: %s !', definition_id)
             abort(404, 'Requested attribute not found!')
 
-        return [item.value for item in DB.session.query(ItemToAttributeDefinition.value).filter(ItemToAttributeDefinition.attribute_definition_id == definition_id).distinct()]
+        return list(set([itad.value for itad in attributeDefinition._item_to_attribute_definitions])).sort()

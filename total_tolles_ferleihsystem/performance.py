@@ -11,7 +11,7 @@ from . import APP
 from typing import Any, List
 
 
-QueryRecord = namedtuple('QueryRecord', ['duration', 'statement', 'write'])
+QueryRecord = namedtuple('QueryRecord', ['duration', 'statement', 'write', 'params'])
 
 
 class RequestPerformance:
@@ -47,10 +47,10 @@ class RequestPerformance:
     def start_query(self):
         self.query_start = time()
 
-    def end_query(self, statement):
+    def end_query(self, statement, parameters):
         query_end = time()
         write = not statement.upper().startswith('SELECT')
-        self.queries.append(QueryRecord(query_end - self.query_start, statement, write))
+        self.queries.append(QueryRecord(query_end - self.query_start, statement, write, parameters))
         self.query_start = query_end
 
     def start_view_function(self):
@@ -82,8 +82,8 @@ class RequestPerformance:
             longest_query_duration = self.queries[0].duration
             methodToLogWith(f'performance report: duration {self.duration: 2.2f}s, {time_in_view}duration without queries {duration_wo_queries: 2.2f}s, query-duration {tot_query_duration: 2.2f}s, {q_number: 2d} queries ({q_write_number: 2d} write), longest query {longest_query_duration: 2.2f}s, url {method:6} {url}')
             for q in self.queries:
-                if q.duration > 1:
-                    methodToLogWith(f'performance report: long query detected: duration {q.duration: 2.2f}s, statement "{q.statement}"')
+                if q.duration > APP.config.get('LONG_REQUEST_THRESHHOLD', 1):
+                    methodToLogWith(f'performance report: long query detected: duration {q.duration: 2.2f}s, statement "{q.statement}", params: {q.params}')
         else:
             methodToLogWith(f'performance report: duration {self.duration: 2.2f}s, {time_in_view}url {method} {url}')
 
@@ -116,7 +116,7 @@ def before_query(conn, cursor, statement, parameters, context, executemany):
 def after_query(conn, cursor, statement, parameters, context, executemany):
     r_perf: RequestPerformance = g.get('ttf_request_performance')
     if r_perf is not None:
-        r_perf.end_query(statement)
+        r_perf.end_query(statement, parameters)
 
 
 def record_view_performance():
