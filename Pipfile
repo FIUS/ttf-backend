@@ -1,0 +1,33 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[scripts]
+#webpack-build = "cd total_tolles_ferleihsystem && npm run build"
+#webpack-dev = "cd total_tolles_ferleihsystem && npm run start"
+drop-db = "flask drop_db"
+upgrade-db = "flask db upgrade"
+create-migration = "flask db migrate"
+start = "flask run"
+
+[dev-packages]
+jedi = "*"
+mypy = "*"
+nose = "*"
+pep8 = "*"
+pylint = "*"
+
+[packages]
+flask-restplus = "==0.12.1"
+celery = "==4.1.1"
+ldap3 = "==2.5"
+Flask = "==1.0.2"
+Flask-SQLAlchemy = "==2.3.1"
+Flask-Migrate = "==2.2.1"
+Flask-Webpack = "==0.1.0"
+Flask-Cors = "==3.0.6"
+Flask-JWT-Extended = "==3.12.1"
+Flask-Bcrypt = "==0.7.1"
+total-tolles-ferleihsystem = {editable = true,path = "."}
+
