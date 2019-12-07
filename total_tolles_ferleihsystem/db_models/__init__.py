@@ -13,7 +13,7 @@ DB_COMMAND_LOGGER = getLogger('flask.app.db')  # type: Logger
 STD_STRING_SIZE = 190  # Max size that allows Indices while using utf8mb4 in MySql DB
 
 
-from . import attributeDefinition, blacklist, item, itemType, tag, settings
+from . import attributeDefinition, blacklist, item, itemType, ruleEngine, settings, tag
 
 
 if APP.config.get('SQLALCHEMY_DATABASE_URI', '').startswith('sqlite://'):
