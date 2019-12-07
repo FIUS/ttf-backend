@@ -1,7 +1,7 @@
 
-import {throwError as observableThrowError,  Observable } from 'rxjs';
+import { throwError as observableThrowError,  Observable } from 'rxjs';
 
-import {catchError, publishReplay, map} from 'rxjs/operators';
+import { catchError, publishReplay, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -37,7 +37,7 @@ export class BaseApiService {
 
     private base: string = (window as any).basePath;
 
-    private runningRequests: Map<string, Observable<ApiObject | ApiObject[]>> = new Map<string, Observable<ApiObject | ApiObject[]>>();
+    private runningRequests: Map<string, Observable<any>> = new Map<string, Observable<unknown>>();
 
     constructor(private http: HttpClient) {}
 
@@ -89,7 +89,7 @@ export class BaseApiService {
         return { headers: headers };
     }
 
-    get(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, params?): Observable<ApiObject | ApiObject[]> {
+    get<T>(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, params?): Observable<T> {
         url = this.extractUrl(url);
         if (this.runningRequests.has(url) && params == null) {
             return this.runningRequests.get(url);
@@ -98,11 +98,12 @@ export class BaseApiService {
         if (params != null) {
             options.params = params;
         }
-        const request = this.http.get(url, options).pipe(
-            map((res: Response) => {
+        const request = this.http.get<T>(url, options).pipe(
+            map((res) => {
                 this.runningRequests.delete(url as string);
-                return res.json();
-            }),catchError((error: any) => {
+                return res;
+            }),
+            catchError((error: any) => {
                 this.runningRequests.delete(url as string);
                 if (error.status != null) {
                     return observableThrowError({status: error.status,
@@ -110,16 +111,17 @@ export class BaseApiService {
                                 JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return observableThrowError(error.json().error || 'Server error');
-            }),publishReplay(1),);
+            }),
+            publishReplay(1),
+        );
         this.runningRequests.set(url, request);
-        request.connect();
+        //request.connect();
         return request;
     }
 
-    put(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<ApiObject> {
+    put<T>(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<T> {
         url = this.extractUrl(url);
-        return this.http.put(url, JSON.stringify(data), this.headers(token)).pipe(
-            map((res: Response) => res.json()),
+        return this.http.put<T>(url, JSON.stringify(data), this.headers(token)).pipe(
             catchError((error: any) => {
                 if (error.status != null) {
                     return observableThrowError({status: error.status,
@@ -127,13 +129,13 @@ export class BaseApiService {
                                 JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return observableThrowError(error.json().error || 'Server error')
-            }),);
+            }),
+        );
     }
 
-    post(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<ApiObject> {
+    post<T>(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<T> {
         url = this.extractUrl(url);
-        return this.http.post(url, JSON.stringify(data), this.headers(token)).pipe(
-            map((res: Response) => res.json()),
+        return this.http.post<T>(url, JSON.stringify(data), this.headers(token)).pipe(
             catchError((error: any) => {
                 if (error.status != null) {
                     return observableThrowError({status: error.status,
@@ -141,14 +143,14 @@ export class BaseApiService {
                                 JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return observableThrowError(error.json().error || 'Server error')
-            }),);
+            }),
+        );
     }
 
-    uploadFile(url: string|LinkObject|ApiLinksObject|ApiObject, data: FormData, token?: string): Observable<any> {
+    uploadFile<T>(url: string|LinkObject|ApiLinksObject|ApiObject, data: FormData, token?: string): Observable<T> {
         url = this.extractUrl(url);
         const options = this.headers(token, false);
-        return this.http.post(url, data, options).pipe(
-            map((res: Response) => res.json()),
+        return this.http.post<T>(url, data, options).pipe(
             catchError((error: any) => {
                 if (error.status != null) {
                     return observableThrowError({status: error.status,
@@ -156,14 +158,15 @@ export class BaseApiService {
                                 JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return observableThrowError(error.json().error || 'Server error')
-            }),);
+            }),
+        );
     }
 
-    downloadFile(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<Response> {
+    downloadFile<T>(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<T> {
         url = this.extractUrl(url);
         const options = this.headers(token, false);
         options.responseType = 'blob'
-        return this.http.get(url, options).pipe(
+        return this.http.get<T>(url, options).pipe(
             catchError((error: any) => {
                 if (error.status != null) {
                     return observableThrowError({status: error.status,
@@ -171,17 +174,17 @@ export class BaseApiService {
                                 JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return observableThrowError(error || 'Server error')
-            }));
+            }),
+        );
     }
 
-    delete(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, data?): Observable<ApiObject> {
+    delete<T>(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, data?): Observable<T> {
         url = this.extractUrl(url);
         const options = this.headers(token);
         if (data != null) {
             options.body = data;
         }
-        return this.http.delete(url, options).pipe(
-            map((res: Response) => res.json()),
+        return this.http.delete<T>(url, options).pipe(
             catchError((error: any) => {
                 if (error.status != null) {
                     return observableThrowError({status: error.status,
@@ -189,6 +192,7 @@ export class BaseApiService {
                                 JSON.parse(error._body).message : error.status + ' Server error'});
                 }
                 return observableThrowError(error.json().error || 'Server error')
-            }),);
+            }),
+        );
     }
 }
