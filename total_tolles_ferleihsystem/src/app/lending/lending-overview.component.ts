@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { StagingService } from '../navigation/staging-service';

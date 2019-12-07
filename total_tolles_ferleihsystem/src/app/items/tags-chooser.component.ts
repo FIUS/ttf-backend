@@ -1,5 +1,5 @@
 import { Component, forwardRef, Input, OnInit, OnDestroy, Output, EventEmitter, OnChanges } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { myDropdownComponent } from '../shared/dropdown/dropdown.component';
 import { ApiObject } from '../shared/rest/api-base.service';

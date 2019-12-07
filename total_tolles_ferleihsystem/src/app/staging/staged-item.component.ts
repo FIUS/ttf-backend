@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { StagingService } from '../navigation/staging-service';
 import { ApiService } from '../shared/rest/api.service';

@@ -1,6 +1,8 @@
+
+import {of as observableOf,  Observable ,  AsyncSubject } from 'rxjs';
+
+import {mergeMap} from 'rxjs/operators';
 import { Injectable, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Rx';
-import { AsyncSubject } from 'rxjs/AsyncSubject';
 
 import { ApiService } from '../rest/api.service';
 
@@ -38,9 +40,9 @@ export class QuestionService implements OnInit {
             this.swagger = this.api.getSpec();
         }
 
-        return this.swagger.flatMap(spec => {
+        return this.swagger.pipe(mergeMap(spec => {
             if (spec == undefined) {
-                return Observable.of([]);
+                return observableOf([]);
             }
 
             if (this.observables[model] == undefined) {
@@ -50,7 +52,7 @@ export class QuestionService implements OnInit {
             this.parseModel(spec, model);
 
             return this.observables[model].asObservable();
-        })
+        }))
 
     }
 
@@ -59,9 +61,9 @@ export class QuestionService implements OnInit {
             this.swagger = this.api.getSpec();
         }
 
-        return this.swagger.flatMap(spec => {
+        return this.swagger.pipe(mergeMap(spec => {
             if (spec == undefined) {
-                return Observable.of([]);
+                return observableOf([]);
             }
 
             const result = new AsyncSubject<QuestionBase<any>[]>();
@@ -74,7 +76,7 @@ export class QuestionService implements OnInit {
             result.complete();
 
             return result;
-        });
+        }));
 
     }
 

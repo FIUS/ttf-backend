@@ -1,5 +1,7 @@
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, Input, OnChanges } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { ApiService } from '../shared/rest/api.service';
 import { ApiObject } from '../shared/rest/api-base.service';
@@ -47,11 +49,11 @@ export class FileDetailComponent implements OnChanges, OnDestroy {
     }
 
     save = () => {
-        this.api.putFile(this.fileID, this.newFileData).take(1).subscribe();
+        this.api.putFile(this.fileID, this.newFileData).pipe(take(1)).subscribe();
     }
 
     delete = () => {
-        this.api.deleteFile(this.file, this.item).take(1).subscribe();
+        this.api.deleteFile(this.file, this.item).pipe(take(1)).subscribe();
     }
 
 }

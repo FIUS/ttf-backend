@@ -1,3 +1,5 @@
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup } from '@angular/forms';
@@ -53,10 +55,10 @@ export class StagingComponent implements OnInit {
                     }
                 }
             ]
-        }).take(1).subscribe(questions => {
+        }).pipe(take(1)).subscribe(questions => {
             this.questions = questions;
             this.form = this.qcs.toFormGroup(this.questions);
-            this.staging.currentStaged.take(1).subscribe(this.updateStagedItems);
+            this.staging.currentStaged.pipe(take(1)).subscribe(this.updateStagedItems);
             this.form.patchValue({
                 moderator: this.jwt.username(),
             });

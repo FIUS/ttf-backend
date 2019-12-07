@@ -1,7 +1,10 @@
+
+import {timer as observableTimer,  Observable, Subject, BehaviorSubject, } from 'rxjs';
+
+import {filter, take} from 'rxjs/operators';
 import { Injectable, OnInit, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
-import { Observable, Subject, BehaviorSubject, } from 'rxjs/Rx';
 
 
 @Injectable()
@@ -22,14 +25,14 @@ export class JWTService implements OnInit {
 
 
     constructor (private injector: Injector, private router: Router) {
-        Observable.timer(1).take(1).subscribe((() => {
+        observableTimer(1).pipe(take(1)).subscribe((() => {
             this.ngOnInit()
         }).bind(this))
     }
 
     ngOnInit(): void {
         this.api = this.injector.get(ApiService);
-        Observable.timer(1, 60000).subscribe((() => {
+        observableTimer(1, 60000).subscribe((() => {
             if (this.loggedIn()) {
                 this.userSource.next(this.username());
                 let future = new Date();
@@ -88,7 +91,7 @@ export class JWTService implements OnInit {
     }
 
     getValidApiToken() {
-        return this.apiTokenSource.asObservable().filter(token => {
+        return this.apiTokenSource.asObservable().pipe(filter(token => {
             if (token == null) { //filter out null
                 return false;
             }
@@ -99,7 +102,7 @@ export class JWTService implements OnInit {
                 return false;
             }
             return true;
-        }).take(1);
+        }),take(1),);
     }
 
     private tokenToJson(token: string) {

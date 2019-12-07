@@ -1,8 +1,10 @@
+
+import {take} from 'rxjs/operators';
 import { Component, OnChanges, Input, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 import { NumberQuestion } from '../shared/forms/question-number';
 import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
 import { JWTService } from '../shared/rest/jwt.service';
@@ -16,7 +18,7 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
     private subscription: Subscription;
     private canContainSubscription: Subscription;
 
-    @ViewChild(DynamicFormComponent) form;
+    @ViewChild(DynamicFormComponent, { static: true }) form;
 
     typeQuestion: NumberQuestion = new NumberQuestion();
 
@@ -69,7 +71,7 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
     }
 
     save = (event) => {
-        this.api.putItemType(this.itemTypeID, event).take(1).subscribe(() => {
+        this.api.putItemType(this.itemTypeID, event).pipe(take(1)).subscribe(() => {
             this.form.saveFinished(true);
         }, () => {
             this.form.saveFinished(false);
@@ -77,7 +79,7 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
     }
 
     delete = () => {
-        this.api.deleteItemType(this.itemType.id).take(1).subscribe(() => this.router.navigate(['item-types']));
+        this.api.deleteItemType(this.itemType.id).pipe(take(1)).subscribe(() => this.router.navigate(['item-types']));
     }
 
 }

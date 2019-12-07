@@ -1,7 +1,8 @@
+
+import {take, map} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { ApiService } from '../rest/api.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Rx';
+import { BehaviorSubject ,  Observable } from 'rxjs';
 import { JWTService } from '../rest/jwt.service';
 
 
@@ -24,17 +25,17 @@ export class SettingsService {
     }
 
     getSetting(key: string): Observable<any> {
-        return this.settingsSource.map(settings => {
+        return this.settingsSource.pipe(map(settings => {
             if (settings != null) {
                 return settings[key];
             } else {
                 return undefined;
             }
-        });
+        }));
     }
 
     setSetting(key: string, value: any) {
-        this.settingsSource.take(1).subscribe(settings => {
+        this.settingsSource.pipe(take(1)).subscribe(settings => {
             settings[key] = value;
             const settingsString = JSON.stringify(settings);
             this.settingsSource.next(settings);

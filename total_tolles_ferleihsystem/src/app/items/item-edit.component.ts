@@ -1,8 +1,10 @@
+
+import {take} from 'rxjs/operators';
 import { Component, OnChanges, Input, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 import { DynamicFormComponent } from '../shared/forms/dynamic-form/dynamic-form.component';
 
 @Component({
@@ -13,7 +15,7 @@ export class ItemEditComponent implements OnChanges, OnDestroy {
 
     private subscription: Subscription;
 
-    @ViewChild(DynamicFormComponent) form;
+    @ViewChild(DynamicFormComponent, { static: true }) form;
 
     @Input() itemID: number;
 
@@ -40,7 +42,7 @@ export class ItemEditComponent implements OnChanges, OnDestroy {
     }
 
     save = (event) => {
-        this.api.putItem(this.item.id, event).take(1).subscribe(() => {
+        this.api.putItem(this.item.id, event).pipe(take(1)).subscribe(() => {
             this.form.saveFinished(true);
         }, () => {
             this.form.saveFinished(false);
@@ -48,7 +50,7 @@ export class ItemEditComponent implements OnChanges, OnDestroy {
     }
 
     delete = () => {
-        this.api.deleteItem(this.item.id).take(1).subscribe(() => this.router.navigate(['items']));
+        this.api.deleteItem(this.item.id).pipe(take(1)).subscribe(() => this.router.navigate(['items']));
     };
 
 }

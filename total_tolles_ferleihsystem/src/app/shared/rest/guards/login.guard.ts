@@ -1,7 +1,8 @@
+
+import {timer as observableTimer,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Router, CanActivate } from '@angular/router';
 import { JWTService } from '../jwt.service';
-import { Observable } from 'rxjs/Rx';
 
 
 @Injectable()
@@ -16,7 +17,7 @@ export class LoginGuard implements CanActivate {
         }
 
         // not logged in so redirect to login page
-        Observable.timer(300).subscribe(() => {
+        observableTimer(300).subscribe(() => {
             if (!this.jwt.loggedIn()) {
                 this.router.navigate(['/login']);
             }
