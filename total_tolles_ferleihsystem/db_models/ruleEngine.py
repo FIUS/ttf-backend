@@ -22,16 +22,15 @@ class Rule(DB.Model):
     __tablename__ = 'Rule'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    name = DB.Column(DB.String(STD_STRING_SIZE))
+    name = DB.Column(DB.String(STD_STRING_SIZE), unique=True)
     description = DB.Column(DB.Text, nullable=True)
     last_run = DB.Column(DB.Integer, nullable=True) # seconds since epoch
     next_run = DB.Column(DB.Integer, nullable=True) # seconds since epoch
     execution_schedule = DB.Column(DB.Text, nullable=True)
 
-    def __init__(self, name: str, description: str, next_run: int, execution_schedule: str):
+    def __init__(self, name: str, description: str, execution_schedule: str):
         self.name = name
         self.description = description
-        self.next_run = next_run
         self.execution_schedule = execution_schedule
 
 
@@ -69,8 +68,8 @@ class SubRule(DB.Model):
     rule = DB.relationship('Rule', lazy='select', backref=DB.backref('sub_rules', lazy='joined'))
     variable = DB.relationship('KeyValueStore', lazy='joined')
     type = DB.relationship('ItemType', lazy='select')
-    add_tag = DB.relationship('Tag', lazy='select')
-    remove_tag = DB.relationship('Tag', lazy='select')
+    add_tag = DB.relationship('Tag', foreign_keys=[add_tag_id], lazy='select')
+    remove_tag = DB.relationship('Tag', foreign_keys=[remove_tag_id], lazy='select')
 
     __table_args__ = (
         UniqueConstraint('rule_id', 'position', name='_rule_id_position_uc'),
