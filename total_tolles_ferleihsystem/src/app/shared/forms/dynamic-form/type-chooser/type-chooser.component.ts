@@ -6,7 +6,7 @@ import { ApiService } from '../../../rest/api.service';
 
 import { QuestionBase } from '../../question-base';
 import { myDropdownComponent } from '../../../dropdown/dropdown.component';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 
 
@@ -23,7 +23,7 @@ export class TypeChooserComponent implements ControlValueAccessor, OnInit, OnDes
 
     private typeSubscription: Subscription;
 
-    @ViewChild(myDropdownComponent) dropdown: myDropdownComponent
+    @ViewChild(myDropdownComponent, { static: true }) dropdown: myDropdownComponent
 
     @Input() question: QuestionBase<any>;
     @Input() allowDeselect: boolean = false;

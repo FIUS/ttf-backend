@@ -1,7 +1,9 @@
+
+import {timer as observableTimer,  Subscription, Observable } from 'rxjs';
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
-import { Subscription, Observable } from 'rxjs/Rx';
 
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { StagingService } from '../navigation/staging-service';
@@ -9,7 +11,7 @@ import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { ApiObject } from '../shared/rest/api-base.service';
 import { SettingsService } from '../shared/settings/settings.service';
-import { timeout } from 'rxjs/operator/timeout';
+
 
 @Component({
   selector: 'ttf-item-detail',
@@ -267,11 +269,11 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     }
 
     save = () => {
-        const sub = this.api.postItem(this.newItemData).take(1).subscribe(data => {
-            this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
+        const sub = this.api.postItem(this.newItemData).pipe(take(1)).subscribe(data => {
+            this.settings.getSetting('navigateAfterCreation').pipe(take(1)).subscribe(navigate => {
                 this.addItemToContained(data, this.item);
                 if (navigate) {
-                    Observable.timer(150).take(1).subscribe(() => {
+                    observableTimer(150).pipe(take(1)).subscribe(() => {
                         this.router.navigate(['items', data.id]);
                     });
                 }

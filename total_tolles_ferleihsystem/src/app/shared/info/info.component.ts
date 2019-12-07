@@ -1,7 +1,10 @@
+
+import {timer as observableTimer,  Observable, } from 'rxjs';
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { InfoService, Message } from './info.service';
-import { Observable, } from 'rxjs/Rx';
-import { timeout } from 'rxjs/operator/timeout';
+
 
 @Component({
   selector: 'ttf-info',
@@ -21,7 +24,7 @@ export class InfoComponent implements OnInit {
     addMessage(message: Message) {
         this.messages.push(message);
         if (message.timeout != null && message.timeout > 0) {
-            Observable.timer(message.timeout).take(1).subscribe((() => this.remove(message)).bind(this));
+            observableTimer(message.timeout).pipe(take(1)).subscribe((() => this.remove(message)).bind(this));
         }
     }
 

@@ -1,7 +1,9 @@
+
+import {take} from 'rxjs/operators';
 import { Component, Input, Output, OnInit, OnChanges, SimpleChanges, EventEmitter, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { QuestionBase } from '../question-base';
 import { QuestionService } from '../question.service';
@@ -32,7 +34,7 @@ export class DynamicFormComponent implements OnInit, OnChanges {
 
     @Output() save: EventEmitter<any> = new EventEmitter<any>();
 
-    @ViewChild(SaveButtonComponent) savebutton: SaveButtonComponent;
+    @ViewChild(SaveButtonComponent, { static: false }) savebutton: SaveButtonComponent;
 
     constructor(private qcs: QuestionControlService, private qs: QuestionService) { }
 
@@ -84,7 +86,7 @@ export class DynamicFormComponent implements OnInit, OnChanges {
                 this.valueChangeSubscription.unsubscribe();
             }
             this.form.patchValue(patched);
-            this.valueChangeSubscription = this.form.valueChanges.take(1).subscribe(() => {
+            this.valueChangeSubscription = this.form.valueChanges.pipe(take(1)).subscribe(() => {
                 if (this.savebutton != null) {
                     this.savebutton.resetStatus();
                 }

@@ -1,3 +1,7 @@
+
+import {forkJoin as observableForkJoin, from as observableFrom,  Subject, Observable, AsyncSubject } from 'rxjs';
+
+import {mergeMap, concatAll, debounceTime, distinct, toArray, take, map} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
@@ -9,7 +13,6 @@ import { ApiService } from '../shared/rest/api.service';
 import { TypeQuestion } from '../shared/forms/question-type';
 import { NumberQuestion } from '../shared/forms/question-number';
 import { StagingService } from '../navigation/staging-service';
-import { Subject, Observable, AsyncSubject } from 'rxjs/Rx';
 
 @Component({
     selector: 'ttf-search',
@@ -56,7 +59,7 @@ export class SearchComponent implements OnChanges {
     constructor(private api: ApiService, private staging: StagingService,
                 private qs: QuestionService, private qcs: QuestionControlService,
                 private changeDetector: ChangeDetectorRef) {
-        this.changeDetectionBatchSubject.asObservable().debounceTime(100).subscribe(() => this.runChangeDetection());
+        this.changeDetectionBatchSubject.asObservable().pipe(debounceTime(100)).subscribe(() => this.runChangeDetection());
     }
 
     private runChangeDetection() {
@@ -148,13 +151,13 @@ export class SearchComponent implements OnChanges {
     updateAttributes() {
         const typeAndTagsSubject = new Subject<ApiObject>();
 
-        typeAndTagsSubject.flatMap(typeOrTag => {
-            return this.api.getLinkedAttributeDefinitions(typeOrTag).take(1)
-        }).map(attributes => Observable.from(attributes))
-        .concatAll()
-        .distinct(attr => attr.id)
-        .toArray()
-        .map(attrs => attrs.sort((a, b) => a.type.localeCompare(b.type)).sort((a, b) => a.name.localeCompare(b.name)))
+        typeAndTagsSubject.pipe(mergeMap(typeOrTag => {
+            return this.api.getLinkedAttributeDefinitions(typeOrTag).pipe(take(1))
+        }),map(attributes => observableFrom(attributes)),
+        concatAll(),
+        distinct(attr => attr.id),
+        toArray(),
+        map(attrs => attrs.sort((a, b) => a.type.localeCompare(b.type)).sort((a, b) => a.name.localeCompare(b.name))),)
         .subscribe(attributes => {
             this.attributes = attributes;
             attributes.forEach(this.getQuestion);
@@ -163,7 +166,7 @@ export class SearchComponent implements OnChanges {
 
         const finished = [];
         if (this.type >= 0) {
-            const obs = this.api.getItemType(this.type).take(1);
+            const obs = this.api.getItemType(this.type).pipe(take(1));
             obs.subscribe(itemType => {
                 typeAndTagsSubject.next(itemType);
             });
@@ -171,14 +174,14 @@ export class SearchComponent implements OnChanges {
         }
         if (this.tags != null ) {
             this.tags.forEach(tagID => {
-                const obs = this.api.getTag(tagID).take(1);
+                const obs = this.api.getTag(tagID).pipe(take(1));
                 obs.subscribe(itemTag => {
                     typeAndTagsSubject.next(itemTag);
                 });
                 finished.push(obs);
             });
         }
-        Observable.forkJoin(finished).subscribe(() => typeAndTagsSubject.complete());
+        observableForkJoin(finished).subscribe(() => typeAndTagsSubject.complete());
     }
 
     getQuestion = (attribute_definition) => {
@@ -205,7 +208,7 @@ export class SearchComponent implements OnChanges {
             properties: {
                 [attribute_definition.name]: schema,
             }
-        }).take(1).subscribe(questions => {
+        }).pipe(take(1)).subscribe(questions => {
             questions.forEach(qstn => {
                 if (qstn.key === attribute_definition.name) {
                     qstn.autocompleteData = this.api.getAttributeAutocomplete(attribute_definition);
@@ -259,15 +262,15 @@ export class SearchComponent implements OnChanges {
      * @param item the item that was scrolled into view
      */
     loadData(item) {
-        this.api.getItemType(item.type_id, 'all', true).take(1).subscribe(itemType => {
+        this.api.getItemType(item.type_id, 'all', true).pipe(take(1)).subscribe(itemType => {
             this.itemTypes.set(itemType.id, itemType);
             this.changeDetectionBatchSubject.next();
         });
-        this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
+        this.api.getTagsForItem(item, 'errors', true).pipe(take(1)).subscribe(tags => {
             this.itemTags.set(item.id, tags);
             this.changeDetectionBatchSubject.next();
         });
-        this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
+        this.api.getAttributes(item, 'errors', true).pipe(take(1)).subscribe(attributes => {
             this.itemAttributes.set(item.id, attributes);
             this.changeDetectionBatchSubject.next();
         });

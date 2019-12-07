@@ -11,7 +11,7 @@ export class FileSelectorComponent {
     @Input() allowedMimeTypes: Set<string> = new Set<string>(['application/pdf']);
     @Output() file: EventEmitter<File> = new EventEmitter<File>();
 
-    @ViewChild('fileInput') fileInput;
+    @ViewChild('fileInput', { static: true }) fileInput;
 
     selectedFile: File;
 

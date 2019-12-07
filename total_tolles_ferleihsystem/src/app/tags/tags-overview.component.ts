@@ -1,3 +1,5 @@
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { ApiService } from '../shared/rest/api.service';
@@ -28,7 +30,7 @@ export class TagsOverviewComponent implements OnInit {
 
     save = () => {
         const sub = this.api.postTag(this.newTagData).subscribe(data => {
-            this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
+            this.settings.getSetting('navigateAfterCreation').pipe(take(1)).subscribe(navigate => {
                 if (navigate) {
                     this.router.navigate(['tags', data.id]);
                 }

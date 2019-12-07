@@ -1,9 +1,12 @@
+
+import {timer as observableTimer,  Observable } from 'rxjs';
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { JWTService } from '../shared/rest/jwt.service';
 import { ApiService } from '../shared/rest/api.service';
 import { ApiObject } from '../shared/rest/api-base.service';
-import { Observable } from 'rxjs';
 import { SettingsService } from 'app/shared/settings/settings.service';
 
 @Component({
@@ -34,18 +37,18 @@ export class HomeComponent implements OnInit {
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Home');
         this.data.changeBreadcrumbs([]);
-        this.api.getLentItems('errors').take(2).subscribe(items => {
+        this.api.getLentItems('errors').pipe(take(2)).subscribe(items => {
             this.lentItems = items;
         });
-        this.api.getItemTypes().take(2).subscribe(types => {
+        this.api.getItemTypes().pipe(take(2)).subscribe(types => {
             types.forEach(itemType => this.itemTypes.set(itemType.id, itemType));
         });
-        this.settings.getSetting('pinnedItemTypes').take(2).subscribe(pinnedTypes => {
+        this.settings.getSetting('pinnedItemTypes').pipe(take(2)).subscribe(pinnedTypes => {
             if (pinnedTypes != null) {
                 this.pinnedTypes = pinnedTypes;
             }
         });
-        Observable.timer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
+        observableTimer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
     }
 
     itemOverdue(item: ApiObject): boolean {

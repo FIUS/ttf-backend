@@ -1,3 +1,5 @@
+
+import {take} from 'rxjs/operators';
 import { Component, ViewChild, Input } from '@angular/core';
 import { NavigationService, Breadcrumb } from '../navigation/navigation-service';
 import { myDialogComponent } from '../shared/dialog/dialog.component';
@@ -13,7 +15,7 @@ export class AttributeDefinitionCreateComponent {
 
     @Input() allowAutoNavigate: boolean = false;
 
-    @ViewChild(myDialogComponent) dialog: myDialogComponent;
+    @ViewChild(myDialogComponent, { static: true }) dialog: myDialogComponent;
 
     private newAttributeDefinitionData;
 
@@ -47,7 +49,7 @@ export class AttributeDefinitionCreateComponent {
     save = () => {
         const sub = this.api.postAttributeDefinition(this.newAttributeDefinitionData).subscribe(data => {
             if (this.allowAutoNavigate) {
-                this.settings.getSetting('navigateAfterCreation').take(1).subscribe(navigate => {
+                this.settings.getSetting('navigateAfterCreation').pipe(take(1)).subscribe(navigate => {
                     if (navigate) {
                         this.router.navigate(['attribute-definitions', data.id]);
                     }

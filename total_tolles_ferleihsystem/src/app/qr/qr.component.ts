@@ -1,6 +1,6 @@
 import {Component, ViewChild, ViewEncapsulation, OnInit, Output, EventEmitter, OnDestroy, NgZone} from '@angular/core';
 import { BrowserQRCodeReader, Result } from '@zxing/library';
-import { Subject, Subscription } from 'rxjs/Rx';
+import { Subject, Subscription } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 class QrReader extends BrowserQRCodeReader {
@@ -80,7 +80,7 @@ export class QrComponent implements OnInit, OnDestroy {
 
     isActive = true;
 
-    @ViewChild('video') preview;
+    @ViewChild('video', { static: true }) preview;
 
     constructor(private zone: NgZone) {}
 

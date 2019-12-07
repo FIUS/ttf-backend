@@ -1,6 +1,9 @@
+
+import {timer as observableTimer,  Observable } from 'rxjs';
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NavigationService, Breadcrumb } from './navigation-service';
-import { Observable } from 'rxjs/Rx';
 
 
 @Component({
@@ -10,8 +13,8 @@ import { Observable } from 'rxjs/Rx';
 })
 export class BreadcrumbsComponent implements OnInit {
 
-    @ViewChild('home') home: ElementRef;
-    @ViewChild('bcContainer') bcContainer: ElementRef;
+    @ViewChild('home', { static: true }) home: ElementRef;
+    @ViewChild('bcContainer', { static: true }) bcContainer: ElementRef;
 
     hovered: boolean = false;
 
@@ -31,7 +34,7 @@ export class BreadcrumbsComponent implements OnInit {
     }
 
     scrollToBottom = () => {
-        Observable.timer(50).take(1).subscribe(() => {
+        observableTimer(50).pipe(take(1)).subscribe(() => {
             this.bcContainer.nativeElement.scrollTop = this.bcContainer.nativeElement.scrollHeight;
         });
     }

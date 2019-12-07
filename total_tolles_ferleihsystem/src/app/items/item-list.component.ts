@@ -1,5 +1,7 @@
+
+import {take, debounceTime} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { Subscription, Subject } from 'rxjs/Rx';
+import { Subscription, Subject } from 'rxjs';
 
 import { StagingService } from '../navigation/staging-service';
 
@@ -39,7 +41,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.changeDetectionBatchSubject.asObservable().debounceTime(100).subscribe(() => this.runChangeDetection());
+        this.changeDetectionBatchSubject.asObservable().pipe(debounceTime(100)).subscribe(() => this.runChangeDetection());
         this.api.getItemTypes() // refresh cached itemTypes
         this.subscription = this.api.getItems().subscribe(data => {
             const map = new Map<string, ApiObject[]>();
@@ -100,15 +102,15 @@ export class ItemListComponent implements OnInit, OnDestroy {
      * @param item the item that was scrolled into view
      */
     loadData(item) {
-        this.api.getItemType(item.type_id, 'all', true).take(1).subscribe(itemType => {
+        this.api.getItemType(item.type_id, 'all', true).pipe(take(1)).subscribe(itemType => {
             this.itemTypes.set(itemType.id, itemType);
             this.changeDetectionBatchSubject.next();
         });
-        this.api.getTagsForItem(item, 'errors', true).take(1).subscribe(tags => {
+        this.api.getTagsForItem(item, 'errors', true).pipe(take(1)).subscribe(tags => {
             this.itemTags.set(item.id, tags);
             this.changeDetectionBatchSubject.next();
         });
-        this.api.getAttributes(item, 'errors', true).take(1).subscribe(attributes => {
+        this.api.getAttributes(item, 'errors', true).pipe(take(1)).subscribe(attributes => {
             this.itemAttributes.set(item.id, attributes);
             this.changeDetectionBatchSubject.next();
         });

@@ -1,5 +1,7 @@
+
+import {take} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { ApiService } from '../shared/rest/api.service';
 import { ApiObject } from '../shared/rest/api-base.service';
@@ -24,10 +26,10 @@ export class ItemLendingComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
       if (this.item != null && this.item != null) {
-            this.api.getTagsForItem(this.item).take(1).subscribe(tags => {
+            this.api.getTagsForItem(this.item).pipe(take(1)).subscribe(tags => {
               this.tags = tags;
             });
-            this.api.getAttributes(this.item).take(1).subscribe(attributes => {
+            this.api.getAttributes(this.item).pipe(take(1)).subscribe(attributes => {
               this.attributes = attributes;
             });
         }

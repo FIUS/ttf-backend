@@ -1,7 +1,9 @@
+
+import {debounceTime, map, filter, take} from 'rxjs/operators';
 import { Component, OnChanges, Input, OnDestroy, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup } from '@angular/forms';
-import { Subscription, Observable } from 'rxjs/Rx';
+import { Subscription, Observable } from 'rxjs';
 
 import { ApiObject } from '../shared/rest/api-base.service';
 import { ApiService } from '../shared/rest/api.service';
@@ -75,7 +77,7 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
             properties: {
                 [attribute.attribute_definition.name]: schema,
             }
-        }).take(1).subscribe(questions => {
+        }).pipe(take(1)).subscribe(questions => {
             this.questions = questions;
             this.questions.forEach(qstn => {
                 if (qstn.key === attribute.attribute_definition.name) {
@@ -93,10 +95,10 @@ export class AttributeEditComponent implements OnChanges, OnDestroy {
             if (this.formStatusChangeSubscription != null) {
                 this.formStatusChangeSubscription.unsubscribe();
             }
-            this.formStatusChangeSubscription = this.form.statusChanges.filter(status => status === 'VALID').map(status => {
+            this.formStatusChangeSubscription = this.form.statusChanges.pipe(filter(status => status === 'VALID'),map(status => {
                 this.saved = false;
                 return JSON.stringify(this.form.value[attribute.attribute_definition.name]);
-            }).debounceTime(700).subscribe(value => {
+            }),debounceTime(700),).subscribe(value => {
                 this.api.putAttribute(this.item, this.attributeID, value);
             })
         });

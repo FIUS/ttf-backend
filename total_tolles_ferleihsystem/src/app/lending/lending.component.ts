@@ -4,7 +4,7 @@ import { NavigationService, Breadcrumb } from '../navigation/navigation-service'
 import { StagingService } from '../navigation/staging-service';
 import { ApiService } from '../shared/rest/api.service';
 import { JWTService } from '../shared/rest/jwt.service';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({

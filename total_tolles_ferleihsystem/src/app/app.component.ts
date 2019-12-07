@@ -10,7 +10,7 @@ import { SettingsService } from './shared/settings/settings.service';
 export class AppComponent implements OnInit {
     title = 'app';
 
-    @ViewChild('renewLoginDialog') loginDialog: myDialogComponent;
+    @ViewChild('renewLoginDialog', { static: true }) loginDialog: myDialogComponent;
     private password: string;
 
     style: any;
