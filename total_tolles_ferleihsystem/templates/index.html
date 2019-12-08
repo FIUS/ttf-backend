@@ -96,16 +96,23 @@
         </h1>
     </div>
 
-    <script src="{{ static_url_for('static', filename='runtime-es2015.js') }}" type="module"></script>
-    <script src="{{ static_url_for('static', filename='runtime-es5.js') }}" nomodule defer></script>
-    <script src="{{ static_url_for('static', filename='polyfills-es5.js') }}" nomodule defer></script>
-    <script src="{{ static_url_for('static', filename='polyfills-es2015.js') }}" type="module"></script>
-    <script src="{{ static_url_for('static', filename='styles-es2015.js') }}" type="module"></script>
-    <script src="{{ static_url_for('static', filename='styles-es5.js') }}" nomodule defer></script>
-    <script src="{{ static_url_for('static', filename='vendor-es2015.js') }}" type="module"></script>
-    <script src="{{ static_url_for('static', filename='vendor-es5.js') }}" nomodule defer></script>
-    <script src="{{ static_url_for('static', filename='main-es2015.js') }}" type="module"></script>
-    <script src="{{ static_url_for('static', filename='main-es5.js') }}" nomodule defer></script>
+    <script src="{{ static_url_for('static', filename='runtime.js') | bustcache }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='polyfills.js') | bustcache }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='styles.js') | bustcache }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='vendor.js') | bustcache }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='main.js') | bustcache }}" type="module"></script>
+    <!--
+        <script src="{{ static_url_for('static', filename='runtime-es2015.js') }}" type="module"></script>
+        <script src="{{ static_url_for('static', filename='runtime-es5.js') }}" nomodule defer></script>
+        <script src="{{ static_url_for('static', filename='polyfills-es2015.js') }}" type="module"></script>
+        <script src="{{ static_url_for('static', filename='polyfills-es5.js') }}" nomodule defer></script>
+        <script src="{{ static_url_for('static', filename='styles-es2015.js') }}" type="module"></script>
+        <script src="{{ static_url_for('static', filename='styles-es5.js') }}" nomodule defer></script>
+        <script src="{{ static_url_for('static', filename='vendor-es2015.js') }}" type="module"></script>
+        <script src="{{ static_url_for('static', filename='vendor-es5.js') }}" nomodule defer></script>
+        <script src="{{ static_url_for('static', filename='main-es2015.js') }}" type="module"></script>
+        <script src="{{ static_url_for('static', filename='main-es5.js') }}" nomodule defer></script>
+    -->
 </body>
 
 </html>

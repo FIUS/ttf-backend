@@ -6,6 +6,7 @@ from sys import platform
 from os import environ, path
 from logging import getLogger, Logger
 from logging.config import dictConfig
+from secrets import token_urlsafe
 
 from flask import Flask, logging
 from flask_sqlalchemy import SQLAlchemy
@@ -64,8 +65,18 @@ JWT: JWTManager = JWTManager(APP)
 # Setup Headers
 CORS(APP)
 
-
+# Javascript stuff
 FLASK_STATIC_DIGEST.init_app(APP)
+
+
+if APP.config['DEBUG']:
+    @APP.template_filter('bustcache')
+    def cache_busting_filter(s):
+        return s + '?chache-bust={}'.format(token_urlsafe(16))
+else:
+    @APP.template_filter('bustcache')
+    def cache_busting_filter(s):
+        return s
 
 # Setup Celery
 # pylint: disable=C0413
