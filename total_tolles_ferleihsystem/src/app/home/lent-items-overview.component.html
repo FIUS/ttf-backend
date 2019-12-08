@@ -1,0 +1,30 @@
+
+<div class="mh2 mv3 br2 shadow-5 ba b--black-10" *ngIf="lentItems?.length > 0">
+    <div class="ttf-box-header min-h2 mv0 pv2 ph3 flex items-center justify-between f4 br2 br--top">
+        <p class="mv0">Currently lent Items:</p>
+    </div>
+    <div class="max-h5 overflow-y-auto bt ged b--black-10">
+        <table class="w-100 table collapse ph3 pv2" body>
+            <tbody>
+                <tr>
+                    <th class="ph3 pv2 tl ttu">Item</th>
+                    <th class="ph3 pv2 tl ttu">Due</th>
+                    <th class="ph3 pv2 tl ttu" *ngIf="canSeeLending()">Lending</th>
+                </tr>
+                <ng-container *ngFor="let item of lentItems">
+                    <tr class="bt b--black-10 bg-animate" [ngClass]="{'bg-light-red': itemOverdue(item), 'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}">
+                        <th class="ph3 pv2 tl w-two-thirds link pointer underline-hover" [routerLink]="['/items', item.id]">
+                            <a class="min-w5 link">{{item.name}} ({{(itemTypes.get(item.type_id) | async)?.name}})</a>
+                        </th>
+                        <th class="ph3 pv2 tl nowrap">
+                            {{item.due * 1000 | date:'yyyy-MM-dd HH:mm'}}
+                        </th>
+                        <th class="ph3 pv2 tl w-third link pointer underline-hover" *ngIf="canSeeLending()" [routerLink]="['/lendings', item.lending_id]">
+                            <a class="min-w5 link">{{(lendings.get(item.lending_id) | async)?.user}} ({{(lendings.get(item.lending_id) | async)?.deposit}})</a>
+                        </th>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+</div>

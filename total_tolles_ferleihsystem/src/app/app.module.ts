@@ -18,6 +18,8 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { SettingsComponent } from './settings/settings.component';
 
+import { LentItemsOverviewComponent } from './home/lent-items-overview.component';
+
 import { SearchOverviewComponent } from './search/search-overview.component';
 import { SearchComponent } from './search/search.component';
 
@@ -75,6 +77,8 @@ registerLocaleData(de, 'de-DE', localeDeExtra);
         HomeComponent,
 
         SettingsComponent,
+
+        LentItemsOverviewComponent,
 
         SearchOverviewComponent,
         SearchComponent,

@@ -1,26 +1,5 @@
-<div class="mh2 mv3 br2 shadow-5 ba b--black-10" *ngIf="lentItems?.length > 0">
-    <div class="ttf-box-header min-h2 mv0 pv2 ph3 flex items-center justify-between f4 br2 br--top">
-        <p class="mv0">Currently lent Items:</p>
-    </div>
-    <div class="max-h5 overflow-y-auto bt ged b--black-10">
-        <table class="w-100 table collapse ph3 pv2" body>
-            <tbody>
-                <tr>
-                    <th class="ph3 pv2 tl ttu">Item</th>
-                    <th class="ph3 pv2 tl ttu">Due</th>
-                </tr>
-                <tr class="bt b--black-10" [ngClass]="{'bg-light-red': itemOverdue(item)}" *ngFor="let item of lentItems">
-                    <th class="ph3 pv2 tl link bg-animate pointer" [ngClass]="{'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}" routerLink="/items/{{item.id}}">
-                        <a class="min-w5 link">{{item.name}} ({{itemTypes.get(item.type_id)?.name}})</a>
-                    </th>
-                    <th class="ph3 pv2 tl link bg-animate hover-bg-near-white pointer" [ngClass]="{'hover-bg-near-white': !itemOverdue(item), 'hover-bg-red': itemOverdue(item)}" [routerLink]="(jwt.isModerator() || jwt.isAdmin()) ? ['lendings', item.lending_id] : ['items', item.id]">
-                        <a class="link">{{item.due * 1000 | date:'yyyy-MM-dd HH:mm'}}</a>
-                    </th>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+
+<ttf-lent-items-overview></ttf-lent-items-overview>
 <div #menuContainer class="ttf-button-grid">
     <div class="h4 w5 ma2 br3 ttf-main-button flex flex-column items-center justify-center grow pointer" *ngIf="jwt.isModerator()" routerLink="/item-types">
         <i class="f2 fa fa-folder"></i>

@@ -28,7 +28,6 @@ import { SettingsService } from 'app/shared/settings/settings.service';
 })
 export class HomeComponent implements OnInit {
 
-    lentItems: ApiObject[];
     itemTypes: Map<number, ApiObject> = new Map<number, ApiObject>();
     pinnedTypes: number[] = [];
 
@@ -37,9 +36,6 @@ export class HomeComponent implements OnInit {
     ngOnInit(): void {
         this.data.changeTitle('Total Tolles Ferleihsystem – Home');
         this.data.changeBreadcrumbs([]);
-        this.api.getLentItems('errors').pipe(take(2)).subscribe(items => {
-            this.lentItems = items;
-        });
         this.api.getItemTypes().pipe(take(2)).subscribe(types => {
             types.forEach(itemType => this.itemTypes.set(itemType.id, itemType));
         });
@@ -49,11 +45,6 @@ export class HomeComponent implements OnInit {
             }
         });
         observableTimer(5 * 60 * 1000, 5 * 60 * 1000).subscribe(() => this.api.getLentItems());
-    }
-
-    itemOverdue(item: ApiObject): boolean {
-        const due = new Date(item.due * 1000);
-        return due < new Date();
     }
 
 }
