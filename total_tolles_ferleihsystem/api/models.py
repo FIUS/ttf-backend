@@ -38,10 +38,7 @@ ROOT_LINKS = API.inherit('RootLinks', WITH_CURIES, {
     'self': HaLUrl(UrlData('api.default_root_resource')),
     'auth': HaLUrl(UrlData('api.auth_authentication_routes')),
     'catalog': HaLUrl(UrlData('api.default_catalog_resource')),
-    'search': HaLUrl(UrlData('api.search_search')),
-    'doc': HaLUrl(UrlData('api.doc')),
-    'spec': HaLUrl(UrlData('api.specs')),
-    'lending': HaLUrl(UrlData('api.lending_lending_list')),
+    'search': HaLUrl(UrlData('api(_lending_list')),
 })
 
 ROOT_MODEL = API.model('RootModel', {
@@ -300,4 +297,62 @@ BLACKLIST_PUT = API.inherit('BlacklistPUT', BLACKLIST_BASIC, {})
 BLACKLIST_GET = API.inherit('BlacklistGET', BLACKLIST_BASIC, ID, {
     '_links': NestedFields(BLACKLIST_LINKS),
     'blocked_types': fields.Nested(BLACKLIST_ITEM_TYPE)
+})
+
+#
+# --- RuleEngine ---
+#
+
+RULE_ENGINE_LINKS = API.inherit('RuleEngineLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.default_rule_engine_resource')),
+    'rule': HaLUrl(UrlData('api.rule_rule_list')),
+    'subrule': HaLUrl(UrlData('api.subrule_sub_rule_list'))
+})
+
+RULE_ENGINE_MODEL = API.model('RuleEngineModel', {
+    '_links': NestedFields(RULE_ENGINE_LINKS),
+})
+
+#
+# --- SubRule ---
+#
+SUB_RULE_BASIC = API.model('SubRuleBasic', {
+    'position': fields.Integer(title="The execution order"),
+    'variable_key': fields.String(max_length=STD_STRING_SIZE),
+    'operator': fields.String(max_length=2),
+    'comparison': fields.String(max_length=STD_STRING_SIZE),
+    'type_id': fields.Integer(title="The type id to be filtered for"),
+    'add_tag_id': fields.Integer(title="The tag id to be added"),
+    'remove_tag_id': fields.Integer(title="The tag id to be removed")
+})
+SUB_RULE_LINKS = API.inherit('SubRuleLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.rules/subrule_sub_rule_detail', url_data={'sub_rule_id' : 'id'})),
+})
+SUB_RULE_POST = API.inherit('SubRulePOST', SUB_RULE_BASIC, {})
+SUB_RULE_PUT = API.inherit('SubRulePUT', SUB_RULE_BASIC, {})
+SUB_RULE_GET = API.inherit('SubRuleGET', SUB_RULE_BASIC, ID, {
+    'rule_id': fields.Integer(),
+    '_links': NestedFields(SUB_RULE_LINKS),
+})
+
+#
+# --- Rule ---
+#
+
+RULE_BASIC = API.model('RuleBasic', {
+    'name': fields.String(max_length=STD_STRING_SIZE),
+    'description': fields.String(),
+    'execution_schedule': fields.String()
+})
+RULE_LINKS = API.inherit('RuleLinks', WITH_CURIES, {
+    'self': HaLUrl(UrlData('api.rules/rule_rule_detail', url_data={'rule_id' : 'id'})),
+    'subrule':  HaLUrl(UrlData('api.rules/rule_rule_sub_rule_detail', url_data={'rule_id' : 'id'})),
+})
+RULE_POST = API.inherit('RulePOST', RULE_BASIC, {})
+RULE_PUT = API.inherit('RulePUT', RULE_BASIC, {})
+RULE_GET = API.inherit('RuleGET', RULE_BASIC, ID, {
+    'last_run': fields.Integer(title="last execution date", description="Seconds since epoch"),
+    'next_run': fields.Integer(title="next execution date", description="Seconds since epoch"),
+    'sub_rules': fields.List(fields.Nested(SUB_RULE_GET)),
+    '_links': NestedFields(RULE_LINKS),
 })

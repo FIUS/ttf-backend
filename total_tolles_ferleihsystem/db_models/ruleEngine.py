@@ -43,7 +43,7 @@ class KeyValueStore(DB.Model):
     key = DB.Column(DB.String(STD_STRING_SIZE), primary_key=True)
     value = DB.Column(DB.String(STD_STRING_SIZE), nullable=True)
 
-    def __init__(self, key: str, value: str):
+    def __init__(self, key: str, value: str=None):
         self.key = key
         if value != '' and value != None:
             self.value = value
@@ -84,13 +84,13 @@ class SubRule(DB.Model):
         self.operator = operator
         self.comparison = comparison
 
-        if type_id != 0 and type_id != None:
+        if type_id != -1 and type_id != None:
             self.type_id = type_id
 
-        if add_tag_id != 0 and add_tag_id != None:
+        if add_tag_id != -1 and add_tag_id != None:
             self.add_tag_id = add_tag_id
 
-        if remove_tag_id != 0 and remove_tag_id != None:
+        if remove_tag_id != -1 and remove_tag_id != None:
             self.remove_tag_id = remove_tag_id
 
 
