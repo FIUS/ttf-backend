@@ -1,8 +1,10 @@
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, LOCALE_ID } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { registerLocaleData } from '@angular/common';
+import de from '@angular/common/locales/de';
 
 import { SharedModule } from './shared/shared.module';
 
@@ -58,6 +60,8 @@ import { AttributeDefinitionTitlePipe } from './attribute-definitions/attribute-
 
 import { AppComponent } from './app.component';
 
+// register locales
+registerLocaleData(de, 'de-DE');
 
 @NgModule({
     declarations: [
@@ -120,7 +124,6 @@ import { AppComponent } from './app.component';
         AppRoutingModule,
     ],
     providers: [
-        { provide: LOCALE_ID, useValue: 'de-DE' },
         NavigationService,
         StagingService,
     ],
