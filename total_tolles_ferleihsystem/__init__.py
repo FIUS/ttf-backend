@@ -72,7 +72,7 @@ FLASK_STATIC_DIGEST.init_app(APP)
 if APP.config['DEBUG']:
     @APP.template_filter('bustcache')
     def cache_busting_filter(s):
-        return s + '?chache-bust={}'.format(token_urlsafe(16))
+        return s.replace('-es2015', '') + '?chache-bust={}'.format(token_urlsafe(16))
 else:
     @APP.template_filter('bustcache')
     def cache_busting_filter(s):
