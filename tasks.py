@@ -6,8 +6,7 @@ from pathlib import Path
 
 SHELL = environ.get('SHELL', 'bash')
 
-BUILD_FOLDER = Path('./total_tolles_ferleihsystem/build')
-MANIFEST_PATH = BUILD_FOLDER / Path('manifest.json')
+BUILD_FOLDER = Path('./total_tolles_ferleihsystem/static')
 
 
 @task
@@ -53,7 +52,4 @@ def start_js(c):
 
 @task
 def start_py(c):
-    # check manifest.json path:
-    if not (MANIFEST_PATH.exists() and MANIFEST_PATH.is_file()):
-        build(c)
     c.run('flask run', shell=SHELL, pty=True)

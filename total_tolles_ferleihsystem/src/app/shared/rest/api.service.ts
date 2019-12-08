@@ -118,12 +118,14 @@ export class ApiService implements OnInit {
     }
 
     getRoot(): Observable<RootModel> {
+        console.log('request root')
         if (!this.rootSource.isStopped) {
             let url = '/api'
             if ((window as any).apiBasePath != null) {
                 url = (window as any).apiBasePath;
             }
             this.rest.get<RootModel>(url).subscribe(data => {
+                console.log('root', data)
                 this.rootSource.next(data);
                 this.rootSource.complete();
             });

@@ -5,9 +5,8 @@
   "scripts": {
     "ng": "ng",
     "rxjs": "rxjs-5-to-6-migrate -p src/tsconfig.app.json",
-    "start": "webpack-dev-server --port 2992 --content-base build/public --hot --inline",
-    "build": "webpack --progress --profile --colors",
-    "production-build": "webpack --progress --profile --colors --env.production --env.DEPLOY_URL='./assets/'",
+    "start": "ng serve",
+    "build": "ng build --deployUrl=static",
     "test": "karma start ./karma.conf.js",
     "lint": "ng lint",
     "e2e": "protractor ./protractor.conf.js",

@@ -13,11 +13,10 @@ from sqlalchemy.schema import MetaData
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
-from flask_webpack import Webpack
+from flask_static_digest import FlaskStaticDigest
 from flask_cors import CORS, cross_origin
 
-
-WEBPACK = Webpack()  # type: Webpack
+FLASK_STATIC_DIGEST = FlaskStaticDigest()
 # Setup Config
 
 APP = Flask(__name__, instance_relative_config=True)  # type: Flask
@@ -66,7 +65,7 @@ JWT: JWTManager = JWTManager(APP)
 CORS(APP)
 
 
-WEBPACK.init_app(APP)
+FLASK_STATIC_DIGEST.init_app(APP)
 
 # Setup Celery
 # pylint: disable=C0413

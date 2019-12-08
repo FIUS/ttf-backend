@@ -96,11 +96,16 @@
         </h1>
     </div>
 
-    {{ javascript_tag('inline') | safe }}
-    {{ javascript_tag('polyfills') | safe }}
-    {{ javascript_tag('styles') | safe }}
-    {{ javascript_tag('vendor') | safe }}
-    {{ javascript_tag('main') | safe }}
+    <script src="{{ static_url_for('static', filename='runtime-es2015.js') }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='runtime-es5.js') }}" nomodule defer></script>
+    <script src="{{ static_url_for('static', filename='polyfills-es5.js') }}" nomodule defer></script>
+    <script src="{{ static_url_for('static', filename='polyfills-es2015.js') }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='styles-es2015.js') }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='styles-es5.js') }}" nomodule defer></script>
+    <script src="{{ static_url_for('static', filename='vendor-es2015.js') }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='vendor-es5.js') }}" nomodule defer></script>
+    <script src="{{ static_url_for('static', filename='main-es2015.js') }}" type="module"></script>
+    <script src="{{ static_url_for('static', filename='main-es5.js') }}" nomodule defer></script>
 </body>
 
 </html>
