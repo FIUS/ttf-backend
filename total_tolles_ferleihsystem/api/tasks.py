@@ -9,7 +9,7 @@ PATH: str = '/tasks'
 ANS = API.namespace('tasks', description='Tasks', path=PATH)
 
 @ANS.route('/')
-class Taks(Resource):
+class Task(Resource):
 
     def get(self):
         from .. import celery
@@ -21,7 +21,7 @@ class Taks(Resource):
 
 
 @ANS.route('/test/')
-class TestTaks(Resource):
+class TestTask(Resource):
 
     def get(self):
         sample.delay(1, 2)
