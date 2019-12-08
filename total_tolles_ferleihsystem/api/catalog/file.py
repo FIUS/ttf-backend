@@ -219,7 +219,7 @@ class FileData(Resource):
         """
         Get the actual file
         """
-        base_query = File.query.filter(File.file_id == file_id).options(joinedload('item'))
+        base_query = File.query.filter(File.id == file_id).options(joinedload('item'))
 
         # auth check
         if UserRole(get_jwt_claims()) != UserRole.ADMIN:
