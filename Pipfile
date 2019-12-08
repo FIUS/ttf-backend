@@ -31,3 +31,4 @@ Flask-Cors = "==3.0.6"
 Flask-JWT-Extended = "==3.12.1"
 Flask-Bcrypt = "==0.7.1"
 total-tolles-ferleihsystem = {editable = true,path = "."}
+flask-static-digest = "*"

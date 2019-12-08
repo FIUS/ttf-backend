@@ -78,15 +78,15 @@ export class BaseApiService {
     }
 
     private headers(token?: string, mimetypeJSON: boolean= true): {headers: HttpHeaders, [prop: string]: any} {
-        const headers = new HttpHeaders();
+        const headers: {[prop: string]: string} = {};
         if (mimetypeJSON) {
-            headers.append('Content-Type', 'application/json');
+            headers['Content-Type'] = 'application/json';
         }
         if (token != null) {
-            headers.append('Authorization', 'Bearer ' + token);
+            headers['Authorization'] = 'Bearer ' + token;
         }
 
-        return { headers: headers };
+        return { headers: new HttpHeaders(headers) };
     }
 
     get<T>(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, params?): Observable<T> {
@@ -98,6 +98,7 @@ export class BaseApiService {
         if (params != null) {
             options.params = params;
         }
+        // TODO fix fancy request caching...
         const request = this.http.get<T>(url, options).pipe(
             map((res) => {
                 this.runningRequests.delete(url as string);
@@ -116,7 +117,7 @@ export class BaseApiService {
         );
         this.runningRequests.set(url, request);
         //request.connect();
-        return request;
+        return this.http.get<T>(url, options);
     }
 
     put<T>(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<T> {
