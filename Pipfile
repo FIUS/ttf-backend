@@ -4,12 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [scripts]
-webpack-build = "invoke build"
-webpack-dev = "invoke start-js"
+build = "invoke build"
+start-js = "invoke start-js"
 drop-db = "flask drop_db"
 upgrade-db = "flask db upgrade"
 create-migration = "flask db migrate"
-start = "invoke start-py"
+start = "invoke start-py --autoreload"
 
 [dev-packages]
 jedi = "*"

@@ -37,19 +37,36 @@ def dependencies(c):
 
 
 @task(dependencies_js)
-def build(c):
+def build(c, production=False, deploy_url='/static/', base_href='/'):
     if not BUILD_FOLDER.exists():
         BUILD_FOLDER.mkdir()
     with c.cd('./total_tolles_ferleihsystem'):
-        c.run('npm run build', shell=SHELL)
+        attrs = [
+            '--',
+            '--extract-css',
+            "--deploy-url='{}'".format(deploy_url),
+            "--base-href='{}'".format(base_href),
+        ]
+        if prod:
+            attrs.append('--prod')
+        c.run('npm run build ' + ' '.join(attrs), shell=SHELL)
 
 
 @task
-def start_js(c):
+def start_js(c, deploy_url='/static/'):
     with c.cd('./total_tolles_ferleihsystem'):
-        c.run('npm run start', shell=SHELL, pty=True)
+        attrs = [
+            '--',
+            '--extract-css',
+            "--deploy-url='{}'".format(deploy_url),
+            "--watch",
+        ]
+        c.run('npm run build ' + ' '.join(attrs), shell=SHELL, pty=True)
 
 
 @task
-def start_py(c):
-    c.run('flask run', shell=SHELL, pty=True)
+def start_py(c, autoreload=False):
+    if autoreload:
+        c.run('FLASK_DEBUG=1 flask run', shell=SHELL, pty=True)
+    else:
+        c.run('flask run', shell=SHELL, pty=True)
