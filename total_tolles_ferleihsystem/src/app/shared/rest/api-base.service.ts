@@ -172,11 +172,12 @@ export class BaseApiService {
         );
     }
 
-    downloadFile<T>(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<T> {
+    downloadFile(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string): Observable<Response> {
         url = this.extractUrl(url);
         const options = this.headers(token, false);
-        options.responseType = 'blob'
-        return this.http.get<T>(url, options).pipe(
+        options.responseType = 'blob';
+        options.observe = 'response';
+        return this.http.get<Response>(url, options).pipe(
             catchError((error: any) => {
                 if (error.status != null) {
                     return observableThrowError({status: error.status,

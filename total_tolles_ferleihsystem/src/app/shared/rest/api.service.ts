@@ -1102,7 +1102,7 @@ export class ApiService implements OnInit {
         const stream = new AsyncSubject<any>();
 
         this.currentJWT.pipe(mergeMap(jwt => jwt.getValidApiToken())).subscribe(token => {
-            this.rest.downloadFile<any>(file._links.download, token).subscribe(data => {
+            this.rest.downloadFile(file._links.download, token).subscribe(data => {
                 stream.next(data);
                 stream.complete();
             }, error => this.errorHandler(error, 'file-store/' + 'file.file_hash', 'GET', showErrors));
@@ -1110,8 +1110,7 @@ export class ApiService implements OnInit {
 
         stream.subscribe(data => {
             const dispositonHeader = data.headers.get('content-disposition')
-            console.log(data)
-            const blob = new Blob([data.blob()], {type: 'application/pdf'}); //octet-stream
+            const blob = new Blob([data.body], {type: 'application/pdf'}); //octet-stream
             saveAs(blob, dispositonHeader.length > 25 ? dispositonHeader.substring(21) : file.name + file.file_type);
         })
     }
