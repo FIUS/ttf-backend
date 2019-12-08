@@ -8,7 +8,7 @@
             <p class="f4"><span class="b">Moderator:</span> {{lending?.moderator}}</p>
             <p class="f4"><span class="b">User:</span> {{lending?.user}}</p>
             <p class="f4"><span class="b">Deposit:</span> {{lending?.deposit}}</p>
-            <p class="f4"><span class="b">Date:</span> {{lending?.date * 1000 | date:'short'}}</p>
+            <p class="f4"><span class="b">Date:</span> {{lending?.date * 1000 | date:'yyyy-MM-dd HH:mm'}}</p>
             <ttf-item-lending *ngFor="let item of lending?.items" [item]="item" (return)="return($event)"></ttf-item-lending>
         </div>
     </ttf-box>

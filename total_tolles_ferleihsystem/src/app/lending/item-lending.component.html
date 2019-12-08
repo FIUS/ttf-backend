@@ -3,7 +3,7 @@
         <div>
             <i class="f5 fa fa-chevron-right" [hidden]="open"></i>
             <i class="f5 fa fa-chevron-down" [hidden]="!open"></i>
-            {{item?.name}} (due: {{item?.due * 1000 | date:'short'}})
+            {{item?.name}} (due: {{item?.due * 1000 | date:'yyyy-MM-dd HH:mm'}})
         </div>
         <div>
             <div class="tooltip tooltip-left button h2 pv1 ph2 ml2 br2 link bg-animate hover-bg-light-silver pointer" data-tooltip="return" (click)="return.emit(item?.id)">

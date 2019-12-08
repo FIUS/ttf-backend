@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { registerLocaleData } from '@angular/common';
 import de from '@angular/common/locales/de';
+import localeDeExtra from '@angular/common/locales/extra/de';
 
 import { SharedModule } from './shared/shared.module';
 
@@ -61,7 +62,7 @@ import { AttributeDefinitionTitlePipe } from './attribute-definitions/attribute-
 import { AppComponent } from './app.component';
 
 // register locales
-registerLocaleData(de, 'de-DE');
+registerLocaleData(de, 'de-DE', localeDeExtra);
 
 @NgModule({
     declarations: [

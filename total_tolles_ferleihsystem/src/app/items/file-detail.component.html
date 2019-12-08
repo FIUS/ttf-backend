@@ -18,8 +18,8 @@
     <div class="ph2 bt b--black-10" [hidden]="!open">
         <p class="f4" *ngIf="uploadFileName != null" ><span class="b">Filename before Upload:</span> <span>{{uploadFileName}}</span></p>
         <p class="f4"><span class="b">Filetype:</span> <span>{{file?.file_type}}</span></p>
-        <p class="f4"><span class="b">Creation Date:</span> <span>{{file?.creation | date}}</span></p>
-        <p class="f4" *ngIf="file?.invalidation != null" ><span class="b">Invaldidation Date:</span> <span>{{file?.invalidation | date}}</span></p>
+        <p class="f4"><span class="b">Creation Date:</span> <span>{{file?.creation | date:'yyyy-MM-dd HH:mm'}}</span></p>
+        <p class="f4" *ngIf="file?.invalidation != null" ><span class="b">Invaldidation Date:</span> <span>{{file?.invalidation | date:'yyyy-MM-dd HH:mm'}}</span></p>
         <p class="f4"><span class="b">Hash:</span> <span style="word-break: break-all">{{file?.file_hash}}</span></p>
         <p class="f5 tr gray hover-red pointer" (click)="deleteFile.open()"><i class="fa fa-trash"></i> delete file</p>
     </div>
