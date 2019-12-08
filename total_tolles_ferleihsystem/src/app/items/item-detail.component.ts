@@ -26,6 +26,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     private tagsSubscription: Subscription;
     private containedTypeSubscription: Subscription;
     private containedItemsSubscription: Subscription;
+    private parentItemsSubscription: Subscription;
     private filesSubscription: Subscription;
 
     rememberEditMode: boolean = false;
@@ -38,6 +39,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
     attributes: ApiObject[];
     tags: ApiObject[];
 
+    parentItems: ApiObject[];
     canContain: ApiObject[];
     containedItems: ApiObject[];
     containedItemsAsMap: Map<number, ApiObject[]> = new Map<number, ApiObject[]>();
@@ -109,6 +111,7 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                 this.itemTypeSubscription = this.api.getItemType(item.type_id).subscribe(itemType => {
                     this.itemType = itemType;
                     this.updateContainedItems(item, itemType);
+                    this.updateParentItems(item);
                 });
             }
             this.data.changeBreadcrumbs([new Breadcrumb('Items', '/items'),
@@ -159,6 +162,15 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
                     }
                 }
             })
+        });
+    }
+
+    private updateParentItems(item: ApiObject) {
+        if (this.parentItemsSubscription != null) {
+            this.parentItemsSubscription.unsubscribe();
+        }
+        this.parentItemsSubscription = this.api.getParentItems(item).subscribe(parents => {
+            this.parentItems = parents;
         });
     }
 
@@ -230,6 +242,9 @@ export class ItemDetailComponent implements OnInit, OnDestroy {
         }
         if (this.containedItemsSubscription != null) {
             this.containedItemsSubscription.unsubscribe();
+        }
+        if (this.parentItemsSubscription != null) {
+            this.parentItemsSubscription.unsubscribe();
         }
         if (this.filesSubscription != null) {
             this.filesSubscription.unsubscribe();

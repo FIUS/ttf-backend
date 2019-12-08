@@ -41,9 +41,21 @@
                 <p class="f4 b">Attributes:</p>
                 <p class="f5" *ngFor="let attr of attributes"><span class="b">{{attr.attribute_definition | attributeDefinitionTitle}}:</span> {{attr?.value}}</p>
             </div>
+            <div [hidden]="parentItems?.length === 0">
+                <p class="f4 b">Parent Items:</p>
+                <ul class="list pl2">
+                    <li class="pv1" *ngFor="let item of parentItems" >
+                        <a class="f5 hover-underline pointer" [routerLink]="['/items', item.id]">{{item.name}}</a>
+                    </li>
+                </ul>
+            </div>
             <div [hidden]="containedItems?.length === 0">
                 <p class="f4 b">Contained Items:</p>
-                <p class="f5" *ngFor="let item of containedItems"><span class="hover-underline pointer" routerLink="/items/{{item.id}}">{{item.name}}</span></p>
+                <ul class="list pl2">
+                    <li class="pv1" *ngFor="let item of containedItems" >
+                        <a class="f5 hover-underline pointer" [routerLink]="['/items', item.id]">{{item.name}}</a>
+                    </li>
+                </ul>
             </div>
             <div *ngIf="jwt.isModerator()">
                 <p class="f4 b">Files:</p>

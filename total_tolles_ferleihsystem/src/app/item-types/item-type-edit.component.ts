@@ -65,7 +65,7 @@ export class ItemTypeEditComponent implements OnChanges, OnDestroy {
     }
 
     removeCanContain(id) {
-        if (this.canContainTypeID != null && this.canContainTypeID >= 0) {
+        if (id != null && id >= 0) {
             this.api.deleteContainedType(this.itemType, id);
         }
     }

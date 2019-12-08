@@ -990,6 +990,19 @@ export class ApiService implements OnInit {
         return stream.asObservable().pipe(filter(data => data != null));
     }
 
+    getParentItems(item: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
+        const resource = 'items/' + item.id + '/parents';
+        const stream = this.getStreamSource<ApiObject[]>(resource);
+
+        this.currentJWT.pipe(mergeMap(jwt => jwt.getValidApiToken())).subscribe(token => {
+            this.rest.get<ApiObject[]>(item._links.parent_items, token).subscribe(data => {
+                stream.next(data);
+            }, error => this.errorHandler(error, resource, 'GET', showErrors));
+        });
+
+        return stream.asObservable().pipe(filter(data => data != null));
+    }
+
     getContainedItems(item: ApiObject, showErrors: string= 'all'): Observable<ApiObject[]> {
         const resource = 'items/' + item.id + '/contained-items';
         const stream = this.getStreamSource<ApiObject[]>(resource);
