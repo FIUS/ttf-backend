@@ -10,6 +10,13 @@ BUILD_FOLDER = Path('./total_tolles_ferleihsystem/static')
 
 
 @task
+def clean(c):
+    print('Removing ui build output.')
+    if BUILD_FOLDER.exists():
+        rmtree(BUILD_FOLDER)
+
+
+@task
 def clean_js_dependencies(c):
     print('Removing node_modules folder.')
     rmtree(Path('./total_tolles_ferleihsystem/node_modules'))
@@ -37,9 +44,12 @@ def dependencies(c):
 
 
 @task(dependencies_js)
-def build(c, production=False, deploy_url='/static/', base_href='/'):
+def build(c, production=False, deploy_url='/static/', base_href='/', clean_build=False):
+    if clean_build:
+        clean(c)
     if not BUILD_FOLDER.exists():
         BUILD_FOLDER.mkdir()
+    c.run('flask digest clean', shell=SHELL)
     with c.cd('./total_tolles_ferleihsystem'):
         attrs = [
             '--',
@@ -47,9 +57,10 @@ def build(c, production=False, deploy_url='/static/', base_href='/'):
             "--deploy-url='{}'".format(deploy_url),
             "--base-href='{}'".format(base_href),
         ]
-        if prod:
+        if production:
             attrs.append('--prod')
         c.run('npm run build ' + ' '.join(attrs), shell=SHELL)
+    c.run('flask digest compile', shell=SHELL)
 
 
 @task
