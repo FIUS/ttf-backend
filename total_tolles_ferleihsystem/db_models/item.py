@@ -275,15 +275,16 @@ class File(DB.Model):
         if visible_for != '' and visible_for != None:
             self.visible_for = visible_for
 
-    def update(self, name: str, file_type: str, invalidation: int, item_id: int, visible_for: str = '') -> None:
+    def update(self, name: str, file_type: str, invalidation: int, visible_for: str = '', **kwargs) -> None:
         """
         Function to update the objects data
         """
         self.name = name
         self.file_type = file_type
         self.invalidation = invalidation
-        self.item_id = item_id
         self.visible_for = visible_for
+        if 'item_id' in kwargs:
+            self.item_id = kwargs['item_id']
 
 
 class Lending(DB.Model):
