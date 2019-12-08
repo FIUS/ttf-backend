@@ -1,7 +1,7 @@
 
-import { throwError as observableThrowError,  Observable } from 'rxjs';
+import { throwError as observableThrowError,  Observable, AsyncSubject } from 'rxjs';
 
-import { catchError, publishReplay, map } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -37,7 +37,7 @@ export class BaseApiService {
 
     private base: string = (window as any).basePath;
 
-    private runningRequests: Map<string, Observable<any>> = new Map<string, Observable<unknown>>();
+    private runningRequests: Map<string, AsyncSubject<unknown>> = new Map<string, AsyncSubject<unknown>>();
 
     constructor(private http: HttpClient) {}
 
@@ -92,18 +92,16 @@ export class BaseApiService {
     get<T>(url: string|LinkObject|ApiLinksObject|ApiObject, token?: string, params?): Observable<T> {
         url = this.extractUrl(url);
         if (this.runningRequests.has(url) && params == null) {
-            return this.runningRequests.get(url);
+            return this.runningRequests.get(url).asObservable() as Observable<T>;
         }
         const options = this.headers(token);
         if (params != null) {
             options.params = params;
         }
-        // TODO fix fancy request caching...
-        const request = this.http.get<T>(url, options).pipe(
-            map((res) => {
-                this.runningRequests.delete(url as string);
-                return res;
-            }),
+
+        const request = new AsyncSubject<T>();
+        this.runningRequests.set(url, request);
+        this.http.get<T>(url, options).pipe(
             catchError((error: any) => {
                 this.runningRequests.delete(url as string);
                 if (error.status != null) {
@@ -113,11 +111,22 @@ export class BaseApiService {
                 }
                 return observableThrowError(error.json().error || 'Server error');
             }),
-            publishReplay(1),
-        );
-        this.runningRequests.set(url, request);
-        //request.connect();
-        return this.http.get<T>(url, options);
+        ).subscribe((res) => {
+            request.next(res);
+            request.complete();
+            this.runningRequests.delete(url as string);
+        }, (error: any) => {
+            if (error.status != null) {
+                request.error({
+                    status: error.status,
+                    message: (error._body.startsWith != null && error._body.startsWith('{')) ? JSON.parse(error._body).message : error.status + ' Server error'}
+                );
+            } else {
+                request.error(error.json().error || 'Server error');
+            }
+            this.runningRequests.delete(url as string);
+        });
+        return request;
     }
 
     put<T>(url: string|LinkObject|ApiLinksObject|ApiObject, data, token?: string): Observable<T> {

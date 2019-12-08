@@ -118,14 +118,12 @@ export class ApiService implements OnInit {
     }
 
     getRoot(): Observable<RootModel> {
-        console.log('request root')
         if (!this.rootSource.isStopped) {
             let url = '/api'
             if ((window as any).apiBasePath != null) {
                 url = (window as any).apiBasePath;
             }
             this.rest.get<RootModel>(url).subscribe(data => {
-                console.log('root', data)
                 this.rootSource.next(data);
                 this.rootSource.complete();
             });
@@ -804,7 +802,7 @@ export class ApiService implements OnInit {
 
 
     // Items ///////////////////////////////////////////////////////////////////
-    getItems(deleted: boolean=false, showErrors: string= 'all'): Observable<ApiObject[]> {
+    getItems(deleted: boolean= false, showErrors: string= 'all'): Observable<ApiObject[]> {
         let resource = 'items';
         let params = null;
         if (deleted) {
@@ -1112,6 +1110,7 @@ export class ApiService implements OnInit {
 
         stream.subscribe(data => {
             const dispositonHeader = data.headers.get('content-disposition')
+            console.log(data)
             const blob = new Blob([data.blob()], {type: 'application/pdf'}); //octet-stream
             saveAs(blob, dispositonHeader.length > 25 ? dispositonHeader.substring(21) : file.name + file.file_type);
         })
