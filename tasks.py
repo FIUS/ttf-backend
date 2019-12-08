@@ -43,7 +43,7 @@ def dependencies(c):
     pass
 
 
-@task(dependencies_js)
+@task(dependencies)
 def build(c, production=False, deploy_url='/static/', base_href='/', clean_build=False):
     if clean_build:
         clean(c)
@@ -63,7 +63,7 @@ def build(c, production=False, deploy_url='/static/', base_href='/', clean_build
     c.run('flask digest compile', shell=SHELL)
 
 
-@task
+@task(dependencies_js)
 def start_js(c, deploy_url='/static/'):
     with c.cd('./total_tolles_ferleihsystem'):
         attrs = [
