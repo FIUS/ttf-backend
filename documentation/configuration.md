@@ -7,6 +7,22 @@ The following config sources are all loaded if available. The leading config ove
   3. The config file `/etc/total-tolles-ferleihsystem.conf`
   4. The default values
 
+## Format
+
+A configuration file is a python file which is run when the config is loaded.
+This means the format to set a setting is:
+```python
+key = value
+```
+The value can be `True` and `False` for boolean values, `0` or `0xff` for integer values and `'/tmp/test'` for string values.
+
+> CAUTION! Be aware that you can potentially run any code inside a config file.
+> You shall not allow access to the config from untrusty sources or sources from the internet in order to prevent a remote code execution attack.
+
+For further information on the syntax please read any python tutorial or the [official python specification](https://docs.python.org/3/).
+
+  - [LearnPython.org](https://www.learnpython.org/)
+  - [LearnXInYMinutes](https://learnxinyminutes.com/docs/python3/)
 
 
 ## Environment Variables
