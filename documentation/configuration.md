@@ -62,6 +62,20 @@ This is only possible with the following config options:
   - Should NOT be changed
 
 
+### `CELERY_BROKER_URL`
+
+This is the location of the celery broker.
+
+  - Default: `'amqp://localhost'`
+
+
+### `CELERY_RESULT_BACKEND`
+
+This is the location of the celery result backend.
+
+  - Default: `'rpc://'`
+
+
 ### `DATA_DIRECTORY`
 
 This path must point to a folder.
