@@ -1,5 +1,7 @@
 # System Configuration
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+
 The following config sources are all loaded if available. The leading config overrides the latter:
 
   1. The config file specified in the environment variable `CONFIG_FILE`
@@ -119,6 +121,11 @@ This should be a secure random string.
     - Production: `''.join(hex(randint(0, 255))[2:] for i in range(16))`
     - Debug: `'debug'`
   - Should always be changed to a non changing value to keep logins active.
+
+
+### `LOGIN_PROVIDERS`
+
+See [loginproviders.md](loginproviders.md)
 
 
 ### `RESTPLUS_VALIDATE`
