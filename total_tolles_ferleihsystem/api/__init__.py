@@ -109,8 +109,9 @@ def unauthorized(message: str):
     """
     Handler function for a unauthorized api access
     """
-    log_unauthorized(message)
-    abort(401, message)
+    if not APP.config['DISBALE_JWT_AUTHENTICATION']:
+        log_unauthorized(message)
+        abort(401, message)
 
 
 @JWT.needs_fresh_token_loader

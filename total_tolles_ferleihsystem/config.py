@@ -9,6 +9,7 @@ class Config(object):
     TESTING = False
     RESTPLUS_VALIDATE = True
     BCRYPT_HANDLE_LONG_PASSWORDS = True
+    DISBALE_JWT_AUTHENTICATION = False
     JWT_CLAIMS_IN_REFRESH_TOKEN = True
     JWT_SECRET_KEY = ''.join(hex(randint(0, 255))[2:] for i in range(16))
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
@@ -145,6 +146,7 @@ class DebugConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/test.db'
     LONG_REQUEST_THRESHHOLD = 0
+    DISBALE_JWT_AUTHENTICATION = True
     JWT_SECRET_KEY = 'debug'
     JWT_ACCESS_TOKEN_EXPIRES = False
     LOGIN_PROVIDERS = ['Debug']
