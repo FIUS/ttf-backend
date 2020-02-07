@@ -1,6 +1,6 @@
 # TTF API
 
-The TTF vvers a self-documented API. The swagger documentation can be found under [localhost:5000/api/doc](http://localhost:5000/api/doc)
+The TTF offers a self-documented API. The swagger documentation can be found under [localhost:5000/api/doc](http://localhost:5000/api/doc). The api itself can be found under [localhost:5000/api](http://localhost:5000/api).
 
 ## JWT Access Tokens
 
