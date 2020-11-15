@@ -11,6 +11,8 @@ class Config(object):
     BCRYPT_HANDLE_LONG_PASSWORDS = True
     JWT_CLAIMS_IN_REFRESH_TOKEN = True
     JWT_SECRET_KEY = ''.join(hex(randint(0, 255))[2:] for i in range(16))
+    CORS_ORIGINS = []
+    CORS_SUPPORTS_CREDENTIALS = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DB_UNIQUE_CONSTRAIN_FAIL = 'UNIQUE constraint failed'
@@ -146,6 +148,7 @@ class DebugConfig(Config):
     LONG_REQUEST_THRESHHOLD = 0
     JWT_SECRET_KEY = 'debug'
     JWT_ACCESS_TOKEN_EXPIRES = False
+    CORS_ORIGINS = ["http://localhost:*", "http://127.0.0.1:*"]
     LOGIN_PROVIDERS = ['Debug']
     Config.LOGGING['loggers']['flask.app.auth']['level'] = logging.DEBUG
     Config.LOGGING['loggers']['flask.app.db']['level'] = logging.DEBUG
