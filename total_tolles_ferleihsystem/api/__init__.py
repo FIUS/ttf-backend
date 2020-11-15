@@ -160,4 +160,4 @@ def log_unauthorized(message):
 # pylint: disable=C0413
 from . import root, authentication, catalog, lending, search, tasks
 
-APP.register_blueprint(API_BLUEPRINT, url_prefix='/api')
+APP.register_blueprint(API_BLUEPRINT)

@@ -43,18 +43,6 @@ source $LIB_PATH/bin/activate
 $PIP_VENV install -r requirements.txt
 $PIP_VENV install -e .
 
-# select web directory
-pushd $PACKAGE
-
-# build webpage
-npm install -g node-gyp
-npm install --unsafe-perm
-npm run $NPM_BUILD_SCRIPT
-
-# deselect directory
-popd
-
-
 #
 # --- Create all other files and folders ---
 #
@@ -89,7 +77,6 @@ fi
 if [ ! -f $CONFIG_FILE ]; then
     echo "[INFO] Create config file: $CONFIG_FILE"
     cat > $CONFIG_FILE << EOF
-WEBPACK_MANIFEST_PATH = '$PWD/$PACKAGE/build/manifest.json'
 SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/apache.db'
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_RESULT_BACKEND = 'rpc://'

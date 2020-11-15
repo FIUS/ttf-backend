@@ -14,7 +14,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DB_UNIQUE_CONSTRAIN_FAIL = 'UNIQUE constraint failed'
-    WEBPACK_MANIFEST_PATH = './build/manifest.json'
     LOGGING = {
         'version': 1,
         'formatters': {

@@ -14,11 +14,7 @@ from sqlalchemy.schema import MetaData
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
-from flask_static_digest import FlaskStaticDigest
 from flask_cors import CORS, cross_origin
-
-FLASK_STATIC_DIGEST = FlaskStaticDigest()
-# Setup Config
 
 APP = Flask(__name__, instance_relative_config=True)  # type: Flask
 APP.config['MODE'] = environ['MODE'].upper()
@@ -64,19 +60,6 @@ JWT: JWTManager = JWTManager(APP)
 
 # Setup Headers
 CORS(APP)
-
-# Javascript stuff
-FLASK_STATIC_DIGEST.init_app(APP)
-
-
-if APP.config['DEBUG']:
-    @APP.template_filter('bustcache')
-    def cache_busting_filter(s):
-        return s.replace('-es2015', '') + '?chache-bust={}'.format(token_urlsafe(16))
-else:
-    @APP.template_filter('bustcache')
-    def cache_busting_filter(s):
-        return s
 
 # Setup Celery
 # pylint: disable=C0413
