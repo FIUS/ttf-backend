@@ -1,93 +1,55 @@
-# TTF
-
+# ttf-backend
+The backend of the "Total Tolles Ferleihsystem" (our lending system).
 
 ## Prerequesits
-- nodejs >10.10.0
-- npm
-- python 3.6
-- pip [python 3.6]
-- venv [python 3.6]
+- python >= 3.6
+- Pipenv [python >= 3.6]
 - celery compatible Broker [documentation](http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html)
 - celery scheduler for recurring tasks [documentation](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 
+
 ## First start:
+After you've cloned this repo you have to do some things to prepare for starting the project in your development environment:
 
-After you've cloned this repo you have to do the install routine for both backend AND frontend before starting the backend!
-
-Backend:
-```shell
-# setup virtualenv
-virtualenv venv
-. venv/bin/activate
-
-
-# install requirements
-pip install -r requirements_developement.txt
-pip install -r requirements.txt
-
-pip install -e .
+First, you to set the environment variables required for starting.
+For this the file `.env` in the root of the repo needs to be created and filled with the following:
+```
+FLASK_APP=total_tolles_ferleihsystem
+FLASK_DEBUG=1  # to enable autoreload 
+MODE=debug # or production or test
 ```
 
-Frontend:
-
+Then install the requirements including the development dependencies:
 ```shell
-cd total_tolles_ferleihsystem
-
-npm install
-npm run build
+pipenv install --dev
 ```
 
-
-## start server:
-
-Start the webpack developement server:
+## Starting development server:
+First, create the db:
 ```shell
-cd total_tolles_ferleihsystem
-npm run start
+pipenv run upgrade-db
 ```
 
-First start:
+To start the server:
 ```shell
-. venv/bin/activate
-export FLASK_APP=total_tolles_ferleihsystem
-export FLASK_DEBUG=1  # to enable autoreload
-export MODE=debug
-# export MODE=production
-# export MODE=test
-
-# create and init debug db:
-flask create_db
-
-# start server
-flask run
-
-# start celery worker (needs new terminal) with beats (only for debugging!)
-celery -A total_tolles_ferleihsystem.celery worker -B --loglevel=info
-
-## start celery worker for production:
-# celery -A total_tolles_ferleihsystem.celery worker
-## startcelery scheduler (beats) for production (needed for periodic tasks):
-# celery -A total_tolles_ferleihsystem.celery beat -s <path to persitence db>
+pipenv run start
 ```
 
-Subsequent starts:
+To start a celery worker for background tasks (need running broker for this to work):
 ```shell
-flask run
+pipenv run start-celery-worker
 ```
 
-Drop and recreate DB:
+To drop and recreate the database:
 ```shell
-flask drop_db
-flask create_db
+pipenv run drop-db
+pipenv run upgrade-db
 ```
-
-
 
 ## Sites:
 
 The following sites are available after starting the flask development server:
 
-[Web-App](http://127.0.0.1:5000/)
 [API](http://127.0.0.1:5000/api/doc)
 
 Only in debug mode:
@@ -113,12 +75,13 @@ flask db --help
 After creating a new migration file with `flask db migrate` it is neccessary to manually check the generated upgrade script. Please refer to the [alembic documentation](alembic.zzzcomputing.com/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
 
 
-## Install:
+## Install for production:
+
+### Using our install script
 
 Prerequisites:
 
- *  Python >3.6, Virtualenv, Pip
- *  npm, node >8
+ *  Python >=3.6, Virtualenv, Pip
  *  Apache2, mod-wsgi
  *  Celery Broker [documentation](http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html)
  *  Celery Scheduler celery scheduler for recurring tasks [documentation](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)

@@ -11,7 +11,6 @@ setup(
     install_requires=[
         'flask',
         'flask_sqlalchemy',
-        'flask_webpack',
         'flask_jwt_extended',
         'flask_bcrypt',
         'flask_cors',

@@ -18,7 +18,6 @@ Options are read from the following sources. Options in later sources overwrite 
 | JWT_SECRET_KEY          | :heavy_check_mark: | Secret key for JWT Tokens. Do NOT make this public! Use a random string! |  |
 | SQLALCHEMY_DATABASE_URI | :heavy_check_mark: | Url for Database. [More Info](README.md#install) | `sqlite://:memory:` |
 | SQLITE_FOREIGN_KEYS     |                    | Use Sqlite with Foreign Key checks enabled.  | `True` |
-| WEBPACK_MANIFEST_PATH   |                    | Path to Manifest.json written by npm build. | `./build/manifest.json` |
 | LOG_PATH                | :heavy_check_mark: | Path to log folder. | `/tmp` |
 | TMP_DIRECTORY           |                    | | `/tmp` |
 | DATA_DIRECTORY          |                    | | `/tmp` |
