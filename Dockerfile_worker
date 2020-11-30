@@ -1,0 +1,28 @@
+FROM tiangolo/uwsgi-nginx-flask:python3.8
+
+RUN pip install pipenv cymysql
+
+COPY Pipfile /app/
+RUN pipenv lock
+RUN pipenv install --system
+
+WORKDIR /app
+
+RUN mkdir --parents /app/instance
+RUN mkdir --parents /app-mnt/data
+
+COPY docker/total-tolles-ferleihsystem.conf /app/instance
+COPY total_tolles_ferleihsystem /app/total_tolles_ferleihsystem
+
+ENV FLASK_APP total_tolles_ferleihsystem
+ENV MODE production
+ENV CONFIG_FILE /app-mnt/total-tolles-ferleihsystem.conf
+
+RUN adduser --disabled-password --gecos '' celery
+RUN chown -R celery:celery /app-mnt/
+
+USER celery:celery
+
+VOLUME ["/app-mnt"]
+
+ENTRYPOINT ["celery", "-A", "total_tolles_ferleihsystem", "worker", "--loglevel=info"]

@@ -76,6 +76,97 @@ After creating a new migration file with `flask db migrate` it is neccessary to 
 
 
 ## Install for production:
+This software can be deployed using docker or on a machine using our install script.
+
+### Using Docker
+A Dockerfile for the application is provided.
+It is also published as a container under [fius/ttf-backend](https://hub.docker.com/r/fius/ttf-backend).
+It uses different defaults for some config variables. For details see [docker](docker).
+For the database Sqlite is used. The database is stored under `/app-mnt` within the container.
+The binary files uploaded through the file api are also stored there.
+Therefore, that folder is declared as a volume.
+Additionally, the file `/app-mnt/total-tolles-ferleihsystem.conf` is read for any extra configuration.
+
+A sperate Dockerfile and container are provided for the worker.
+However, a broker is additionally required.
+
+To properly run this software multiple containers with the different software components are advisable.
+This can be achived by the following `docker-compose.yml`:
+```yml
+version: "3"
+
+networks:
+  ttf:
+    external: false
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    restart: always
+    hostname: rabbitmq
+    environment:
+      TZ: Europe/Berlin
+    networks:
+      - ttf
+
+  mariadb:
+    image: mariadb:10
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: supersecret
+      MYSQL_DATABASE: ttf
+      MYSQL_USER: ttf
+      MYSQL_PASSWORD: secret
+      TZ: Europe/Berlin
+    networks:
+      - ttf
+
+  ttf-backend:
+    image: ttf-backend
+    restart: always
+    environment:
+      CELERY_BROKER_URL: amqp://rabbitmq
+      SQLALCHEMY_DATABASE_URI: mysql+cymysql://ttf:secret@mariadb:3306/ttf
+      SWT_SECRET_KEY: megasecret
+      TZ: Europe/Berlin
+    ports:
+      - "8088:80"
+    depends_on:
+      - rabbitmq
+      - mariadb
+    networks:
+      - ttf
+
+  ttf-worker:
+    image: ttf-worker
+    restart: always
+    environment:
+      CELERY_BROKER_URL: amqp://rabbitmq
+      SQLALCHEMY_DATABASE_URI: mysql+cymysql://ttf:secret@mariadb:3306/ttf
+      TZ: Europe/Berlin
+    depends_on:
+      - rabbitmq
+      - mariadb
+      - ttf-backend
+    networks:
+      - ttf
+
+  ttf-scheduler:
+    image: ttf-worker
+    entrypoint: ["celery", "-A", "total_tolles_ferleihsystem", "beat", "-s", "/app-mnt/celerybeat-schedule"]
+    restart: always
+    environment:
+      CELERY_BROKER_URL: amqp://rabbitmq
+      SQLALCHEMY_DATABASE_URI: mysql+cymysql://ttf:secret@mariadb:3306/ttf
+      TZ: Europe/Berlin
+    depends_on:
+      - rabbitmq
+      - mariadb
+      - ttf-backend
+    networks:
+      - ttf
+```
+Be sure the replace the secrets `secret` (at 4 positions), `supersecret` and `megasecret`.
 
 ### Using our install script
 
