@@ -15,6 +15,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
+from werkzeug.middleware.proxy_fix import ProxyFix 
 
 APP = Flask(__name__, instance_relative_config=True)  # type: Flask
 APP.config['MODE'] = environ['MODE'].upper()
@@ -30,9 +31,18 @@ APP.config.from_pyfile('total-tolles-ferleihsystem.conf', silent=True)
 if ('CONFIG_FILE' in environ):
     APP.config.from_pyfile(environ.get('CONFIG_FILE', 'total-tolles-ferleihsystem.conf'), silent=True)
 
-CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY')
+CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY', 'REVERSE_PROXY_COUNT')
 for env_var in CONFIG_KEYS:
-    APP.config[env_var] = environ.get(env_var, APP.config.get(env_var))
+    value = environ.get(env_var, APP.config.get(env_var))
+    if value is None:
+        pass
+    elif value.lower() == "true":
+        value = True
+    elif value.lower() == "false":
+        value = False
+    elif value.isnumeric():
+        value = int(value)
+    APP.config[env_var] = value
 
 dictConfig(APP.config['LOGGING'])
 
@@ -41,6 +51,10 @@ APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_UR
 
 AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
 LENDING_LOGGER = getLogger('ttf.lending')  # type: Logger
+
+r_p_count = APP.config['REVERSE_PROXY_COUNT']
+if r_p_count > 0:
+    APP.wsgi_app = ProxyFix(APP.wsgi_app, x_for=r_p_count, x_host=r_p_count, x_port=r_p_count, x_prefix=r_p_count, x_proto=r_p_count)
 
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy

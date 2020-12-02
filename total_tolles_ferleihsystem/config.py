@@ -16,6 +16,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DB_UNIQUE_CONSTRAIN_FAIL = 'UNIQUE constraint failed'
+    REVERSE_PROXY_COUNT = 0
     LOGGING = {
         'version': 1,
         'formatters': {
