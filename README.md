@@ -208,3 +208,8 @@ Troubleshooting:
  *  Check if Celery Broker is running
  *  Check if workers are running
  *  Check if Celery Scheduler is running
+
+### Reverseproxy
+This project can run behind a reverse proxy with the help of [ProxyFix](https://werkzeug.palletsprojects.com/en/1.0.x/middleware/proxy_fix/). \
+ProxyFix uses the headers set by the reverseproxy to adjust the wsgi environment accordingly. For more info visit their website. \
+The number of trusted reverse proxies can be configured using the `REVERSE_PROXY_COUNT` config or environment variable.
