@@ -25,4 +25,5 @@ USER celery:celery
 
 VOLUME ["/app-mnt"]
 
-ENTRYPOINT ["celery", "-A", "total_tolles_ferleihsystem", "worker", "--loglevel=info"]
+ENTRYPOINT []
+CMD ["celery", "-A", "total_tolles_ferleihsystem", "worker", "--loglevel=info"]
