@@ -15,7 +15,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
-from werkzeug.middleware.proxy_fix import ProxyFix 
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 APP = Flask(__name__, instance_relative_config=True)  # type: Flask
 APP.config['MODE'] = environ['MODE'].upper()
@@ -34,7 +34,7 @@ if ('CONFIG_FILE' in environ):
 CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'CELERY_BROKER_URL', 'CELERY_RESULT_BACKEND', 'JWT_SECRET_KEY', 'REVERSE_PROXY_COUNT')
 for env_var in CONFIG_KEYS:
     value = environ.get(env_var, APP.config.get(env_var))
-    if value is None:
+    if value is None or not isinstance(value, str):
         pass
     elif value.lower() == "true":
         value = True
