@@ -19,7 +19,7 @@ pylint = "*"
 
 [packages]
 flask-restplus = "==0.12.1"
-celery = "==5.0.2"
+celery = "==5.2.2"
 ldap3 = "==2.5"
 Flask = "==1.0.2"
 Werkzeug = "<1.0.0"
