@@ -1,9 +1,9 @@
-name: ci
+name: buildMain
 
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
   schedule:
     - cron: '1 17 * * 1'
 
