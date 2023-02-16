@@ -1,12 +1,13 @@
 # ttf-backend
 The backend of the "Total Tolles Ferleihsystem" (our lending system).
 
+TEST
+
 ## Prerequesits
 - python >= 3.6
 - Pipenv [python >= 3.6]
 - celery compatible Broker [documentation](http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html)
 - celery scheduler for recurring tasks [documentation](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
-
 
 ## First start:
 After you've cloned this repo you have to do some things to prepare for starting the project in your development environment:
