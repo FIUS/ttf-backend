@@ -1,9 +1,0 @@
-Flask==1.0.2
-flask-restplus==0.12.1
-Flask-SQLAlchemy==2.3.1
-Flask-Migrate==2.2.1
-flask-cors==3.0.6
-flask-jwt-extended==3.12.1
-flask-bcrypt==0.7.1
-celery==4.1.1
-ldap3==2.5

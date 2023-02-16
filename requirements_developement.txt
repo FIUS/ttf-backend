@@ -1,5 +1,0 @@
-jedi
-mypy
-nose
-pep8
-pylint
