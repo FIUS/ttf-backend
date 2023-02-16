@@ -1,9 +1,9 @@
-name: ci
+name: buildPr
 
 on:
   pull_request:
     branches:
-      - 'master'
+      - 'main'
 
 jobs:
   docker:
